@@ -2627,7 +2627,7 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
       const resp = await fetch("/api/load-experiments?key=" + key);
       if (resp.ok) {
         const data = await resp.json();
-        if (data.experiments && data.experiments.length > 0) return data.experiments;
+        if (data.experiments && data.experiments.length > 0) { return data.experiments.map(e => Array.isArray(e) ? e[0] : e).map(e => typeof e === "string" ? JSON.parse(e) : e); }
       }
     } catch(e) {}
     try { return JSON.parse(localStorage.getItem(key)||"[]"); } catch { return []; }
