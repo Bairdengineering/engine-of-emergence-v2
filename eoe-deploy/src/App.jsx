@@ -162,6 +162,84 @@ function calcR2(points) {
   };
 }
 
+// ── PLAIN ENGLISH SUMMARY ────────────────────────────────────────────────────
+function MInsight({ points, dsId, dsLabel, domain }) {
+  const ms = points.map(p => calcM(p.chi, p.s, p.lambda0, p.C));
+  const lastM = ms[ms.length - 1];
+  const firstM = ms[0];
+  const trend = lastM - firstM;
+  const lead = getWarningLead(dsId);
+
+  // Find when M first went negative
+  const negIdx = ms.findIndex(m => m < 0);
+  const negYear = negIdx >= 0 ? points[negIdx].year : null;
+
+  // Dominant driver — which variable changed most
+  const firstPt = points[0];
+  const lastPt = points[points.length - 1];
+  const chiChange = lastPt.chi - firstPt.chi;
+  const sChange = lastPt.s - firstPt.s;
+  const lamChange = (lastPt.lambda0 + 0.15 * Math.pow(lastPt.C, 1.4)) -
+                    (firstPt.lambda0 + 0.15 * Math.pow(firstPt.C, 1.4));
+
+  let driver = "";
+  if (Math.abs(lamChange) > Math.abs(chiChange) && Math.abs(lamChange) > Math.abs(sChange)) {
+    driver = lamChange > 0
+      ? "The primary driver is rising overhead — fixed costs and complexity are consuming more of what the system generates."
+      : "Burden has decreased — fixed costs and complexity are lower than at the start of this period.";
+  } else if (Math.abs(chiChange) > Math.abs(sChange)) {
+    driver = chiChange < 0
+      ? "The primary driver is declining efficiency — the system is converting inputs to outputs less effectively over time."
+      : "Efficiency gains are the main positive factor — the system is doing more with the same inputs.";
+  } else {
+    driver = sChange < 0
+      ? "The primary driver is falling throughput — less energy and resource is flowing through the system."
+      : "Strong throughput — the system has good energy and resource flow supporting its margin.";
+  }
+
+  // Status sentence
+  let status = "";
+  if (lastM > 0.15) status = `${dsLabel} is in healthy territory with a positive Stability Margin of ${lastM >= 0 ? "+" : ""}${lastM.toFixed(3)}.`;
+  else if (lastM > 0.05) status = `${dsLabel} is holding positive but approaching warning territory — Stability Margin is ${lastM >= 0 ? "+" : ""}${lastM.toFixed(3)}.`;
+  else if (lastM > -0.05) status = `${dsLabel} is in the warning zone — Stability Margin is ${lastM.toFixed(3)}, just below the threshold where burden exceeds output.`;
+  else if (lastM > -0.15) status = `${dsLabel} is in decline — Stability Margin is ${lastM.toFixed(3)}, meaning the system is spending more to maintain itself than it generates.`;
+  else status = `${dsLabel} is in critical territory — Stability Margin is ${lastM.toFixed(3)}. Burden has substantially exceeded output capacity.`;
+
+  // Trend sentence
+  let trendSentence = "";
+  if (trend < -0.2) trendSentence = `The margin has declined sharply — down ${Math.abs(trend).toFixed(3)} over the full period.`;
+  else if (trend < -0.05) trendSentence = `The margin has been declining — down ${Math.abs(trend).toFixed(3)} over the full period.`;
+  else if (trend > 0.2) trendSentence = `The margin has improved dramatically — up ${trend.toFixed(3)} over the full period, a recovery trajectory.`;
+  else if (trend > 0.05) trendSentence = `The margin has been improving — up ${trend.toFixed(3)} over the full period.`;
+  else trendSentence = `The margin has been relatively stable over the full period.`;
+
+  // Lead time sentence
+  let leadSentence = "";
+  if (lead && lead.lead !== null) {
+    leadSentence = `M went negative in ${lead.m_negative_year} — ${lead.lead} year${lead.lead !== 1 ? "s" : ""} before ${lead.event} (${lead.event_year}). This warning window was independently verifiable from the data alone.`;
+  } else if (negYear) {
+    leadSentence = `The margin first turned negative in ${negYear}, marking the point where burden began exceeding output.`;
+  }
+
+  const color = mColor(lastM);
+
+  return (
+    <div style={{
+      background:"#0A0A0A", border:`1px solid ${color}30`,
+      borderLeft:`3px solid ${color}`,
+      borderRadius:"0 10px 10px 0", padding:"14px 18px", marginTop:12
+    }}>
+      <div style={{fontFamily:"var(--mono)",fontSize:9,color,letterSpacing:3,marginBottom:10}}>
+        PLAIN ENGLISH SUMMARY
+      </div>
+      <p style={{fontSize:13,color:"#D4D4D4",fontFamily:"var(--sans)",lineHeight:1.75,margin:0}}>
+        {status} {trendSentence} {driver}
+        {leadSentence && <span style={{color:"#F97316"}}> {leadSentence}</span>}
+      </p>
+    </div>
+  );
+}
+
 function R2Badge({ points, compact=false }) {
   const stats = calcR2(points);
   if (!stats || !stats.r2) return null;
@@ -817,7 +895,7 @@ function Gauge({ value, size=160 }) {
 }
 
 // ── M CHART ───────────────────────────────────────────────────────────────────
-function MChart({ points, dsColor="#3B82F6" }) {
+function MChart({ points, dsColor="#3B82F6", dsId=null }) {
   const [hov, setHov] = useState(null);
   const vals = points.map(p => calcM(p.chi, p.s, p.lambda0, p.C));
   const min = Math.min(...vals, -0.42), max = Math.max(...vals, 0.42);
@@ -850,6 +928,38 @@ function MChart({ points, dsColor="#3B82F6" }) {
         })}
         {/* Negative zone */}
         {zeroY < H-pB && <rect x={pL} y={zeroY} width={W-pL-pR} height={H-pB-zeroY} fill="#EF444406"/>}
+        {/* Lead time markers */}
+        {dsId && (() => {
+          const lead = getWarningLead(dsId);
+          if (!lead || !lead.lead || !lead.m_negative_year || !lead.event_year) return null;
+          const allYears = points.map(p=>p.year);
+          const minY = allYears[0], maxY = allYears[allYears.length-1];
+          const toX = yr => pL + ((yr - minY) / (maxY - minY)) * (W - pL - pR);
+          const negX = toX(lead.m_negative_year);
+          const evtX = toX(lead.event_year);
+          if (negX < pL || evtX > W-pR) return null;
+          return (
+            <g>
+              {/* M goes negative line */}
+              <line x1={negX} y1={pT} x2={negX} y2={H-pB} stroke="#F97316" strokeWidth={1.5} strokeDasharray="4,3" opacity={0.7}/>
+              <text x={negX+3} y={pT+10} fill="#F97316" fontSize={8} fontFamily="Inter">M&lt;0</text>
+              <text x={negX+3} y={pT+20} fill="#F97316" fontSize={8} fontFamily="Inter">{lead.m_negative_year}</text>
+              {/* Event line */}
+              <line x1={evtX} y1={pT} x2={evtX} y2={H-pB} stroke="#EF4444" strokeWidth={1.5} strokeDasharray="4,3" opacity={0.7}/>
+              <text x={evtX+3} y={pT+10} fill="#EF4444" fontSize={8} fontFamily="Inter">Event</text>
+              <text x={evtX+3} y={pT+20} fill="#EF4444" fontSize={8} fontFamily="Inter">{lead.event_year}</text>
+              {/* Arrow between them */}
+              {Math.abs(evtX - negX) > 30 && (
+                <g>
+                  <line x1={negX} y1={H-pB-8} x2={evtX} y2={H-pB-8} stroke="#F97316" strokeWidth={1} opacity={0.6}/>
+                  <text x={(negX+evtX)/2} y={H-pB-12} textAnchor="middle" fill="#F97316" fontSize={8} fontFamily="Inter" fontWeight="600">
+                    {lead.lead}yr warning
+                  </text>
+                </g>
+              )}
+            </g>
+          );
+        })()}
         <path d={fill} fill="url(#gfill)"/>
         <path d={path} fill="none" stroke={mColor(vals[vals.length-1])} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"/>
         {/* Points + events */}
@@ -2115,8 +2225,9 @@ function ExploreTab() {
         })()}
 
         {/* Chart */}
-        <MChart points={pts} dsColor={ds.color}/>
+        <MChart points={pts} dsColor={ds.color} dsId={activeId}/>
 
+        <MInsight points={pts} dsId={activeId} dsLabel={ds.label} domain={ds.domain}/>
         {/* Historical annotation — always visible, right under the chart */}
         <div style={{
           marginTop:12,
@@ -2748,9 +2859,10 @@ Analyze their question and respond with JSON only (no markdown):
 
                 {/* Chart */}
                 <div style={{padding:"16px 24px",borderBottom:"1px solid #1A1A1A"}}>
-                  <MChart points={pts} dsColor={ds.color}/>
+                  <MChart points={pts} dsColor={ds.color} dsId={ds.id}/>
                 </div>
 
+                <MInsight points={pts} dsId={ds.id} dsLabel={ds.label} domain={ds.domain}/>
                 {/* Latest annotation */}
                 <div style={{padding:"14px 24px",borderBottom:"1px solid #1A1A1A",
                   background:"#000000",borderLeft:`3px solid ${ds.color}`}}>
@@ -4602,9 +4714,10 @@ function ClimateTab() {
             <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#3B82F6",marginBottom:12,letterSpacing:3}}>
               M TRAJECTORY · {sel.history[0].year}–{sel.history[sel.history.length-1].year}
             </div>
-            <MChart points={sel.history} dsColor={sel.color}/>
+            <MChart points={sel.history} dsColor={sel.color} dsId={sel.id}/>
           </div>
 
+          <MInsight points={sel.history} dsId={sel.id} dsLabel={sel.name} domain={sel.region}/>
           {/* Current point detail */}
           <div style={{padding:"16px 24px",borderBottom:"1px solid #1A1A1A",
             background:"#000000"}}>
@@ -5046,9 +5159,10 @@ function SeismicTab() {
             <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#EF4444",marginBottom:12,letterSpacing:3}}>
               M TRAJECTORY · {sel.history[0].year}–{sel.history[sel.history.length-1].year}
             </div>
-            <MChart points={sel.history} dsColor={sel.color}/>
+            <MChart points={sel.history} dsColor={sel.color} dsId={sel.id}/>
           </div>
 
+          <MInsight points={sel.history} dsId={sel.id} dsLabel={sel.name} domain={sel.region}/>
           {/* Current point */}
           <div style={{padding:"16px 24px",borderBottom:"1px solid #1A1A1A",background:"#000000"}}>
             <div style={{fontSize:9,fontFamily:"var(--mono)",color:sel.color,marginBottom:10,letterSpacing:2}}>
