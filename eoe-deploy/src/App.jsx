@@ -2065,7 +2065,7 @@ function SensitivityPanel({ ds, pts }) {
 }
 
 // ── TAB: EXPLORE ──────────────────────────────────────────────────────────────
-function ExploreTab() {
+function ExploreTab({ injectDataset=null }) {
   const [activeId, setActiveId]     = useState("rome");
   const [ptIdx, setPtIdx]           = useState(null);
   const [sliders, setSliders]       = useState({chi:0.75, s:0.80, lambda0:0.20, C:0.70});
@@ -2073,7 +2073,9 @@ function ExploreTab() {
   const [compareId, setCompareId]   = useState(null);
   const [showCitation, setShowCitation] = useState(false);
   const [activeResearch, setActiveResearch] = useState(null); // "sensitivity"|"tipping"|"overlay"
-  const ds = DATASETS.find(d=>d.id===activeId);
+  const ALL_DATASETS = injectDataset ? [injectDataset, ...DATASETS] : DATASETS;
+  useEffect(()=>{ if(injectDataset){ setActiveId(injectDataset.id); } },[injectDataset]);
+  const ds = ALL_DATASETS.find(d=>d.id===activeId) || ALL_DATASETS[0];
   const pts = ds.points;
   const safeIdx = ptIdx!==null && ptIdx < pts.length ? ptIdx : null;
   const pt = safeIdx!==null ? pts[safeIdx] : pts[pts.length-1];
@@ -2100,7 +2102,7 @@ function ExploreTab() {
             STEP 1 — SELECT A DATASET · {activeId && DATASETS.find(d=>d.id===activeId)?.label}
           </div>
           <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:4}}>
-            {DATASETS.map(d => {
+            {ALL_DATASETS.map(d => {
               const isActive = activeId === d.id;
               // Active dataset: show currently selected point M. Others: show final M.
               const displayPt = isActive
@@ -2356,7 +2358,7 @@ function ExploreTab() {
               Select a second dataset to overlay with <strong style={{color:"#FFFFFF"}}>{ds.label}</strong>:
             </div>
             <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-              {DATASETS.filter(d=>d.id!==activeId).map(d=>(
+              {ALL_DATASETS.filter(d=>d.id!==activeId).map(d=>(
                 <button key={d.id} onClick={()=>setCompareId(compareId===d.id?null:d.id)} style={{
                   background:compareId===d.id?"#1A1A2A":"#111111",
                   border:`1px solid ${compareId===d.id?d.color:"#2A2A2A"}`,
@@ -2369,7 +2371,7 @@ function ExploreTab() {
           {compareId && (
             <OverlayChart
               ds1={ds}
-              ds2={DATASETS.find(d=>d.id===compareId)}
+              ds2={ALL_DATASETS.find(d=>d.id===compareId)}
             />
           )}
         </div>
@@ -2765,7 +2767,7 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
             <button onClick={exportMarkdown} style={{background:"#22C55E",border:"none",borderRadius:8,padding:"10px 18px",fontSize:12,fontWeight:600,color:"#000000",fontFamily:"var(--sans)",cursor:"pointer",display:"flex",alignItems:"center",gap:6}} onMouseEnter={e=>e.currentTarget.style.background="#4ADE80"} onMouseLeave={e=>e.currentTarget.style.background="#22C55E"}>↓ Download .md</button>
             <button onClick={copyToClipboard} style={{background:exportDone?"#22C55E20":"#111111",border:"1px solid "+(exportDone?"#22C55E":"#2A2A2A"),borderRadius:8,padding:"10px 18px",fontSize:12,fontWeight:600,color:exportDone?"#22C55E":"#D4D4D4",fontFamily:"var(--sans)",cursor:"pointer"}}>{exportDone?"✓ Copied!":"⎘ Copy summary"}</button>
-            <button onClick={onGoToExplore} style={{background:"#111111",border:"1px solid #3B82F6",borderRadius:8,padding:"10px 18px",fontSize:12,fontWeight:600,color:"#3B82F6",fontFamily:"var(--sans)",cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.background="#0A0A1A"} onMouseLeave={e=>e.currentTarget.style.background="#111111"}>Full analysis in Explore →</button>
+            <button onClick={()=>onGoToExplore(a.chart_data&&a.chart_data.length>=2?{id:"exp_"+experiment.id,label:s.title,emoji:"⚗️",color:"#22C55E",period:s.timeScale,desc:s.hypothesis,domain:s.domain,source:"EoE Experiment",points:a.chart_data.map((p,idx)=>({...p,year:p.year||idx+1}))}:null)} style={{background:"#111111",border:"1px solid #3B82F6",borderRadius:8,padding:"10px 18px",fontSize:12,fontWeight:600,color:"#3B82F6",fontFamily:"var(--sans)",cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.background="#0A0A1A"} onMouseLeave={e=>e.currentTarget.style.background="#111111"}>Full analysis in Explore →</button>
             <button onClick={reset} style={{background:"none",border:"1px solid #2A2A2A",borderRadius:8,padding:"10px 18px",fontSize:12,color:"#525252",fontFamily:"var(--sans)",cursor:"pointer"}}>⚗️ New experiment</button>
           </div>
           <div style={{padding:"10px 14px",background:"#111111",borderRadius:8,border:"1px solid #1A1A1A",fontFamily:"var(--mono)",fontSize:10,color:"#525252",lineHeight:1.8}}>Cite as: Baird, N. (2026). Engine of Emergence: A Thermodynamic Framework for the Persistence and Collapse of Organized Complexity. DOI: 10.5281/zenodo.19016245</div>
@@ -5291,6 +5293,7 @@ export default function EoEApp() {
   );
   const [tab, setTab] = useState("explore");
   const [uploadedDatasets, setUploadedDatasets] = useState([]);
+  const [pendingExploreDs, setPendingExploreDs] = useState(null);
 
   function handleExperimentReady(ds) {
     setUploadedDatasets(prev => {
@@ -5357,8 +5360,8 @@ export default function EoEApp() {
         {/* Content */}
         <div style={{flex:1,maxWidth:1040,margin:"0 auto",padding:"40px 24px",width:"100%",borderTop:`1px solid ${activeTabMeta.accent}18`,transition:"border-color 0.4s"}}>
           {tab==="understand"  && <UnderstandTab/>}
-          {tab==="explore"     && <ExploreTab/>}
-          {tab==="experiment"  && <ExperimentTab onGoToExplore={()=>setTab("explore")} onGoToAssistant={()=>setTab("assistant")} uploadedDatasets={uploadedDatasets}/>}
+          {tab==="explore"     && <ExploreTab injectDataset={pendingExploreDs}/>}
+          {tab==="experiment"  && <ExperimentTab onGoToExplore={(ds)=>{ if(ds)setPendingExploreDs(ds); setTab("explore"); }} onGoToAssistant={()=>setTab("assistant")} uploadedDatasets={uploadedDatasets}/>}
           {tab==="directory"   && <DirectoryTab/>}
           {tab==="compare"     && <CompareTab/>}
           {tab==="climate"     && <ClimateTab/>}
