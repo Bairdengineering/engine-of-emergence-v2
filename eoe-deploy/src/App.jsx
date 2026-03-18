@@ -2622,16 +2622,31 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
     return "eoe_exp_" + Math.abs(h).toString(36);
   }
 
-  function loadRuns(key) {
+  async function loadRuns(key) {
+    try {
+      const resp = await fetch("/api/load-experiments?key=" + key);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.experiments && data.experiments.length > 0) return data.experiments;
+      }
+    } catch(e) {}
     try { return JSON.parse(localStorage.getItem(key)||"[]"); } catch { return []; }
   }
 
-  function saveRun(key, result) {
+  async function saveRun(key, result) {
     try {
-      const runs = loadRuns(key);
+      await fetch("/api/save-experiment", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({ key, experiment: result })
+      });
+    } catch(e) {}
+    try {
+      const runs = JSON.parse(localStorage.getItem(key)||"[]");
       runs.push(result);
       localStorage.setItem(key, JSON.stringify(runs.slice(-20)));
     } catch(e) {}
+  } catch(e) {}
   }
 
   function averageRuns(runs) {
@@ -2702,8 +2717,8 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
       (() => {
       const key = hashStr(hypothesis);
       const run = {structured,analysis,timestamp:new Date().toISOString(),id:Date.now()};
-      saveRun(key, run);
-      const allRuns = loadRuns(key);
+      await saveRun(key, run);
+      const allRuns = await loadRuns(key);
       const averaged = averageRuns(allRuns);
       (() => {
       // If chart_data is null, generate fallback from EoE prediction
