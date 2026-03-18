@@ -1,13 +1,5 @@
 {
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "framework": "vite",
-  "functions": {
-    "api/claude.js": {
-      "runtime": "edge"
-    }
-  },
-  "rewrites": [
-    { "source": "/api/claude", "destination": "/api/claude" }
-  ]
+  "framework": "vite"
 }
