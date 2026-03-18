@@ -2684,8 +2684,6 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
       const raw2 = d2.content?.map(b=>b.text||"").join("")||"";
       let analysis;
       try { const s2=raw2.indexOf("{"),e2=raw2.lastIndexOf("}"); const c2=s2>=0&&e2>=0?raw2.slice(s2,e2+1):raw2; analysis = JSON.parse(c2); }
-      console.log("raw2 first 200:", raw2.slice(0,200));
-      console.log("analysis parsed:", JSON.stringify(analysis).slice(0,200));
       catch(e) { analysis = {narrative:raw2||"Analysis could not be parsed.",chart_data:null,chart_note:null,minsight:"See narrative above.",key_finding:"See narrative.",analogues:[],intervention:"See narrative."}; }
       setProcessingStep(3);
       (() => {
