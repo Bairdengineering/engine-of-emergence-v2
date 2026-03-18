@@ -2670,7 +2670,7 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
     setProcessingStep(1);
     setExperiment(null);
     const fullInput = "Hypothesis: " + hypothesis + (domain ? "\nDomain: " + domain : "") + (timeScale ? "\nTime scale: " + timeScale : "");
-    const headers = {"Content-Type":"application/json","x-api-key":import.meta.env.VITE_ANTHROPIC_KEY||"","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"};
+    const headers = {"Content-Type":"application/json","Content-Type":"application/json"};
     try {
       const r1 = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers,body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:1000,system:SYSTEM_STRUCTURE,messages:[{role:"user",content:fullInput}]})});
       const d1 = await r1.json();
@@ -2965,7 +2965,7 @@ Please map these columns to EoE variables and return the JSON mapping.`;
       try {
         const response = await fetch("https://api.anthropic.com/v1/messages", {
           method:"POST",
-          headers:{"Content-Type":"application/json","x-api-key":import.meta.env.VITE_ANTHROPIC_KEY||"","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+          headers:{"Content-Type":"application/json","Content-Type":"application/json"},
           body: JSON.stringify({
             model:"claude-sonnet-4-5",
             max_tokens:800,
@@ -3073,7 +3073,7 @@ Please map these columns to EoE variables and return the JSON mapping.`;
     try {
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
         method:"POST",
-        headers:{"Content-Type":"application/json","x-api-key":import.meta.env.VITE_ANTHROPIC_KEY||"","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+        headers:{"Content-Type":"application/json","Content-Type":"application/json"},
         body:JSON.stringify({
           model:"claude-sonnet-4-5", max_tokens:1000,
           system:SYSTEM_PROMPT,
@@ -5157,7 +5157,7 @@ function FloatingAssistant() {
         setLoading(true);
         try {
           const resp = await fetch("https://api.anthropic.com/v1/messages", {
-            method:"POST", headers:{"Content-Type":"application/json","x-api-key":import.meta.env.VITE_ANTHROPIC_KEY||"","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+            method:"POST", headers:{"Content-Type":"application/json","Content-Type":"application/json"},
             body: JSON.stringify({
               model:"claude-sonnet-4-5", max_tokens:400,
               system: SYSTEM,
