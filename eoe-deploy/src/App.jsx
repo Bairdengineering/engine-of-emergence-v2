@@ -2678,45 +2678,80 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
       return;
     }
 
-    // No match — use AI to analyze and route
-    try {
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 600,
-          system: `You are an EoE experiment routing assistant. The user has a research question.
-EoE measures M = χs − λ(C) where χ=efficiency, s=throughput, λ₀=burden, C=complexity.
-Analyze their question and respond with JSON only (no markdown):
-{
-  "hasData": boolean (true if question implies they have data to upload),
-  "domain": "Business|City|Ecological|Government|Civilization|Forest|Seismic|Other",
-  "variables": {
-    "chi": "one sentence: what would chi measure for this specific system",
-    "s": "one sentence: what would s measure for this specific system", 
-    "lambda0": "one sentence: what would lambda0 measure for this specific system",
-    "C": "one sentence: what would C measure for this specific system"
-  },
-  "dataNeeded": "one sentence describing exactly what data they need to collect",
-  "suggestedApproach": "two sentences on how to run this experiment"
-}`,
-          messages: [{ role: "user", content: q }]
-        })
-      });
-      const data = await resp.json();
-      const text = data.content?.map(b => b.text || "").join("") || "";
-      const cleaned = text.replace(/```json|```/g, "").trim();
-      const parsed = JSON.parse(cleaned);
-      const sources = suggestSources(q);
-      setSuggestedSources(sources);
-      setResult({ type: "guided", analysis: parsed, question: q });
-    } catch(e) {
-      // Fallback if AI fails
-      const sources = suggestSources(q);
-      setSuggestedSources(sources);
-      setResult({ type: "guided", analysis: null, question: q });
+    // No match — detect domain and show guidance
+    const sources = suggestSources(q);
+    setSuggestedSources(sources);
+
+    // Rule-based domain detection for variable mapping
+    const ql2 = q.toLowerCase();
+    let domain = "Other";
+    let variables = null;
+    let dataNeeded = "";
+    let approach = "";
+
+    if (ql2.match(/compan|business|firm|startup|corporation|revenue|profit|ceo/)) {
+      domain = "Business";
+      variables = {
+        chi: "How efficiently does the company convert revenue into value — gross margin, revenue per employee, or output per dollar of operating cost.",
+        s: "How much money and energy is flowing through right now — total revenue, new investment, or customer growth rate.",
+        lambda0: "What does it cost just to keep the lights on — rent, payroll for non-revenue staff, debt service, fixed overhead.",
+        C: "How complicated is this organization — number of employees, product lines, markets, and management layers."
+      };
+      dataNeeded = "You need annual revenue, gross margin %, fixed operating costs, and a measure of organizational complexity (headcount or product count). SEC EDGAR has this for any public company.";
+      approach = "Normalize each variable to 0-1 (divide by max). Run M = χs − λ(C) for each year. A declining M 2-3 years before a bankruptcy or acquisition is the classic EoE warning pattern.";
+    } else if (ql2.match(/city|urban|municipal|town|metro|neighborhood/)) {
+      domain = "City";
+      variables = {
+        chi: "How much economic value does the city generate per dollar of infrastructure — GDP per road-mile maintained, or tax revenue per dollar of city spending.",
+        s: "How much economic activity is flowing — employment, tax receipts, building permits, population growth.",
+        lambda0: "What does it cost to keep the city running — pension obligations, debt service, emergency services, infrastructure backlog.",
+        C: "How many people, systems, and jurisdictions must be coordinated — population size, overlapping governments, union contracts."
+      };
+      dataNeeded = "You need municipal revenue, expenditure broken down by mandatory vs discretionary, population, and debt/pension obligations. Lincoln Institute FiSC Database has standardized data for 150 US cities.";
+      approach = "Detroit's collapse arc is preloaded — use it as a comparison baseline. For a new city, normalize Lincoln Institute fiscal data and run the M trajectory over 20+ years.";
+    } else if (ql2.match(/government|federal|nation|country|state|fiscal|debt|deficit|congress/)) {
+      domain = "Government";
+      variables = {
+        chi: "How effectively does government spending turn into actual outcomes — GDP growth per dollar, infrastructure built per dollar, or government effectiveness scores.",
+        s: "How much revenue and economic capacity is available — tax revenue as % of GDP, GDP growth rate, employment rate.",
+        lambda0: "What spending is locked in before a single discretionary dollar — entitlements, interest on debt, military baseline, civil service salaries.",
+        C: "How many laws, agencies, and constituencies must be managed — number of federal agencies, pages of active regulation, treaty obligations."
+      };
+      dataNeeded = "You need government revenue, mandatory vs discretionary spending breakdown, debt/GDP ratio, and a government effectiveness measure. World Bank Open Data and IMF WEO Database are the best free sources.";
+      approach = "The US Federal System dataset is preloaded — try 'US federal government' to see that analysis. For other countries, World Bank government effectiveness scores map directly to χ.";
+    } else if (ql2.match(/ecosystem|forest|reef|river|lake|ocean|species|habitat|biodiversity|environmental/)) {
+      domain = "Ecological";
+      variables = {
+        chi: "How efficiently does the ecosystem convert energy and nutrients into living biomass — net primary productivity, species reproduction rates, or ecosystem service delivery.",
+        s: "How much energy and nutrient is flowing into the system — solar irradiance, rainfall, nutrient upwelling, or resource availability.",
+        lambda0: "What does the ecosystem spend energy on just to survive — baseline respiration, stress responses, disease load, thermal or chemical burden.",
+        C: "How structurally rich and interconnected is this ecosystem — species richness, food web depth, habitat connectivity, trophic levels."
+      };
+      dataNeeded = "You need a productivity metric (NPP or biomass), a resource flow metric (rainfall or nutrient data), a stress indicator, and a biodiversity/complexity measure. NASA AppEEARS provides NPP data for any location on Earth.";
+      approach = "The Great Barrier Reef and Amazon datasets are preloaded for comparison. For a new ecosystem, USGS Water Info, Global Forest Watch, or AIMS LTMP have downloadable time-series data.";
+    } else if (ql2.match(/seismic|earthquake|fault|tectonic|rupture|tremor/)) {
+      domain = "Seismic";
+      variables = {
+        chi: "Fault structural efficiency — how regularly and efficiently does the fault release accumulated stress through small earthquakes vs locking it up.",
+        s: "Seismic energy throughput — normalized annual seismic moment release relative to the regional maximum.",
+        lambda0: "Accumulated strain burden — slip deficit as a fraction of the recurrence interval, representing locked stress.",
+        C: "Fault network complexity — number of fault segments, branching, interaction zones, and proximity to other active faults."
+      };
+      dataNeeded = "You need seismic moment release rates, GPS-measured slip deficit, fault coupling coefficient, and fault network density. USGS Earthquake Catalog and UNAVCO GPS data are the primary sources.";
+      approach = "The Seismic tab has 8 major fault zones preloaded. Check if your fault system is covered there first. For new fault zones, USGS Hazards Science Center publishes coupling coefficients and slip rates.";
+    } else {
+      domain = "Custom System";
+      variables = {
+        chi: "How efficiently does this system convert its inputs (energy, resources, investment) into useful outputs — the ratio of output quality to input cost.",
+        s: "How much resource, energy, or activity is flowing through the system right now — the throughput relative to its historical peak.",
+        lambda0: "What does it cost just to keep this system running at baseline — the fixed overhead that must be paid before any surplus can accumulate.",
+        C: "How many interconnected parts, rules, and relationships must be coordinated — the structural complexity of the system."
+      };
+      dataNeeded = "Identify a time series (10+ data points over years or decades) for each of the four variables above. Normalize each to 0-1. The Assistant tab can help you map your specific data to these variables.";
+      approach = "Start with the domain sandbox in the Explore tab to get a feel for the variables. Then use the Assistant tab — describe your system and it will help you identify data sources and map your columns.";
     }
+
+    setResult({ type: "guided", analysis: { domain, variables, dataNeeded, suggestedApproach: approach }, question: q });
     setLoading(false);
   }
 
