@@ -2691,7 +2691,7 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
 
   const SYSTEM_ANALYZE = `You are the Engine of Emergence experiment analyst. EoE: M = chi*s - (lambda0 + 0.15*C^1.4). RULES: (1) ALWAYS produce chart_data — never set it to null. Generate 6-8 data points with realistic values that match the narrative arc. (2) If declining: chi and s fall, lambda0 and C rise, M goes negative. If recovering: reverse. (3) All values strictly 0-1. (4) Every point needs an event field: one sentence of what was happening that year. (5) Narrative must match chart exactly. Return ONLY valid JSON no backticks: {"narrative":"3-5 paragraphs","chart_data":[{"year":1960,"chi":0.85,"s":0.82,"lambda0":0.18,"C":0.40,"event":"What was happening."}],"chart_note":"caveat or null","minsight":"2 plain English sentences","key_finding":"one sentence","analogues":["system 1","system 2"],"intervention":"one paragraph"}.`;
 
-  async function runExperiment() {
+  async async function runExperiment() {
     if (!hypothesis.trim()) return;
     setPhase("processing");
     setProcessingStep(1);
