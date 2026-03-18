@@ -5323,6 +5323,209 @@ function SeismicTab() {
 }
 
 
+
+// ── FLOATING ASSISTANT BUBBLE ─────────────────────────────────────────────────
+function FloatingAssistant() {
+  const [open, setOpen] = useState(false);
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState([
+    { role:"assistant", text:"Hey — ask me anything about EoE, or describe a system you want to analyze and I'll tell you exactly what data to collect and where to find it." }
+  ]);
+  const [loading, setLoading] = useState(false);
+  const bottomRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (open) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior:"smooth" });
+  }, [messages, loading]);
+
+  const SYSTEM = `You are the Engine of Emergence assistant. EoE measures M = χs − λ(C) where χ=efficiency, s=throughput, λ₀=burden, C=complexity. M positive = runway, M negative = borrowed time.
+
+Approved data sources by domain:
+- Business: SEC EDGAR, Macrotrends, World Bank Enterprise Surveys
+- City/Urban: Lincoln Institute FiSC, BEA Metro GDP, US Census ACS  
+- Government: World Bank Open Data, IMF WEO, CBO Historical Data
+- Ecological: AIMS LTMP, NOAA Coral Reef Watch, Global Forest Watch, NASA AppEEARS
+- Agriculture/Valley: USDA NASS (nass.usda.gov), California DWR (water.ca.gov), USGS Water Resources
+- Seismic: USGS Earthquake Catalog, UNAVCO GPS data
+- Historical: Seshat Databank, HYDE Database
+
+When someone asks where to find data for a specific system, always name the exact approved source and tell them which columns map to χ, s, λ₀, and C. Be concise - 2-4 sentences. No bullet points.`;
+
+  async function send() {
+    const q = input.trim();
+    if (!q || loading) return;
+    const newMsgs = [...messages, { role:"user", text:q }];
+    setMessages(newMsgs);
+    setInput("");
+    setLoading(true);
+    try {
+      const resp = await fetch("https://api.anthropic.com/v1/messages", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({
+          model:"claude-sonnet-4-20250514",
+          max_tokens:400,
+          system: SYSTEM,
+          messages: newMsgs.map(m=>({ role:m.role, content:m.text }))
+        })
+      });
+      const data = await resp.json();
+      const reply = data.content?.map(b=>b.text||"").join("") || "Try again in a moment.";
+      setMessages(prev=>[...prev, { role:"assistant", text:reply }]);
+    } catch(e) {
+      setMessages(prev=>[...prev, { role:"assistant", text:"Connection issue — try again." }]);
+    }
+    setLoading(false);
+  }
+
+  return (
+    <>
+      {/* Backdrop */}
+      {open && (
+        <div onClick={()=>setOpen(false)}
+          style={{position:"fixed",inset:0,zIndex:98,background:"transparent"}}/>
+      )}
+
+      {/* Chat panel */}
+      {open && (
+        <div style={{
+          position:"fixed", bottom:80, right:20, zIndex:99,
+          width:360, height:480,
+          background:"#0A0A0A", border:"1px solid #2A2A2A",
+          borderRadius:16, boxShadow:"0 8px 40px #000000CC",
+          display:"flex", flexDirection:"column", overflow:"hidden",
+          animation:"fadeUp 0.2s ease both"
+        }}>
+          {/* Header */}
+          <div style={{padding:"14px 16px", borderBottom:"1px solid #1A1A1A",
+            display:"flex", justifyContent:"space-between", alignItems:"center",
+            background:"#111111", flexShrink:0}}>
+            <div style={{display:"flex", alignItems:"center", gap:8}}>
+              <div style={{width:28,height:28,borderRadius:"50%",background:"#2563EB",
+                display:"flex",alignItems:"center",justifyContent:"center",
+                fontSize:12,fontWeight:700,color:"#FFFFFF"}}>E</div>
+              <div>
+                <div style={{fontSize:13,fontWeight:600,color:"#FFFFFF",fontFamily:"var(--sans)"}}>
+                  EoE Assistant
+                </div>
+                <div style={{fontSize:10,color:"#525252",fontFamily:"var(--sans)"}}>
+                  Ask anything · Data sources · Variable help
+                </div>
+              </div>
+            </div>
+            <button onClick={()=>setOpen(false)} style={{
+              background:"none",border:"none",color:"#525252",
+              fontSize:18,cursor:"pointer",padding:4
+            }}>✕</button>
+          </div>
+
+          {/* Messages */}
+          <div style={{flex:1,overflowY:"auto",padding:"14px 16px",
+            display:"flex",flexDirection:"column",gap:10}}>
+            {messages.map((m,i)=>(
+              <div key={i} style={{display:"flex",
+                justifyContent:m.role==="user"?"flex-end":"flex-start",gap:6}}>
+                {m.role==="assistant" && (
+                  <div style={{width:22,height:22,borderRadius:"50%",background:"#2563EB",
+                    display:"flex",alignItems:"center",justifyContent:"center",
+                    fontSize:9,fontWeight:700,color:"#FFF",flexShrink:0,marginTop:2}}>E</div>
+                )}
+                <div style={{
+                  maxWidth:"82%",
+                  background:m.role==="user"?"#1A1A1A":"#111111",
+                  border:`1px solid ${m.role==="user"?"#2A2A2A":"#1A1A1A"}`,
+                  borderRadius:m.role==="user"?"12px 12px 3px 12px":"3px 12px 12px 12px",
+                  padding:"9px 12px",fontSize:12,lineHeight:1.65,
+                  color:"#D4D4D4",fontFamily:"var(--sans)"
+                }}>{m.text}</div>
+              </div>
+            ))}
+            {loading && (
+              <div style={{display:"flex",gap:6}}>
+                <div style={{width:22,height:22,borderRadius:"50%",background:"#2563EB",
+                  display:"flex",alignItems:"center",justifyContent:"center",
+                  fontSize:9,fontWeight:700,color:"#FFF",flexShrink:0}}>E</div>
+                <div style={{background:"#111111",border:"1px solid #1A1A1A",
+                  borderRadius:"3px 12px 12px 12px",padding:"9px 12px",
+                  display:"flex",gap:4,alignItems:"center"}}>
+                  {[0,1,2].map(j=>(
+                    <div key={j} style={{width:5,height:5,borderRadius:"50%",
+                      background:"#3B82F6",animation:"pulse 1.2s ease-in-out infinite",
+                      animationDelay:`${j*0.2}s`}}/>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div ref={bottomRef}/>
+          </div>
+
+          {/* Quick prompts */}
+          <div style={{padding:"8px 12px",borderTop:"1px solid #1A1A1A",
+            display:"flex",flexWrap:"wrap",gap:5,flexShrink:0}}>
+            {["Where do I find data for my city?","What is χ?","Explain M like I'm 10","How do I normalize my data?"].map((q,i)=>(
+              <button key={i} onClick={()=>setInput(q)} style={{
+                background:"#111111",border:"1px solid #1A1A1A",borderRadius:12,
+                padding:"3px 9px",fontSize:10,color:"#737373",
+                fontFamily:"var(--sans)",cursor:"pointer",transition:"all 0.12s"
+              }}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor="#2563EB";e.currentTarget.style.color="#93C5FD";}}
+                onMouseLeave={e=>{e.currentTarget.style.borderColor="#1A1A1A";e.currentTarget.style.color="#737373";}}
+              >{q}</button>
+            ))}
+          </div>
+
+          {/* Input */}
+          <div style={{padding:"10px 12px 14px",flexShrink:0,display:"flex",gap:8}}>
+            <input ref={inputRef} value={input}
+              onChange={e=>setInput(e.target.value)}
+              onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}}
+              placeholder="Ask anything..."
+              style={{flex:1,background:"#111111",border:"1px solid #2A2A2A",
+                borderRadius:8,padding:"9px 12px",fontSize:12,color:"#FFFFFF",
+                outline:"none",fontFamily:"var(--sans)"}}
+              onFocus={e=>e.target.style.borderColor="#2563EB"}
+              onBlur={e=>e.target.style.borderColor="#2A2A2A"}
+            />
+            <button onClick={send} disabled={loading||!input.trim()} style={{
+              background:loading||!input.trim()?"#1A1A1A":"#2563EB",
+              border:"none",borderRadius:8,width:38,height:38,
+              fontSize:16,color:"white",cursor:loading||!input.trim()?"not-allowed":"pointer",
+              opacity:loading||!input.trim()?0.4:1,flexShrink:0
+            }}>↑</button>
+          </div>
+        </div>
+      )}
+
+      {/* Bubble trigger */}
+      <button onClick={()=>setOpen(o=>!o)} style={{
+        position:"fixed", bottom:20, right:20, zIndex:100,
+        background:open?"#1D4ED8":"#2563EB",
+        border:"none", borderRadius:24,
+        padding:"10px 18px 10px 14px",
+        boxShadow:"0 4px 20px #2563EB50",
+        display:"flex", alignItems:"center", gap:8,
+        cursor:"pointer", transition:"all 0.2s",
+        fontFamily:"var(--sans)"
+      }}
+        onMouseEnter={e=>{e.currentTarget.style.transform="scale(1.05)";e.currentTarget.style.boxShadow="0 6px 28px #2563EB70";}}
+        onMouseLeave={e=>{e.currentTarget.style.transform="scale(1)";e.currentTarget.style.boxShadow="0 4px 20px #2563EB50";}}
+      >
+        <span style={{fontSize:18}}>💬</span>
+        <span style={{fontSize:13,fontWeight:600,color:"#FFFFFF"}}>
+          {open ? "Close" : "Ask anything"}
+        </span>
+      </button>
+    </>
+  );
+}
+
 // ── MAIN APP ──────────────────────────────────────────────────────────────────
 export default function EoEApp() {
   const [screen, setScreen] = useState(
@@ -5350,7 +5553,6 @@ export default function EoEApp() {
     {id:"understand",  label:"Understand",  icon:"📖", accent:"#A78BFA", desc:"The framework"},
     {id:"explore",     label:"Explore",     icon:"🔭", accent:"#3B82F6", desc:"20 real systems"},
     {id:"experiment",  label:"Experiment",  icon:"⚗️", accent:"#22C55E", desc:"Your data"},
-    {id:"assistant",   label:"Assistant",   icon:"💬", accent:"#F59E0B", desc:"AI guide"},
     {id:"directory",   label:"Sources",     icon:"🗂️", accent:"#EC4899", desc:"34 datasets"},
     {id:"compare",     label:"Compare",     icon:"🌍", accent:"#06B6D4", desc:"Nations"},
     {id:"climate",     label:"Climate",     icon:"🌡️", accent:"#EF4444", desc:"Earth systems"},
@@ -5399,13 +5601,13 @@ export default function EoEApp() {
           {tab==="understand"  && <UnderstandTab/>}
           {tab==="explore"     && <ExploreTab/>}
           {tab==="experiment"  && <ExperimentTab onGoToExplore={()=>setTab("explore")} onGoToAssistant={()=>setTab("assistant")} uploadedDatasets={uploadedDatasets}/>}
-          {tab==="assistant"   && <AssistantTab onExperimentReady={handleExperimentReady}/>}
           {tab==="directory"   && <DirectoryTab/>}
           {tab==="compare"     && <CompareTab/>}
           {tab==="climate"     && <ClimateTab/>}
           {tab==="seismic"     && <SeismicTab/>}
         </div>
 
+        <FloatingAssistant/>
         {/* Footer */}
         <div style={{borderTop:"1px solid var(--border)",padding:"14px 20px",textAlign:"center",flexShrink:0}}>
           <p style={{fontSize:10,color:"#2A2A2A",fontFamily:"var(--sans)"}}>
