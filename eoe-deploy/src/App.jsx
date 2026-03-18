@@ -4258,6 +4258,42 @@ function CompareTab() {
               stroke="#1A1A1A" strokeWidth={0.5}/>;
           })}
 
+
+          {/* Continent wireframe outlines */}
+          <g fill="none" stroke="#2A4A2A" strokeWidth="0.8" opacity="0.55">
+            {/* North America */}
+            <path d="M 52 28 L 78 22 L 100 26 L 118 32 L 128 44 L 130 58 L 124 70 L 112 80 L 100 88 L 90 96 L 82 104 L 76 98 L 68 90 L 60 80 L 54 68 L 50 55 L 50 42 Z"/>
+            {/* Central America + Caribbean */}
+            <path d="M 82 104 L 88 110 L 84 120 L 78 118 Z"/>
+            {/* South America */}
+            <path d="M 88 110 L 106 108 L 120 116 L 128 132 L 126 152 L 118 168 L 108 178 L 96 175 L 86 162 L 80 146 L 80 130 L 84 118 Z"/>
+            {/* Greenland */}
+            <path d="M 68 14 L 82 10 L 88 18 L 80 24 L 68 22 Z"/>
+            {/* Europe */}
+            <path d="M 268 28 L 282 24 L 292 28 L 296 36 L 290 44 L 280 46 L 270 42 L 266 34 Z"/>
+            {/* Scandinavia */}
+            <path d="M 278 18 L 290 14 L 294 22 L 286 28 L 278 26 Z"/>
+            {/* UK */}
+            <path d="M 262 28 L 268 26 L 270 32 L 264 34 Z"/>
+            {/* Africa */}
+            <path d="M 268 44 L 292 40 L 306 48 L 310 64 L 308 82 L 300 98 L 288 110 L 276 114 L 264 106 L 256 90 L 254 74 L 258 58 Z"/>
+            {/* Middle East */}
+            <path d="M 296 38 L 320 34 L 326 46 L 314 52 L 300 50 Z"/>
+            {/* Russia / N Asia */}
+            <path d="M 290 18 L 370 14 L 410 20 L 420 30 L 406 38 L 380 36 L 350 32 L 320 28 L 296 26 Z"/>
+            {/* South Asia */}
+            <path d="M 354 42 L 376 38 L 390 48 L 386 62 L 374 68 L 358 62 L 350 52 Z"/>
+            {/* China / E Asia */}
+            <path d="M 388 32 L 426 28 L 440 38 L 444 52 L 432 60 L 410 58 L 390 52 L 382 42 Z"/>
+            {/* SE Asia */}
+            <path d="M 418 60 L 438 56 L 446 68 L 438 78 L 420 76 L 412 66 Z"/>
+            {/* Japan */}
+            <path d="M 446 40 L 454 36 L 458 44 L 450 50 L 444 46 Z"/>
+            {/* Australia */}
+            <path d="M 430 148 L 460 140 L 480 148 L 484 164 L 476 178 L 456 182 L 436 174 L 424 162 Z"/>
+            {/* New Zealand */}
+            <path d="M 490 168 L 498 162 L 500 172 L 494 176 Z"/>
+          </g>
           {/* Country dots */}
           {COUNTRY_DATA.map(c=>{
             const coords = COUNTRY_COORDS[c.code];
@@ -4804,6 +4840,38 @@ function ClimateTab() {
           })}
           {/* Equator */}
           {(() => { const [,y]=toXY(0,0,W,H); return <line x1={0} y1={y} x2={W} y2={y} stroke="#2A2A2A" strokeWidth={1}/>; })()}
+
+          {/* Continent wireframe outlines */}
+          <g fill="none" stroke="#2A3A4A" strokeWidth="0.8" opacity="0.55">
+            {/* North America */}
+            <path d="M 54 29 L 81 23 L 103 27 L 122 33 L 132 45 L 134 60 L 128 72 L 116 82 L 103 91 L 93 99 L 85 107 L 78 101 L 70 93 L 62 82 L 56 70 L 52 57 L 52 43 Z"/>
+            {/* Central America */}
+            <path d="M 85 107 L 91 113 L 87 124 L 81 122 Z"/>
+            {/* South America */}
+            <path d="M 91 113 L 110 111 L 124 120 L 132 136 L 130 157 L 122 173 L 111 184 L 99 181 L 89 167 L 83 150 L 83 134 L 87 122 Z"/>
+            {/* Greenland */}
+            <path d="M 70 14 L 85 10 L 91 19 L 83 25 L 70 23 Z"/>
+            {/* Europe */}
+            <path d="M 277 29 L 291 25 L 302 29 L 306 37 L 299 45 L 289 47 L 278 43 L 274 35 Z"/>
+            {/* Scandinavia */}
+            <path d="M 287 19 L 300 14 L 304 23 L 295 29 L 287 27 Z"/>
+            {/* Africa */}
+            <path d="M 277 45 L 302 41 L 316 49 L 320 66 L 318 84 L 310 101 L 297 114 L 285 118 L 272 110 L 264 93 L 262 76 L 266 59 Z"/>
+            {/* Middle East */}
+            <path d="M 306 39 L 331 35 L 337 47 L 324 54 L 309 52 Z"/>
+            {/* Russia / N Asia */}
+            <path d="M 299 19 L 382 14 L 423 21 L 433 31 L 419 39 L 392 37 L 361 33 L 330 29 L 305 27 Z"/>
+            {/* South Asia */}
+            <path d="M 365 43 L 388 39 L 402 49 L 398 64 L 385 70 L 368 64 L 360 53 Z"/>
+            {/* China / E Asia */}
+            <path d="M 400 33 L 439 29 L 454 39 L 458 54 L 445 62 L 423 60 L 402 54 L 394 43 Z"/>
+            {/* SE Asia */}
+            <path d="M 431 62 L 452 58 L 460 70 L 452 80 L 433 78 L 424 68 Z"/>
+            {/* Japan */}
+            <path d="M 460 41 L 468 37 L 472 45 L 463 51 L 457 47 Z"/>
+            {/* Australia */}
+            <path d="M 443 153 L 474 144 L 495 153 L 499 170 L 490 184 L 470 188 L 449 180 L 437 167 Z"/>
+          </g>
           {/* System dots */}
           {CLIMATE_SYSTEMS.map(sys=>{
             const coords = CLIMATE_COORDS[sys.id];
