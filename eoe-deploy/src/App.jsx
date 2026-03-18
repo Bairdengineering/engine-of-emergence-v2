@@ -2502,7 +2502,7 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
       apple:      ["apple","tim cook","iphone","jobs","cupertino"],
       reef:       ["reef","coral","bleaching","barrier","australia"],
       detroit:    ["detroit","michigan","bankruptcy","motor city","municipal"],
-      usfiscal:   ["us government","federal","congress","debt","deficit","united states","american"],
+      usfiscal:   ["us government","us govern","federal","congress","debt","deficit","united states","american","us fiscal","usa","collapse","heading for","headed for","government heading","government headed"],
       maya:       ["maya","mayan","mesoamerica","classic"],
       bronze:     ["bronze age","mycenae","hittite","late bronze"],
       tang:       ["tang","dynasty","china","chinese","ancient china"],
