@@ -2600,6 +2600,52 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
   const [processingStep, setProcessingStep] = useState(0);
   const inputRef = useRef(null);
 
+
+  function hashStr(str) {
+    let h = 0;
+    for (let c of str.trim().toLowerCase()) h = (Math.imul(31,h) + c.charCodeAt(0)) | 0;
+    return "eoe_exp_" + Math.abs(h).toString(36);
+  }
+
+  function loadRuns(key) {
+    try { return JSON.parse(localStorage.getItem(key)||"[]"); } catch { return []; }
+  }
+
+  function saveRun(key, result) {
+    try {
+      const runs = loadRuns(key);
+      runs.push(result);
+      localStorage.setItem(key, JSON.stringify(runs.slice(-20)));
+    } catch(e) {}
+  }
+
+  function averageRuns(runs) {
+    if (!runs.length) return null;
+    if (runs.length === 1) return {...runs[0], runCount:1};
+    const base = runs[runs.length-1];
+    // Average chart_data across runs that have it
+    const withCharts = runs.filter(r => r.analysis.chart_data && r.analysis.chart_data.length >= 2);
+    let avgChart = base.analysis.chart_data;
+    if (withCharts.length > 1) {
+      const len = Math.min(...withCharts.map(r => r.analysis.chart_data.length));
+      avgChart = Array.from({length:len}, (_,i) => {
+        const pts = withCharts.map(r => r.analysis.chart_data[i]).filter(Boolean);
+        return {
+          year: pts[0].year,
+          chi: pts.reduce((a,p)=>a+p.chi,0)/pts.length,
+          s: pts.reduce((a,p)=>a+p.s,0)/pts.length,
+          lambda0: pts.reduce((a,p)=>a+p.lambda0,0)/pts.length,
+          C: pts.reduce((a,p)=>a+p.C,0)/pts.length,
+        };
+      });
+    }
+    return {
+      ...base,
+      runCount: runs.length,
+      analysis: {...base.analysis, chart_data: avgChart}
+    };
+  }
+
   const DOMAINS = ["Civilizational","Ecological","Fiscal/National","Urban","Corporate","Biological","Seismic","Climate","Custom"];
   const TIMESCALES = ["Decades","Centuries","Years","Months","Geological"];
 
@@ -2638,7 +2684,14 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
       try { const c2 = raw2.replace(/```[a-z]*/g,"").replace(/```/g,"").trim(); analysis = JSON.parse(c2); }
       catch(e) { analysis = {narrative:raw2||"Analysis could not be parsed.",chart_data:null,chart_note:null,minsight:"See narrative above.",key_finding:"See narrative.",analogues:[],intervention:"See narrative."}; }
       setProcessingStep(3);
-      setExperiment({structured,analysis,timestamp:new Date().toISOString(),id:Date.now()});
+      (() => {
+      const key = hashStr(hypothesis);
+      const run = {structured,analysis,timestamp:new Date().toISOString(),id:Date.now()};
+      saveRun(key, run);
+      const allRuns = loadRuns(key);
+      const averaged = averageRuns(allRuns);
+      setExperiment({...averaged, cacheKey:key});
+    })();
       setPhase("results");
     } catch(err) {
       setExperiment({structured:{title:"Error",hypothesis,domain:domain||"Unknown",timeScale:timeScale||"Unknown",variables:{chi:"—",s:"—",lambda0:"—",C:"—"},eoe_prediction:"Connection failed.",confidence:"speculative",confidence_reason:"Network error.",generate_chart:false,chart_reason:"N/A",uncertainty_flag:"Connection failed."},analysis:{narrative:"Connection issue — please try again.",chart_data:null,chart_note:null,minsight:"Try again.",key_finding:"N/A",analogues:[],intervention:"N/A"},timestamp:new Date().toISOString(),id:Date.now()});
