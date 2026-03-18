@@ -3098,7 +3098,7 @@ When someone asks about a specific geographic system (like California's Central 
 3. Tell them exactly which variables/columns to download
 4. Explain how those columns map to χ, s, λ₀, and C
 
-Be concise - 3-5 sentences max unless they ask for more detail. Never use bullet points in conversational responses.`
+Be concise - 3-5 sentences max unless they ask for more detail. Never use bullet points in conversational responses.
 
 When a user uploads a CSV, analyze the headers and sample rows, then return a JSON block in this EXACT format (no markdown, no backticks around it):
 {"mapping":{"label":"column_name_or_null","chi":"column_name","s":"column_name","lambda0":"column_name","C":"column_name"},"confidence":"high|medium|low","notes":"one sentence explaining your mapping"}
