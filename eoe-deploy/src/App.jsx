@@ -4246,6 +4246,19 @@ function CompareTab() {
           marginBottom:10,letterSpacing:3}}>WORLD MAP — dot size = GDP, color = M</div>
         <svg viewBox={`0 0 ${worldW} ${worldH}`} style={{display:"block",width:"100%",height:"auto"}} preserveAspectRatio="xMidYMid meet">
           <rect x={0} y={0} width={worldW} height={worldH} fill="#050505"/>
+          <g fill="none" stroke="#3A5A3A" strokeWidth="1.2" opacity="0.6">
+            <path d="M55 28 L80 22 L102 27 L120 34 L128 46 L126 60 L118 72 L104 82 L90 90 L82 98 L76 92 L68 82 L58 68 L52 54 L52 40 Z"/>
+            <path d="M88 104 L108 102 L122 112 L128 130 L124 152 L114 168 L100 174 L88 162 L82 146 L82 128 L86 114 Z"/>
+            <path d="M70 12 L84 8 L90 16 L82 22 L70 20 Z"/>
+            <path d="M264 28 L282 22 L294 26 L298 34 L292 42 L280 46 L268 42 L262 34 Z"/>
+            <path d="M278 18 L292 14 L296 22 L288 28 L278 26 Z"/>
+            <path d="M264 44 L292 40 L308 48 L312 64 L308 82 L298 98 L284 110 L272 112 L260 102 L254 86 L252 70 L256 56 Z"/>
+            <path d="M292 18 L380 12 L418 18 L428 28 L412 36 L378 34 L344 30 L312 26 L294 24 Z"/>
+            <path d="M356 40 L380 36 L394 46 L390 62 L376 68 L360 62 L352 50 Z"/>
+            <path d="M392 30 L432 26 L448 36 L452 50 L438 58 L412 56 L392 50 L384 40 Z"/>
+            <path d="M424 58 L446 54 L454 66 L446 76 L426 74 L418 64 Z"/>
+            <path d="M434 146 L468 138 L488 148 L490 164 L480 178 L458 182 L438 172 L428 158 Z"/>
+          </g>
           {/* Background grid */}
           {[-60,-30,0,30,60].map(lat=>{
             const [,y] = toXY(0,lat);
@@ -4869,6 +4882,19 @@ function ClimateTab() {
         >
           {/* Background */}
           <rect x={0} y={0} width={W} height={H} fill="#050505"/>
+          <g fill="none" stroke="#3A5A3A" strokeWidth="1.2" opacity="0.6">
+            <path d="M55 28 L80 22 L102 27 L120 34 L128 46 L126 60 L118 72 L104 82 L90 90 L82 98 L76 92 L68 82 L58 68 L52 54 L52 40 Z"/>
+            <path d="M88 104 L108 102 L122 112 L128 130 L124 152 L114 168 L100 174 L88 162 L82 146 L82 128 L86 114 Z"/>
+            <path d="M70 12 L84 8 L90 16 L82 22 L70 20 Z"/>
+            <path d="M264 28 L282 22 L294 26 L298 34 L292 42 L280 46 L268 42 L262 34 Z"/>
+            <path d="M278 18 L292 14 L296 22 L288 28 L278 26 Z"/>
+            <path d="M264 44 L292 40 L308 48 L312 64 L308 82 L298 98 L284 110 L272 112 L260 102 L254 86 L252 70 L256 56 Z"/>
+            <path d="M292 18 L380 12 L418 18 L428 28 L412 36 L378 34 L344 30 L312 26 L294 24 Z"/>
+            <path d="M356 40 L380 36 L394 46 L390 62 L376 68 L360 62 L352 50 Z"/>
+            <path d="M392 30 L432 26 L448 36 L452 50 L438 58 L412 56 L392 50 L384 40 Z"/>
+            <path d="M424 58 L446 54 L454 66 L446 76 L426 74 L418 64 Z"/>
+            <path d="M434 146 L468 138 L488 148 L490 164 L480 178 L458 182 L438 172 L428 158 Z"/>
+          </g>
           {/* Grid */}
           {[-60,-30,0,30,60].map(lat=>{
             const [,y]=toXY(0,lat,W,H);
