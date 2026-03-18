@@ -2646,7 +2646,6 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
       runs.push(result);
       localStorage.setItem(key, JSON.stringify(runs.slice(-20)));
     } catch(e) {}
-  } catch(e) {}
   }
 
   function averageRuns(runs) {
