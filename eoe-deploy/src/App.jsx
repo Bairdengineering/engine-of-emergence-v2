@@ -2693,7 +2693,26 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
       // const allRuns = loadRuns(key);
       const allRuns = [run]; // cache disabled for testing
       const averaged = averageRuns(allRuns);
+      (() => {
+      // If chart_data is null, generate fallback from EoE prediction
+      if (!averaged.analysis.chart_data || averaged.analysis.chart_data.length < 2) {
+        const conf = averaged.structured.confidence;
+        const declining = averaged.structured.eoe_prediction.toLowerCase().includes("negat") || averaged.structured.eoe_prediction.toLowerCase().includes("declin") || averaged.structured.eoe_prediction.toLowerCase().includes("collaps");
+        const pts = [0,1,2,3,4,5,6,7].map(i => {
+          const t = i/7;
+          const chi = declining ? 0.82 - t*0.28 : 0.55 + t*0.25;
+          const s   = declining ? 0.78 - t*0.24 : 0.52 + t*0.22;
+          const lam = declining ? 0.20 + t*0.30 : 0.40 - t*0.15;
+          const C   = declining ? 0.45 + t*0.35 : 0.65 - t*0.10;
+          const startYear = 1960;
+          const endYear = 2024;
+          return { year: Math.round(startYear + t*(endYear-startYear)), chi, s, lambda0:lam, C, event:"" };
+        });
+        averaged.analysis.chart_data = pts;
+        averaged.analysis.chart_note = "Illustrative trajectory based on EoE prediction — upload real data for precise analysis.";
+      }
       setExperiment({...averaged, cacheKey:key});
+    })()
     })();
       setPhase("results");
     } catch(err) {
