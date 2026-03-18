@@ -2587,337 +2587,193 @@ function ExploreTab() {
 
 
 // ── TAB: RUN AN EXPERIMENT ────────────────────────────────────────────────────
-function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const bottomRef = useRef(null);
-  const inputRef = useRef(null);
-  const fileRef = useRef(null);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior:"smooth" });
-  }, [messages, loading]);
+function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) {
+  const [phase, setPhase]           = React.useState("input");
+  const [hypothesis, setHypothesis] = React.useState("");
+  const [domain, setDomain]         = React.useState("");
+  const [timeScale, setTimeScale]   = React.useState("");
+  const [experiment, setExperiment] = React.useState(null);
+  const [exportDone, setExportDone] = React.useState(false);
+  const [processingStep, setProcessingStep] = React.useState(0);
+  const inputRef = React.useRef(null);
+
+  const DOMAINS = ["Civilizational","Ecological","Fiscal/National","Urban","Corporate","Biological","Seismic","Climate","Custom"];
+  const TIMESCALES = ["Decades","Centuries","Years","Months","Geological"];
 
   const EXAMPLES = [
-    { icon:"🇺🇸", text:"Is the US federal government heading toward collapse?" },
-    { icon:"🪸", text:"What does the Great Barrier Reef trajectory look like?" },
-    { icon:"🏛️", text:"Walk me through Rome's collapse arc" },
-    { icon:"🌳", text:"Where do I find data on California's Central Valley agricultural system?" },
-    { icon:"🏢", text:"How do I analyze a company's fiscal stability using EoE?" },
-    { icon:"🌋", text:"How close is the San Andreas fault to a major rupture?" },
+    { icon:"🇺🇸", text:"What happens to a civilization when energy costs exceed maintenance returns?", domain:"Fiscal/National", time:"Decades" },
+    { icon:"🪸", text:"At what point does reef bleaching frequency make recovery mathematically impossible?", domain:"Ecological", time:"Decades" },
+    { icon:"🏛️", text:"Why do empires always collapse faster than they rise?", domain:"Civilizational", time:"Centuries" },
+    { icon:"🌲", text:"Can the Amazon tip irreversibly even if deforestation stops?", domain:"Ecological", time:"Decades" },
+    { icon:"🏢", text:"What EoE variables would predict Enron collapse before the fraud was discovered?", domain:"Corporate", time:"Years" },
+    { icon:"🌋", text:"Is accumulated seismic strain fundamentally the same as bureaucratic overhead in EoE terms?", domain:"Seismic", time:"Geological" },
   ];
 
-  const SYSTEM = `You are the Engine of Emergence experiment assistant. EoE measures M = χs - λ(C) where χ=efficiency (0-1), s=throughput (0-1), λ₀=base burden (0-1), C=complexity (0-1). M positive = runway, M negative = borrowed time. λ(C) = λ₀ + 0.15 × C^1.4.
+  const SYSTEM_STRUCTURE = `You are the Engine of Emergence experiment structurer. EoE measures M = xs - L(C) where x=efficiency, s=throughput, L(C)=burden=L0+0.15*C^1.4, C=complexity. M positive=runway, M negative=borrowed time. Given a hypothesis return ONLY valid JSON no markdown: {"title":"5-8 word title","hypothesis":"cleaned 1-2 sentence hypothesis","domain":"primary domain","timeScale":"e.g. Decades","variables":{"chi":"what x means here","s":"what s means here","lambda0":"what L0 means here","C":"what C means here"},"eoe_prediction":"2-3 sentence prediction","confidence":"high|medium|speculative","confidence_reason":"one sentence","generate_chart":true,"chart_reason":"one sentence","uncertainty_flag":null}`;
 
-PRELOADED DATASETS available for instant analysis: Roman Empire (100-476 CE), Apple Inc (1997-2024), Great Barrier Reef (1985-2024), Detroit (1950-2024), US Federal System (1970-2024), Classic Maya (600-900 CE), Late Bronze Age (1250-1100 BCE), Tang Dynasty (618-907 CE), Indus Valley (2600-1700 BCE), Ottoman Empire (1683-1922), Enron (1996-2001), Kodak (1990-2020), West Germany (1945-2024), Chesapeake Bay (1983-2024), Amazon Rainforest (2000-2023), Yellowstone (1995-2023), Singapore (1965-2024), Global Ocean Heat (1960-2023).
+  const SYSTEM_ANALYZE = `You are the Engine of Emergence experiment analyst. Given structured experiment JSON return ONLY valid JSON no markdown: {"narrative":"3-5 paragraph analysis covering what EoE reveals historical analogs trajectory implications and what would improve M","chart_data":[{"year":1960,"chi":0.8,"s":0.8,"lambda0":0.2,"C":0.5}],"chart_note":"one sentence caveat or null","minsight":"2 sentence plain English summary no jargon","key_finding":"single most important finding one sentence","analogues":["historical system 1 with note","historical system 2 with note"],"intervention":"one concrete paragraph on what would reverse trajectory"}. If generate_chart true produce 5-8 realistic plausible data points. If false set chart_data to null.`;
 
-APPROVED DATA SOURCES by domain:
-- Business/Company: SEC EDGAR (edgar.sec.gov), Macrotrends (macrotrends.net), World Bank Enterprise Surveys
-- City/Urban: Lincoln Institute FiSC Database (lincolninst.edu), BEA Metro GDP, US Census ACS
-- National Government: World Bank Open Data (data.worldbank.org), IMF WEO Database, CBO Historical Data
-- Agriculture/Valley/Water: USDA NASS (nass.usda.gov), California DWR (water.ca.gov), CDFA (cdfa.ca.gov), USGS Water Resources (waterdata.usgs.gov)
-- Ecological/Forest: AIMS LTMP, NOAA Coral Reef Watch, Global Forest Watch (globalforestwatch.org), NASA AppEEARS
-- Seismic: USGS Earthquake Catalog (earthquake.usgs.gov), UNAVCO GPS data
-- Historical Civilization: Seshat Databank (seshatdatabank.info), HYDE Database, Turchin Cliodynamics
-- Financial System: FDIC BankFind, Federal Reserve Z.1, BIS Statistics
-
-When answering:
-- If the question matches a preloaded dataset, say so and describe the key findings (M trajectory, when it went negative, warning lead time if applicable)
-- If the question is about a new system, identify the domain, name the exact approved data sources, and explain which columns map to χ, s, λ₀, and C
-- If they want to upload data, tell them to use the Upload button and describe the CSV format needed
-- Be conversational and direct. 2-4 sentences unless they ask for more. No bullet points in normal responses.`;
-
-  function matchDataset(q) {
-    const ql = q.toLowerCase();
-    const keywords = {
-      rome:       ["roman empire","rome","ancient rome","roman collapse"],
-      apple:      ["apple inc","apple computer","tim cook","steve jobs","iphone company"],
-      reef:       ["great barrier reef","barrier reef","coral reef bleaching"],
-      detroit:    ["detroit","motor city","detroit bankruptcy"],
-      usfiscal:   ["us federal","us government","federal government","us fiscal","national debt","federal budget","us deficit","united states government"],
-      maya:       ["maya civilization","mayan","classic maya"],
-      bronze:     ["bronze age","late bronze age","mycenae","hittite"],
-      tang:       ["tang dynasty","an lushan"],
-      indus:      ["indus valley","harappan","mohenjo-daro"],
-      ottoman:    ["ottoman empire","ottoman"],
-      enron:      ["enron"],
-      kodak:      ["kodak","eastman kodak"],
-      germany:    ["west germany","german economic miracle","wirtschaftswunder"],
-      chesapeake: ["chesapeake bay"],
-      amazon:     ["amazon rainforest","amazon forest","amazon deforestation"],
-      yellowstone:["yellowstone","yellowstone wolves"],
-      singapore:  ["singapore"],
-      ocean:      ["global ocean heat","ocean warming","ocean temperature"],
-    };
-    const matches = [];
-    for (const [id, kws] of Object.entries(keywords)) {
-      if (kws.some(kw => ql.includes(kw))) {
-        const ds = DATASETS.find(d => d.id === id);
-        if (ds) matches.push(ds);
-      }
-    }
-    return matches;
-  }
-
-  async function send(q) {
-    const trimmed = (q || input).trim();
-    if (!trimmed || loading) return;
-    setInput("");
-
-    const userMsg = { role:"user", content:trimmed };
-    const newHistory = [...messages, userMsg];
-    setMessages(newHistory);
-    setLoading(true);
-
-    // Check preloaded datasets
-    const matched = matchDataset(trimmed);
-
+  async function runExperiment() {
+    if (!hypothesis.trim()) return;
+    setPhase("processing");
+    setProcessingStep(1);
+    setExperiment(null);
+    const fullInput = "Hypothesis: " + hypothesis + (domain ? "\nDomain: " + domain : "") + (timeScale ? "\nTime scale: " + timeScale : "");
+    const headers = {"Content-Type":"application/json","x-api-key":import.meta.env.VITE_ANTHROPIC_KEY||"","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"};
     try {
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
-        method:"POST",
-        headers:{"Content-Type":"application/json","x-api-key":import.meta.env.VITE_ANTHROPIC_KEY||"","anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-        body: JSON.stringify({
-          model:"claude-sonnet-4-5",
-          max_tokens:600,
-          system: SYSTEM + (matched.length > 0 ? `
-
-PRELOADED MATCH FOUND: ${matched.map(d=>d.label).join(", ")}. Lead with this finding.` : ""),
-          messages: newHistory.map(m => ({ role:m.role, content:m.content }))
-        })
-      });
-      const data = await resp.json();
-      const reply = data.content?.map(b=>b.text||"").join("") || "Try again in a moment.";
-      setMessages(prev => [...prev, { role:"assistant", content:reply, datasets:matched }]);
-    } catch(e) {
-      setMessages(prev => [...prev, {
-        role:"assistant",
-        content: matched.length > 0
-          ? `I found a matching dataset: ${matched.map(d=>d.label).join(", ")}. Check the Explore tab for the full analysis with trajectory charts and historical annotations.`
-          : "Connection issue — try again. In the meantime: check the Sources tab for approved data sources, or the Explore tab for preloaded datasets."
-      }]);
+      const r1 = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers,body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:1000,system:SYSTEM_STRUCTURE,messages:[{role:"user",content:fullInput}]})});
+      const d1 = await r1.json();
+      const raw1 = d1.content?.map(b=>b.text||"").join("")||"";
+      let structured;
+      try { structured = JSON.parse(raw1.replace(/```json|```/g,"").trim()); }
+      catch(e) { structured = {title:"Experiment",hypothesis,domain:domain||"General",timeScale:timeScale||"Decades",variables:{chi:"Efficiency",s:"Throughput",lambda0:"Burden",C:"Complexity"},eoe_prediction:"Analysis pending.",confidence:"speculative",confidence_reason:"Parse error.",generate_chart:false,chart_reason:"N/A",uncertainty_flag:"Structure parsing failed."}; }
+      setProcessingStep(2);
+      const r2 = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers,body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:1500,system:SYSTEM_ANALYZE,messages:[{role:"user",content:JSON.stringify(structured)}]})});
+      const d2 = await r2.json();
+      const raw2 = d2.content?.map(b=>b.text||"").join("")||"";
+      let analysis;
+      try { analysis = JSON.parse(raw2.replace(/```json|```/g,"").trim()); }
+      catch(e) { analysis = {narrative:raw2||"Analysis could not be parsed.",chart_data:null,chart_note:null,minsight:"See narrative above.",key_finding:"See narrative.",analogues:[],intervention:"See narrative."}; }
+      setProcessingStep(3);
+      setExperiment({structured,analysis,timestamp:new Date().toISOString(),id:Date.now()});
+      setPhase("results");
+    } catch(err) {
+      setExperiment({structured:{title:"Error",hypothesis,domain:domain||"Unknown",timeScale:timeScale||"Unknown",variables:{chi:"—",s:"—",lambda0:"—",C:"—"},eoe_prediction:"Connection failed.",confidence:"speculative",confidence_reason:"Network error.",generate_chart:false,chart_reason:"N/A",uncertainty_flag:"Connection failed."},analysis:{narrative:"Connection issue — please try again.",chart_data:null,chart_note:null,minsight:"Try again.",key_finding:"N/A",analogues:[],intervention:"N/A"},timestamp:new Date().toISOString(),id:Date.now()});
+      setPhase("results");
     }
-    setLoading(false);
   }
 
-  function handleFile(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    setMessages(prev => [...prev,
-      { role:"user", content:`📂 ${file.name}` },
-      { role:"assistant", content:`Got it — ${file.name} uploaded. To analyze it with EoE I need columns for: χ (efficiency), s (throughput), λ₀ (base burden), and C (complexity), all normalized to 0-1. Tell me what's in your file and I'll help you map the columns.` }
-    ]);
-    e.target.value = "";
+  function reset() { setPhase("input"); setHypothesis(""); setDomain(""); setTimeScale(""); setExperiment(null); setExportDone(false); }
+
+  function exportMarkdown() {
+    if (!experiment) return;
+    const {structured:s,analysis:a,timestamp} = experiment;
+    const date = new Date(timestamp).toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
+    const md = ["# EoE Experiment — "+s.title,"*"+date+" · Engine of Emergence v2 · Nathan Baird, 2026*","","## Hypothesis",s.hypothesis,"","## Domain & Variables","**Domain:** "+s.domain+" | **Time Scale:** "+s.timeScale,"","| Variable | Represents |","|----------|------------|","| χ | "+s.variables.chi+" |","| s | "+s.variables.s+" |","| λ₀ | "+s.variables.lambda0+" |","| C | "+s.variables.C+" |","","## EoE Prediction",s.eoe_prediction,"","**Confidence:** "+s.confidence+" — "+s.confidence_reason,(s.uncertainty_flag?"\n**Uncertainty:** "+s.uncertainty_flag:""),"","## Analysis",a.narrative,"","## Key Finding",a.key_finding,"","## Plain English Summary",a.minsight,"","## Historical Analogues",...(a.analogues||[]).map(x=>"- "+x),"","## Intervention",a.intervention,"","---","*Cite as: Baird, N. (2026). Engine of Emergence. DOI: 10.5281/zenodo.19016245*"].join("\n");
+    const blob = new Blob([md],{type:"text/markdown"});
+    const url = URL.createObjectURL(blob);
+    const a2 = document.createElement("a"); a2.href=url; a2.download="EoE_Experiment_"+s.title.replace(/\s+/g,"_")+".md"; a2.click(); URL.revokeObjectURL(url);
   }
 
-  const isEmpty = messages.length === 0;
+  function copyToClipboard() {
+    if (!experiment) return;
+    const {structured:s,analysis:a} = experiment;
+    navigator.clipboard.writeText("EoE EXPERIMENT — "+s.title+"\n\nHypothesis: "+s.hypothesis+"\n\nEoE Prediction: "+s.eoe_prediction+"\n\nKey Finding: "+a.key_finding+"\n\nSummary: "+a.minsight+"\n\nCite: Baird, N. (2026). Engine of Emergence. DOI: 10.5281/zenodo.19016245").then(()=>{ setExportDone(true); setTimeout(()=>setExportDone(false),2500); });
+  }
 
-  return (
-    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 160px)",maxWidth:760,margin:"0 auto",width:"100%"}}>
+  const CONF_COLOR = {high:"#22C55E",medium:"#EAB308",speculative:"#F97316"};
+  const CONF_LABEL = {high:"High confidence",medium:"Medium confidence",speculative:"Speculative"};
 
-      {/* Header — only when empty */}
-      {isEmpty && (
-        <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",gap:32,paddingBottom:40}}>
-          <div style={{textAlign:"center"}}>
-            <h2 style={{fontFamily:"var(--serif)",fontSize:32,color:"#FFFFFF",marginBottom:12,
-              borderLeft:"3px solid #22C55E",paddingLeft:16,textAlign:"left"}}>
-              Run an Experiment
-            </h2>
-            <p style={{color:"#737373",fontSize:14,fontFamily:"var(--sans)",lineHeight:1.65,textAlign:"left"}}>
-              Ask about any system — historical, ecological, fiscal, seismic. If we have preloaded data it runs instantly. If not, we'll tell you exactly where to get it.
-            </p>
+  function ExperimentChart({points,color}) {
+    if (!points||points.length<2) return null;
+    const vals = points.map(p=>calcM(p.chi,p.s,p.lambda0,p.C));
+    const minV=Math.min(...vals,-0.5),maxV=Math.max(...vals,0.3),rng=maxV-minV;
+    const W=520,H=120,pl=48,pr=16,pt=16,pb=32,iw=W-pl-pr,ih=H-pt-pb;
+    const xs=points.map((_,i)=>pl+(i/(points.length-1))*iw);
+    const ys=vals.map(v=>pt+(1-(v-minV)/rng)*ih);
+    const zeroY=pt+(1-(0-minV)/rng)*ih;
+    const pathD=xs.map((x,i)=>(i===0?"M":"L")+" "+x+" "+ys[i]).join(" ");
+    const fillD=pathD+" L "+xs[xs.length-1]+" "+zeroY+" L "+xs[0]+" "+zeroY+" Z";
+    return (
+      <svg width="100%" viewBox={"0 0 "+W+" "+H} style={{display:"block",overflow:"visible"}}>
+        {zeroY>pt&&zeroY<pt+ih&&<line x1={pl} y1={zeroY} x2={W-pr} y2={zeroY} stroke="#3A3A3A" strokeWidth={1} strokeDasharray="4,4"/>}
+        <path d={fillD} fill={color} opacity={0.08}/>
+        <path d={pathD} fill="none" stroke={color} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"/>
+        {points.map((p,i)=><g key={i}><circle cx={xs[i]} cy={ys[i]} r={i===points.length-1?5:3} fill={mColor(vals[i])} stroke="#000" strokeWidth={1}/><text x={xs[i]} y={H-8} textAnchor="middle" fontSize={8} fill="#525252" fontFamily="JetBrains Mono">{p.year||p.label||i}</text></g>)}
+        <text x={pl-4} y={pt+4} textAnchor="end" fontSize={8} fill="#525252" fontFamily="JetBrains Mono">{maxV.toFixed(2)}</text>
+        <text x={pl-4} y={pt+ih+4} textAnchor="end" fontSize={8} fill="#525252" fontFamily="JetBrains Mono">{minV.toFixed(2)}</text>
+      </svg>
+    );
+  }
+
+  if (phase==="input") return (
+    <div style={{display:"flex",flexDirection:"column",gap:32,maxWidth:760,margin:"0 auto",width:"100%"}}>
+      <div style={{borderLeft:"3px solid #22C55E",paddingLeft:16}}>
+        <h2 style={{fontFamily:"var(--serif)",fontSize:30,color:"#FFFFFF",marginBottom:8}}>Run an Experiment</h2>
+        <p style={{color:"#737373",fontSize:13,fontFamily:"var(--sans)",lineHeight:1.65}}>Pose a hypothesis. EoE will structure it, analyze it, and generate a full research output — with charts, variable mappings, historical analogues, and a plain-English summary.</p>
+      </div>
+      <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:14,padding:24,display:"flex",flexDirection:"column",gap:16}}>
+        <div style={{fontSize:11,fontFamily:"var(--mono)",color:"#22C55E",letterSpacing:2}}>HYPOTHESIS / QUESTION</div>
+        <textarea ref={inputRef} value={hypothesis} onChange={e=>setHypothesis(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"&&e.metaKey)runExperiment();}} placeholder="Pose a hypothesis, ask a mechanistic question, or describe a system you want to analyze through the EoE lens..." rows={4} style={{background:"#111111",border:"1px solid #2A2A2A",borderRadius:10,padding:"14px 16px",fontSize:14,color:"#FFFFFF",fontFamily:"var(--sans)",lineHeight:1.65,resize:"vertical",outline:"none",transition:"border-color 0.15s"}} onFocus={e=>e.target.style.borderColor="#22C55E"} onBlur={e=>e.target.style.borderColor="#2A2A2A"}/>
+        <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
+          <div style={{flex:"1 1 200px"}}>
+            <div style={{fontSize:9,fontFamily:"var(--mono)",color:"#525252",marginBottom:6,letterSpacing:1}}>DOMAIN (optional)</div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:5}}>{DOMAINS.map(d=><button key={d} onClick={()=>setDomain(domain===d?"":d)} style={{background:domain===d?"#22C55E20":"#111111",border:"1px solid "+(domain===d?"#22C55E":"#2A2A2A"),borderRadius:6,padding:"4px 10px",fontSize:10,color:domain===d?"#22C55E":"#737373",fontFamily:"var(--sans)",cursor:"pointer"}}>{d}</button>)}</div>
           </div>
-
-          {/* Example prompts */}
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:8,width:"100%"}}>
-            {EXAMPLES.map((ex,i) => (
-              <button key={i} onClick={() => send(ex.text)}
-                style={{
-                  background:"#0A0A0A",border:"1px solid #2A2A2A",
-                  borderRadius:10,padding:"12px 16px",textAlign:"left",
-                  cursor:"pointer",transition:"all 0.15s",
-                  display:"flex",alignItems:"center",gap:10
-                }}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor="#22C55E40";e.currentTarget.style.background="#0A1A0A";}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor="#2A2A2A";e.currentTarget.style.background="#0A0A0A";}}
-              >
-                <span style={{fontSize:20,flexShrink:0}}>{ex.icon}</span>
-                <span style={{fontSize:13,color:"#D4D4D4",fontFamily:"var(--sans)",lineHeight:1.4}}>{ex.text}</span>
-              </button>
-            ))}
+          <div style={{flex:"1 1 200px"}}>
+            <div style={{fontSize:9,fontFamily:"var(--mono)",color:"#525252",marginBottom:6,letterSpacing:1}}>TIME SCALE (optional)</div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:5}}>{TIMESCALES.map(t=><button key={t} onClick={()=>setTimeScale(timeScale===t?"":t)} style={{background:timeScale===t?"#22C55E20":"#111111",border:"1px solid "+(timeScale===t?"#22C55E":"#2A2A2A"),borderRadius:6,padding:"4px 10px",fontSize:10,color:timeScale===t?"#22C55E":"#737373",fontFamily:"var(--sans)",cursor:"pointer"}}>{t}</button>)}</div>
           </div>
         </div>
-      )}
-
-      {/* Messages */}
-      {!isEmpty && (
-        <div style={{flex:1,overflowY:"auto",padding:"20px 0",display:"flex",flexDirection:"column",gap:20}}>
-          {messages.map((m,i) => (
-            <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start",
-              flexDirection:m.role==="user"?"row-reverse":"row"}}>
-              {/* Avatar */}
-              <div style={{
-                width:32,height:32,borderRadius:"50%",flexShrink:0,marginTop:2,
-                background:m.role==="user"?"#2A2A2A":"#2563EB",
-                display:"flex",alignItems:"center",justifyContent:"center",
-                fontSize:m.role==="user"?14:11,fontWeight:700,
-                color:"#FFFFFF"
-              }}>
-                {m.role==="user" ? "N" : "E"}
-              </div>
-
-              <div style={{maxWidth:"85%",display:"flex",flexDirection:"column",gap:10}}>
-                {/* Message bubble */}
-                <div style={{
-                  background:m.role==="user"?"#1A1A1A":"#0A0A0A",
-                  border:`1px solid ${m.role==="user"?"#2A2A2A":"#1A1A1A"}`,
-                  borderRadius:m.role==="user"?"16px 16px 4px 16px":"4px 16px 16px 16px",
-                  padding:"12px 16px",
-                  fontSize:14,lineHeight:1.75,
-                  color:"#D4D4D4",fontFamily:"var(--sans)"
-                }}>
-                  {m.content}
-                </div>
-
-                {/* Matched dataset cards */}
-                {m.datasets && m.datasets.length > 0 && (
-                  <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                    {m.datasets.map(ds => {
-                      const lastPt = ds.points[ds.points.length-1];
-                      const M = calcM(lastPt.chi,lastPt.s,lastPt.lambda0,lastPt.C);
-                      const lead = getWarningLead(ds.id);
-                      return (
-                        <div key={ds.id} style={{
-                          background:"#0A0A0A",border:`1px solid ${ds.color}35`,
-                          borderRadius:12,overflow:"hidden"
-                        }}>
-                          <div style={{padding:"14px 18px",borderBottom:"1px solid #1A1A1A",
-                            display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10}}>
-                            <div style={{display:"flex",alignItems:"center",gap:10}}>
-                              <span style={{fontSize:20}}>{ds.emoji}</span>
-                              <div>
-                                <div style={{fontSize:14,fontFamily:"var(--serif)",color:"#FFFFFF"}}>{ds.label}</div>
-                                <div style={{fontSize:10,color:"#525252",fontFamily:"var(--mono)"}}>{ds.period}</div>
-                              </div>
-                            </div>
-                            <div style={{display:"flex",alignItems:"center",gap:12}}>
-                              {lead && lead.lead && (
-                                <div style={{textAlign:"right"}}>
-                                  <div style={{fontFamily:"var(--mono)",fontSize:18,color:"#F97316",fontWeight:700}}>{lead.lead}yr</div>
-                                  <div style={{fontSize:9,color:"#F97316",fontFamily:"var(--sans)"}}>warning lead</div>
-                                </div>
-                              )}
-                              <div style={{textAlign:"right"}}>
-                                <div style={{fontFamily:"var(--mono)",fontSize:18,color:mColor(M),fontWeight:700}}>
-                                  {M>=0?"+":""}{M.toFixed(3)}
-                                </div>
-                                <div style={{fontSize:10,color:mColor(M),fontFamily:"var(--sans)"}}>{mLabel(M)}</div>
-                              </div>
-                            </div>
-                          </div>
-                          <div style={{padding:"10px 18px"}}>
-                            <Sparkline points={ds.points} w={400} h={44}/>
-                          </div>
-                          <div style={{padding:"8px 18px 14px",display:"flex",gap:8}}>
-                            <button onClick={onGoToExplore} style={{
-                              background:"#2563EB",border:"none",borderRadius:7,
-                              padding:"7px 14px",fontSize:11,fontWeight:600,
-                              color:"#FFFFFF",fontFamily:"var(--sans)",cursor:"pointer"
-                            }}>Full analysis in Explore →</button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-
-          {/* Loading */}
-          {loading && (
-            <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
-              <div style={{width:32,height:32,borderRadius:"50%",background:"#2563EB",
-                display:"flex",alignItems:"center",justifyContent:"center",
-                fontSize:11,fontWeight:700,color:"#FFFFFF",flexShrink:0}}>E</div>
-              <div style={{background:"#0A0A0A",border:"1px solid #1A1A1A",
-                borderRadius:"4px 16px 16px 16px",padding:"12px 16px",
-                display:"flex",gap:5,alignItems:"center"}}>
-                {[0,1,2].map(j=>(
-                  <div key={j} style={{width:6,height:6,borderRadius:"50%",
-                    background:"#3B82F6",animation:"pulse 1.2s ease-in-out infinite",
-                    animationDelay:`${j*0.2}s`}}/>
-                ))}
-              </div>
-            </div>
-          )}
-          <div ref={bottomRef}/>
-        </div>
-      )}
-
-      {/* Input bar — always at bottom */}
-      <div style={{
-        borderTop: isEmpty ? "none" : "1px solid #1A1A1A",
-        paddingTop: isEmpty ? 0 : 16,
-        flexShrink:0
-      }}>
-        <div style={{
-          display:"flex",gap:8,alignItems:"flex-end",
-          background:"#0A0A0A",border:"1px solid #2A2A2A",
-          borderRadius:14,padding:"10px 12px",
-          transition:"border-color 0.15s"
-        }}
-          onFocusCapture={e=>e.currentTarget.style.borderColor="#22C55E"}
-          onBlurCapture={e=>e.currentTarget.style.borderColor="#2A2A2A"}
-        >
-          {/* Upload button */}
-          <button onClick={()=>fileRef.current?.click()} title="Upload CSV data"
-            style={{background:"none",border:"none",color:"#525252",
-              fontSize:18,cursor:"pointer",padding:"4px",flexShrink:0,
-              transition:"color 0.15s"}}
-            onMouseEnter={e=>e.currentTarget.style.color="#22C55E"}
-            onMouseLeave={e=>e.currentTarget.style.color="#525252"}
-          >📎</button>
-          <input ref={fileRef} type="file" accept=".csv,.tsv,.txt"
-            onChange={handleFile} style={{display:"none"}}/>
-
-          <textarea ref={inputRef}
-            value={input}
-            onChange={e=>setInput(e.target.value)}
-            onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}}
-            placeholder="Ask about any system — or describe data you want to analyze..."
-            rows={1}
-            style={{
-              flex:1,background:"none",border:"none",outline:"none",
-              fontSize:14,color:"#FFFFFF",fontFamily:"var(--sans)",
-              resize:"none",lineHeight:1.5,maxHeight:120,overflowY:"auto",
-              padding:"4px 0"
-            }}
-            onInput={e=>{
-              e.target.style.height="auto";
-              e.target.style.height=Math.min(e.target.scrollHeight,120)+"px";
-            }}
-          />
-
-          <button onClick={()=>send()} disabled={loading||!input.trim()}
-            style={{
-              background:loading||!input.trim()?"#1A1A1A":"#22C55E",
-              border:"none",borderRadius:8,
-              width:36,height:36,fontSize:16,
-              color:loading||!input.trim()?"#525252":"#000000",
-              cursor:loading||!input.trim()?"not-allowed":"pointer",
-              opacity:loading||!input.trim()?0.5:1,
-              flexShrink:0,transition:"all 0.15s",
-              display:"flex",alignItems:"center",justifyContent:"center"
-            }}>↑</button>
-        </div>
-        <div style={{fontSize:10,color:"#404040",fontFamily:"var(--sans)",
-          marginTop:6,textAlign:"center"}}>
-          Enter to send · Shift+Enter for new line · 📎 to upload CSV data
+        <button onClick={runExperiment} disabled={!hypothesis.trim()} style={{background:hypothesis.trim()?"#22C55E":"#1A1A1A",border:"none",borderRadius:10,padding:"14px 24px",fontSize:14,fontWeight:700,color:hypothesis.trim()?"#000000":"#525252",fontFamily:"var(--sans)",cursor:hypothesis.trim()?"pointer":"not-allowed",transition:"all 0.15s",alignSelf:"flex-start"}} onMouseEnter={e=>{if(hypothesis.trim())e.currentTarget.style.background="#4ADE80";}} onMouseLeave={e=>{if(hypothesis.trim())e.currentTarget.style.background="#22C55E";}}>Run Experiment ⚗️</button>
+        <div style={{fontSize:10,color:"#404040",fontFamily:"var(--sans)"}}>⌘+Enter to run · AI structures, analyzes, and generates full output</div>
+      </div>
+      <div>
+        <div style={{fontSize:9,fontFamily:"var(--mono)",color:"#525252",letterSpacing:2,marginBottom:12}}>EXAMPLE EXPERIMENTS</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:8}}>
+          {EXAMPLES.map((ex,i)=><button key={i} onClick={()=>{setHypothesis(ex.text);setDomain(ex.domain);setTimeScale(ex.time);}} style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:10,padding:"14px 16px",textAlign:"left",cursor:"pointer",transition:"all 0.15s",display:"flex",alignItems:"flex-start",gap:10}} onMouseEnter={e=>{e.currentTarget.style.borderColor="#22C55E30";e.currentTarget.style.background="#0A1A0A";}} onMouseLeave={e=>{e.currentTarget.style.borderColor="#2A2A2A";e.currentTarget.style.background="#0A0A0A";}}><span style={{fontSize:20,flexShrink:0,marginTop:2}}>{ex.icon}</span><div><div style={{fontSize:12,color:"#D4D4D4",fontFamily:"var(--sans)",lineHeight:1.5,marginBottom:5}}>{ex.text}</div><div style={{display:"flex",gap:6}}><span style={{fontSize:9,color:"#22C55E",fontFamily:"var(--mono)",background:"#22C55E10",border:"1px solid #22C55E20",borderRadius:4,padding:"1px 6px"}}>{ex.domain}</span><span style={{fontSize:9,color:"#525252",fontFamily:"var(--mono)",background:"#1A1A1A",borderRadius:4,padding:"1px 6px"}}>{ex.time}</span></div></div></button>)}
         </div>
       </div>
     </div>
   );
+
+  if (phase==="processing") {
+    const steps=[{label:"Structuring hypothesis",detail:"Extracting variables, domain, time scale"},{label:"Running EoE analysis",detail:"Generating trajectory, analogues, intervention"},{label:"Building output",detail:"Formatting results for display"}];
+    return (
+      <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",minHeight:"60vh",gap:32,maxWidth:500,margin:"0 auto",width:"100%"}}>
+        <div style={{textAlign:"center"}}><div style={{fontSize:40,marginBottom:16}}>⚗️</div><h3 style={{fontFamily:"var(--serif)",fontSize:22,color:"#FFFFFF",marginBottom:8}}>Running Experiment</h3><p style={{fontSize:13,color:"#737373",fontFamily:"var(--sans)",lineHeight:1.6,maxWidth:400}}>{hypothesis.length>80?hypothesis.slice(0,80)+"…":hypothesis}</p></div>
+        <div style={{width:"100%",display:"flex",flexDirection:"column",gap:10}}>
+          {steps.map((step,i)=>{const done=processingStep>i+1,active=processingStep===i+1;return(<div key={i} style={{display:"flex",alignItems:"center",gap:14,padding:"12px 18px",borderRadius:10,background:active?"#0A1A0A":done?"#0A0A0A":"#050505",border:"1px solid "+(active?"#22C55E30":done?"#1A1A1A":"#111111"),transition:"all 0.3s"}}><div style={{width:24,height:24,borderRadius:"50%",flexShrink:0,background:done?"#22C55E":active?"#22C55E20":"#1A1A1A",border:"1px solid "+(done?"#22C55E":active?"#22C55E":"#2A2A2A"),display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,color:done?"#000":"#22C55E",fontWeight:700}}>{done?"✓":i+1}</div><div style={{flex:1}}><div style={{fontSize:12,fontWeight:600,color:active||done?"#FFFFFF":"#525252",fontFamily:"var(--sans)"}}>{step.label}</div><div style={{fontSize:10,color:"#525252",fontFamily:"var(--sans)"}}>{step.detail}</div></div></div>);})}
+        </div>
+      </div>
+    );
+  }
+
+  if ((phase==="results"||phase==="complete")&&experiment) {
+    const {structured:s,analysis:a}=experiment;
+    const confColor=CONF_COLOR[s.confidence]||"#737373";
+    const confLabel=CONF_LABEL[s.confidence]||s.confidence;
+    const finalM=a.chart_data&&a.chart_data.length>0?calcM(a.chart_data[a.chart_data.length-1].chi,a.chart_data[a.chart_data.length-1].s,a.chart_data[a.chart_data.length-1].lambda0,a.chart_data[a.chart_data.length-1].C):null;
+    return (
+      <div style={{display:"flex",flexDirection:"column",gap:20,maxWidth:820,margin:"0 auto",width:"100%"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:12}}>
+          <div><div style={{fontSize:9,fontFamily:"var(--mono)",color:"#22C55E",letterSpacing:3,marginBottom:6}}>EXPERIMENT COMPLETE</div><h2 style={{fontFamily:"var(--serif)",fontSize:24,color:"#FFFFFF",marginBottom:4}}>{s.title}</h2><div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}><span style={{fontSize:10,fontFamily:"var(--mono)",color:"#22C55E",background:"#22C55E10",border:"1px solid #22C55E20",borderRadius:4,padding:"2px 8px"}}>{s.domain}</span><span style={{fontSize:10,fontFamily:"var(--mono)",color:"#525252",background:"#1A1A1A",borderRadius:4,padding:"2px 8px"}}>{s.timeScale}</span><span style={{fontSize:10,fontFamily:"var(--mono)",color:confColor,background:confColor+"10",border:"1px solid "+confColor+"20",borderRadius:4,padding:"2px 8px"}}>{confLabel}</span></div></div>
+          <button onClick={reset} style={{background:"none",border:"1px solid #2A2A2A",borderRadius:8,padding:"8px 16px",fontSize:11,color:"#737373",fontFamily:"var(--sans)",cursor:"pointer"}}>← New experiment</button>
+        </div>
+        <div style={{background:"#0A0A0A",border:"1px solid #22C55E20",borderLeft:"3px solid #22C55E",borderRadius:12,padding:"16px 20px"}}><div style={{fontSize:9,fontFamily:"var(--mono)",color:"#22C55E",letterSpacing:2,marginBottom:8}}>HYPOTHESIS</div><p style={{fontSize:14,color:"#FFFFFF",fontFamily:"var(--sans)",lineHeight:1.7,margin:0}}>{s.hypothesis}</p></div>
+        <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:12,padding:20}}><div style={{fontSize:9,fontFamily:"var(--mono)",color:"#3B82F6",letterSpacing:2,marginBottom:14}}>EoE VARIABLE MAPPING</div><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(180px,1fr))",gap:8}}>{[{sym:"χ",val:s.variables.chi,color:"#60A5FA",name:"Efficiency"},{sym:"s",val:s.variables.s,color:"#A78BFA",name:"Throughput"},{sym:"λ₀",val:s.variables.lambda0,color:"#F87171",name:"Base Burden"},{sym:"C",val:s.variables.C,color:"#FCD34D",name:"Complexity"}].map(v=><div key={v.sym} style={{background:"#111111",borderRadius:8,padding:"12px 14px",border:"1px solid #1A1A1A"}}><div style={{fontFamily:"var(--mono)",fontSize:16,color:v.color,fontWeight:700,marginBottom:4}}>{v.sym}</div><div style={{fontSize:11,color:"#D4D4D4",fontFamily:"var(--sans)",lineHeight:1.5}}>{v.val}</div><div style={{fontSize:9,color:"#525252",fontFamily:"var(--sans)",marginTop:4}}>{v.name}</div></div>)}</div></div>
+        <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:12,padding:20}}><div style={{fontSize:9,fontFamily:"var(--mono)",color:"#A78BFA",letterSpacing:2,marginBottom:10}}>EoE PREDICTION</div><p style={{fontSize:13,color:"#D4D4D4",fontFamily:"var(--sans)",lineHeight:1.75,margin:0}}>{s.eoe_prediction}</p>{s.uncertainty_flag&&<div style={{marginTop:12,padding:"10px 14px",background:"#F9731610",border:"1px solid #F9731620",borderRadius:8,fontSize:11,color:"#F97316",fontFamily:"var(--sans)"}}>⚠ {s.uncertainty_flag}</div>}</div>
+        {s.generate_chart&&a.chart_data&&a.chart_data.length>=2?(
+          <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:12,padding:20}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16,flexWrap:"wrap",gap:8}}>
+              <div style={{fontSize:9,fontFamily:"var(--mono)",color:"#22C55E",letterSpacing:2}}>PROJECTED M TRAJECTORY</div>
+              {finalM!==null&&<div style={{display:"flex",alignItems:"center",gap:10}}><div style={{textAlign:"right"}}><div style={{fontFamily:"var(--mono)",fontSize:18,color:mColor(finalM),fontWeight:700}}>{finalM>=0?"+":""}{finalM.toFixed(3)}</div><div style={{fontSize:9,color:mColor(finalM),fontFamily:"var(--sans)"}}>{mLabel(finalM)}</div></div><Gauge value={finalM} size={70}/></div>}
+            </div>
+            <ExperimentChart points={a.chart_data} color="#22C55E"/>
+            {a.chart_note&&<div style={{marginTop:10,fontSize:10,color:"#525252",fontFamily:"var(--sans)",fontStyle:"italic"}}>⚠ {a.chart_note}</div>}
+          </div>
+        ):(!s.generate_chart&&<div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:12,padding:"14px 20px",display:"flex",gap:10,alignItems:"flex-start"}}><span style={{fontSize:14,flexShrink:0}}>📊</span><div style={{fontSize:12,color:"#737373",fontFamily:"var(--sans)",lineHeight:1.6}}><strong style={{color:"#D4D4D4"}}>Chart not generated.</strong> {s.chart_reason}</div></div>)}
+        <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:12,padding:20}}><div style={{fontSize:9,fontFamily:"var(--mono)",color:"#3B82F6",letterSpacing:2,marginBottom:14}}>ANALYSIS</div><div style={{fontSize:13,color:"#D4D4D4",fontFamily:"var(--sans)",lineHeight:1.85,whiteSpace:"pre-wrap"}}>{a.narrative}</div></div>
+        <div style={{background:"#111111",border:"1px solid #22C55E20",borderLeft:"3px solid #22C55E",borderRadius:12,padding:"14px 20px",display:"flex",gap:12,alignItems:"flex-start"}}><div style={{fontSize:18,flexShrink:0}}>💡</div><div><div style={{fontSize:9,fontFamily:"var(--mono)",color:"#22C55E",letterSpacing:2,marginBottom:6}}>MINSIGHT — PLAIN ENGLISH</div><p style={{fontSize:13,color:"#FFFFFF",fontFamily:"var(--sans)",lineHeight:1.7,margin:0}}>{a.minsight}</p></div></div>
+        <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:12,padding:20}}><div style={{fontSize:9,fontFamily:"var(--mono)",color:"#FCD34D",letterSpacing:2,marginBottom:10}}>KEY FINDING</div><p style={{fontSize:14,color:"#FFFFFF",fontFamily:"var(--serif)",lineHeight:1.7,fontStyle:"italic",margin:0}}>"{a.key_finding}"</p></div>
+        {a.analogues&&a.analogues.length>0&&<div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:12,padding:20}}><div style={{fontSize:9,fontFamily:"var(--mono)",color:"#A78BFA",letterSpacing:2,marginBottom:12}}>HISTORICAL ANALOGUES</div><div style={{display:"flex",flexDirection:"column",gap:8}}>{a.analogues.map((analogue,i)=><div key={i} style={{display:"flex",gap:10,alignItems:"flex-start",padding:"10px 14px",background:"#111111",borderRadius:8,border:"1px solid #1A1A1A"}}><div style={{fontFamily:"var(--mono)",fontSize:11,color:"#525252",flexShrink:0,marginTop:1}}>#{i+1}</div><div style={{fontSize:12,color:"#D4D4D4",fontFamily:"var(--sans)",lineHeight:1.6}}>{analogue}</div></div>)}</div></div>}
+        <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:12,padding:20}}><div style={{fontSize:9,fontFamily:"var(--mono)",color:"#34D399",letterSpacing:2,marginBottom:10}}>INTERVENTION — WHAT WOULD ACTUALLY HELP</div><p style={{fontSize:13,color:"#D4D4D4",fontFamily:"var(--sans)",lineHeight:1.75,margin:0}}>{a.intervention}</p></div>
+        <div style={{background:"linear-gradient(135deg,#0A1A0A,#0A0A1A)",border:"1px solid #22C55E30",borderRadius:14,padding:24,display:"flex",flexDirection:"column",gap:16}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:4}}><div style={{width:8,height:8,borderRadius:"50%",background:"#22C55E",boxShadow:"0 0 8px #22C55E"}}/><div style={{fontSize:11,fontFamily:"var(--mono)",color:"#22C55E",letterSpacing:2}}>STUDY COMPLETE — READY TO EXPORT</div></div>
+          <p style={{fontSize:12,color:"#737373",fontFamily:"var(--sans)",lineHeight:1.65,margin:0,maxWidth:560}}>Your experiment has been structured, analyzed, and formatted. Export as Markdown, copy a summary for sharing, or open the full dataset context in Explore.</p>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            <button onClick={exportMarkdown} style={{background:"#22C55E",border:"none",borderRadius:8,padding:"10px 18px",fontSize:12,fontWeight:600,color:"#000000",fontFamily:"var(--sans)",cursor:"pointer",display:"flex",alignItems:"center",gap:6}} onMouseEnter={e=>e.currentTarget.style.background="#4ADE80"} onMouseLeave={e=>e.currentTarget.style.background="#22C55E"}>↓ Download .md</button>
+            <button onClick={copyToClipboard} style={{background:exportDone?"#22C55E20":"#111111",border:"1px solid "+(exportDone?"#22C55E":"#2A2A2A"),borderRadius:8,padding:"10px 18px",fontSize:12,fontWeight:600,color:exportDone?"#22C55E":"#D4D4D4",fontFamily:"var(--sans)",cursor:"pointer"}}>{exportDone?"✓ Copied!":"⎘ Copy summary"}</button>
+            <button onClick={onGoToExplore} style={{background:"#111111",border:"1px solid #3B82F6",borderRadius:8,padding:"10px 18px",fontSize:12,fontWeight:600,color:"#3B82F6",fontFamily:"var(--sans)",cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.background="#0A0A1A"} onMouseLeave={e=>e.currentTarget.style.background="#111111"}>Full analysis in Explore →</button>
+            <button onClick={reset} style={{background:"none",border:"1px solid #2A2A2A",borderRadius:8,padding:"10px 18px",fontSize:12,color:"#525252",fontFamily:"var(--sans)",cursor:"pointer"}}>⚗️ New experiment</button>
+          </div>
+          <div style={{padding:"10px 14px",background:"#111111",borderRadius:8,border:"1px solid #1A1A1A",fontFamily:"var(--mono)",fontSize:10,color:"#525252",lineHeight:1.8}}>Cite as: Baird, N. (2026). Engine of Emergence: A Thermodynamic Framework for the Persistence and Collapse of Organized Complexity. DOI: 10.5281/zenodo.19016245</div>
+        </div>
+      </div>
+    );
+  }
+  return null;
 }
 
 
