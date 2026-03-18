@@ -3028,7 +3028,7 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
                     background:"#111111",border:"1px solid #2A2A2A",borderRadius:8,
                     padding:"10px 20px",fontSize:12,fontWeight:600,
                     color:"#D4D4D4",fontFamily:"var(--sans)",cursor:"pointer"
-                  }}>Get help in Assistant →</button>
+                  }}>💬 Ask the assistant →</button>
                 </div>
                 <input ref={fileRef} type="file" accept=".csv,.tsv,.txt" style={{display:"none"}}/>
               </div>
