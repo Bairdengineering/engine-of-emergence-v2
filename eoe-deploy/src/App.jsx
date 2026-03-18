@@ -5569,7 +5569,6 @@ export default function EoEApp() {
           {tab==="compare"     && <CompareTab/>}
           {tab==="climate"     && <ClimateTab/>}
           {tab==="seismic"     && <SeismicTab/>}
-          {tab==="seismic"     && <SeismicTab/>}
         </div>
 
         {/* Footer */}
