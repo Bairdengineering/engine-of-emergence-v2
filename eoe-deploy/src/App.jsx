@@ -2604,30 +2604,31 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
     { q: "Analyze a company's fiscal stability using EoE", icon: "🏢", hint: "Upload your data" },
   ];
 
-  // Match question to preloaded datasets
+  // Match question to preloaded datasets — strict matching only
+  // Only matches when question clearly names a known dataset
   function matchDataset(q) {
     const ql = q.toLowerCase();
     const matches = [];
+    // Each dataset requires SPECIFIC named references — not generic words
     const keywords = {
-      rome:       ["rome","roman","empire","collapse","ancient"],
-      apple:      ["apple","tim cook","iphone","jobs","cupertino"],
-      reef:       ["reef","coral","bleaching","barrier","australia"],
-      detroit:    ["detroit","michigan","bankruptcy","motor city","municipal"],
-      usfiscal:   ["us government","us govern","federal","congress","debt","deficit","united states","american","us fiscal","usa","collapse","heading for","headed for","government heading","government headed"],
-      maya:       ["maya","mayan","mesoamerica","classic"],
-      bronze:     ["bronze age","mycenae","hittite","late bronze"],
-      tang:       ["tang","dynasty","china","chinese","ancient china"],
-      indus:      ["indus","harappa","mohenjo","pakistan"],
-      ottoman:    ["ottoman","turkey","empire","istanbul"],
-      enron:      ["enron","fraud","energy","skilling","lay"],
-      kodak:      ["kodak","film","photography","bankruptcy","rochester"],
-      germany:    ["germany","german","west germany","wirtschaftswunder","reunification"],
-      chesapeake: ["chesapeake","bay","maryland","virginia","estuary"],
-      amazon:     ["amazon","rainforest","brazil","deforestation","tipping"],
-      yellowstone:["yellowstone","wolf","wolves","ecosystem","trophic"],
-      singapore:  ["singapore","city state","lee kuan yew","asian tiger"],
-      ocean:      ["ocean","sea","marine","global warming","heat"],
-      compare:    ["compare","versus","vs","contrast"],
+      rome:       ["roman empire","rome","ancient rome","roman collapse","romulus"],
+      apple:      ["apple inc","apple computer","tim cook","steve jobs","iphone company","apple stock","cupertino"],
+      reef:       ["great barrier reef","coral reef","barrier reef","coral bleaching"],
+      detroit:    ["detroit","motor city","detroit bankruptcy","detroit fiscal"],
+      usfiscal:   ["us federal","us government","federal government","us fiscal","national debt","federal debt","us congress","us deficit","american government","united states government","us budget"],
+      maya:       ["maya civilization","mayan","classic maya","ancient maya"],
+      bronze:     ["bronze age","late bronze age","mycenae","hittite empire"],
+      tang:       ["tang dynasty","tang empire","an lushan"],
+      indus:      ["indus valley","harappan","mohenjo-daro","harappa"],
+      ottoman:    ["ottoman empire","ottoman","tanzimat"],
+      enron:      ["enron"],
+      kodak:      ["kodak","eastman kodak"],
+      germany:    ["west germany","german economic","wirtschaftswunder","post-war germany","german reunification"],
+      chesapeake: ["chesapeake bay","chesapeake estuary"],
+      amazon:     ["amazon rainforest","amazon forest","amazon deforestation","brazilian amazon"],
+      yellowstone:["yellowstone","yellowstone wolves","yellowstone ecosystem"],
+      singapore:  ["singapore","lee kuan yew","city-state singapore"],
+      ocean:      ["ocean heat","global ocean","ocean warming","ocean temperature"],
     };
     for (const [id, kws] of Object.entries(keywords)) {
       if (kws.some(kw => ql.includes(kw))) {
