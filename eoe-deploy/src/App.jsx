@@ -2678,7 +2678,7 @@ When answering:
         method:"POST",
         headers:{"Content-Type":"application/json","x-api-key":import.meta.env.VITE_ANTHROPIC_KEY||"","anthropic-dangerous-direct-browser-access":"true"},
         body: JSON.stringify({
-          model:"claude-sonnet-4-20250514",
+          model:"claude-sonnet-4-5",
           max_tokens:600,
           system: SYSTEM + (matched.length > 0 ? `
 
@@ -3034,7 +3034,7 @@ Please map these columns to EoE variables and return the JSON mapping.`;
           method:"POST",
           headers:{"Content-Type":"application/json","x-api-key":import.meta.env.VITE_ANTHROPIC_KEY||"","anthropic-dangerous-direct-browser-access":"true"},
           body: JSON.stringify({
-            model:"claude-sonnet-4-20250514",
+            model:"claude-sonnet-4-5",
             max_tokens:800,
             system: SYSTEM_PROMPT,
             messages:[{role:"user", content:prompt}]
@@ -3142,7 +3142,7 @@ Please map these columns to EoE variables and return the JSON mapping.`;
         method:"POST",
         headers:{"Content-Type":"application/json","x-api-key":import.meta.env.VITE_ANTHROPIC_KEY||"","anthropic-dangerous-direct-browser-access":"true"},
         body:JSON.stringify({
-          model:"claude-sonnet-4-20250514", max_tokens:1000,
+          model:"claude-sonnet-4-5", max_tokens:1000,
           system:SYSTEM_PROMPT,
           messages:[...history, {role:"user",content:trimmed}]
         })
@@ -5226,7 +5226,7 @@ function FloatingAssistant() {
           const resp = await fetch("https://api.anthropic.com/v1/messages", {
             method:"POST", headers:{"Content-Type":"application/json","x-api-key":import.meta.env.VITE_ANTHROPIC_KEY||"","anthropic-dangerous-direct-browser-access":"true"},
             body: JSON.stringify({
-              model:"claude-sonnet-4-20250514", max_tokens:400,
+              model:"claude-sonnet-4-5", max_tokens:400,
               system: SYSTEM,
               messages: [{ role:"user", content:q }]
             })
@@ -5272,7 +5272,7 @@ When someone asks where to find data for a specific system, always name the exac
         method:"POST",
         headers:{ "Content-Type":"application/json" },
         body: JSON.stringify({
-          model:"claude-sonnet-4-20250514",
+          model:"claude-sonnet-4-5",
           max_tokens:400,
           system: SYSTEM,
           messages: newMsgs.map(m=>({ role:m.role, content:m.text }))
