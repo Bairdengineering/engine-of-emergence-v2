@@ -2073,7 +2073,6 @@ function ExploreTab({ injectDataset=null }) {
   const [compareId, setCompareId]   = useState(null);
   const [showCitation, setShowCitation] = useState(false);
   const [activeResearch, setActiveResearch] = useState(null); // "sensitivity"|"tipping"|"overlay"
-  console.log("ExploreTab injectDataset:", injectDataset);
   const ALL_DATASETS = injectDataset ? [injectDataset, ...DATASETS] : DATASETS;
   const injectId = injectDataset ? injectDataset.id : null;
   useEffect(()=>{ if(injectId){ setActiveId(injectId); } },[injectId]);
@@ -2672,14 +2671,14 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
     const fullInput = "Hypothesis: " + hypothesis + (domain ? "\nDomain: " + domain : "") + (timeScale ? "\nTime scale: " + timeScale : "");
     const headers = {"Content-Type":"application/json","Content-Type":"application/json"};
     try {
-      const r1 = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers,body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:1000,system:SYSTEM_STRUCTURE,messages:[{role:"user",content:fullInput}]})});
+      const r1 = await fetch("/api/claude",{method:"POST",headers,body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:1000,system:SYSTEM_STRUCTURE,messages:[{role:"user",content:fullInput}]})});
       const d1 = await r1.json();
       const raw1 = d1.content?.map(b=>b.text||"").join("")||"";
       let structured;
       try { const s1=raw1.indexOf("{"),e1=raw1.lastIndexOf("}"); const c1=s1>=0&&e1>=0?raw1.slice(s1,e1+1):raw1; structured = JSON.parse(c1); }
       catch(e) { structured = {title:"Experiment",hypothesis,domain:domain||"General",timeScale:timeScale||"Decades",variables:{chi:"Efficiency",s:"Throughput",lambda0:"Burden",C:"Complexity"},eoe_prediction:"Analysis pending.",confidence:"speculative",confidence_reason:"Parse error.",generate_chart:false,chart_reason:"N/A",uncertainty_flag:"Structure parsing failed."}; }
       setProcessingStep(2);
-      const r2 = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers,body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:1500,system:SYSTEM_ANALYZE,messages:[{role:"user",content:JSON.stringify(structured)}]})});
+      const r2 = await fetch("/api/claude",{method:"POST",headers,body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:1500,system:SYSTEM_ANALYZE,messages:[{role:"user",content:JSON.stringify(structured)}]})});
       const d2 = await r2.json();
       const raw2 = d2.content?.map(b=>b.text||"").join("")||"";
       let analysis;
@@ -2690,8 +2689,7 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
       const key = hashStr(hypothesis);
       const run = {structured,analysis,timestamp:new Date().toISOString(),id:Date.now()};
       saveRun(key, run);
-      // const allRuns = loadRuns(key);
-      const allRuns = [run]; // cache disabled for testing
+      const allRuns = loadRuns(key);
       const averaged = averageRuns(allRuns);
       (() => {
       // If chart_data is null, generate fallback from EoE prediction
@@ -2963,7 +2961,7 @@ ${JSON.stringify(rows.slice(0,3), null, 2)}
 Please map these columns to EoE variables and return the JSON mapping.`;
 
       try {
-        const response = await fetch("https://api.anthropic.com/v1/messages", {
+        const response = await fetch("/api/claude", {
           method:"POST",
           headers:{"Content-Type":"application/json","Content-Type":"application/json"},
           body: JSON.stringify({
@@ -3071,7 +3069,7 @@ Please map these columns to EoE variables and return the JSON mapping.`;
     setMessages(prev=>[...prev, userMsg]);
     setInput(""); setLoading(true);
     try {
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      const resp = await fetch("/api/claude", {
         method:"POST",
         headers:{"Content-Type":"application/json","Content-Type":"application/json"},
         body:JSON.stringify({
@@ -5156,7 +5154,7 @@ function FloatingAssistant() {
       setTimeout(async () => {
         setLoading(true);
         try {
-          const resp = await fetch("https://api.anthropic.com/v1/messages", {
+          const resp = await fetch("/api/claude", {
             method:"POST", headers:{"Content-Type":"application/json","Content-Type":"application/json"},
             body: JSON.stringify({
               model:"claude-sonnet-4-5", max_tokens:400,
@@ -5201,7 +5199,7 @@ When someone asks where to find data for a specific system, always name the exac
     setInput("");
     setLoading(true);
     try {
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      const resp = await fetch("/api/claude", {
         method:"POST",
         headers:{ "Content-Type":"application/json" },
         body: JSON.stringify({
