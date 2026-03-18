@@ -2589,14 +2589,14 @@ function ExploreTab() {
 // ── TAB: RUN AN EXPERIMENT ────────────────────────────────────────────────────
 
 function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) {
-  const [phase, setPhase]           = React.useState("input");
-  const [hypothesis, setHypothesis] = React.useState("");
-  const [domain, setDomain]         = React.useState("");
-  const [timeScale, setTimeScale]   = React.useState("");
-  const [experiment, setExperiment] = React.useState(null);
-  const [exportDone, setExportDone] = React.useState(false);
-  const [processingStep, setProcessingStep] = React.useState(0);
-  const inputRef = React.useRef(null);
+  const [phase, setPhase]           = useState("input");
+  const [hypothesis, setHypothesis] = useState("");
+  const [domain, setDomain]         = useState("");
+  const [timeScale, setTimeScale]   = useState("");
+  const [experiment, setExperiment] = useState(null);
+  const [exportDone, setExportDone] = useState(false);
+  const [processingStep, setProcessingStep] = useState(0);
+  const inputRef = useRef(null);
 
   const DOMAINS = ["Civilizational","Ecological","Fiscal/National","Urban","Corporate","Biological","Seismic","Climate","Custom"];
   const TIMESCALES = ["Decades","Centuries","Years","Months","Geological"];
