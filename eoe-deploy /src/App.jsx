@@ -989,51 +989,55 @@ function Landing({ onEnter }) {
             <stop offset="25%" stopColor="#000000" stopOpacity="0"/>
             <stop offset="100%" stopColor="#000000" stopOpacity="1"/>
           </radialGradient>
+          <filter id="contGlow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="1.5" result="blur"/>
+            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
         </defs>
 
         {/* Simplified continent outlines — Mercator projection, viewBox 360x180 */}
         {/* North America */}
-        <path d="M 190 25 L 220 22 L 240 28 L 255 35 L 260 45 L 255 55 L 245 62 L 235 68 L 225 72 L 215 78 L 208 85 L 200 82 L 192 75 L 188 65 L 185 55 L 182 45 L 185 35 Z"
-          fill="#1C2A1C" stroke="#2A3F2A" strokeWidth={0.6} opacity={0.7}/>
+        <path filter="url(#contGlow)" d="M 190 25 L 220 22 L 240 28 L 255 35 L 260 45 L 255 55 L 245 62 L 235 68 L 225 72 L 215 78 L 208 85 L 200 82 L 192 75 L 188 65 L 185 55 L 182 45 L 185 35 Z"
+          fill="#223322" stroke="#4A7A4A" strokeWidth={1.5} opacity={0.92}/>
         {/* Central America */}
         <path d="M 208 85 L 215 88 L 212 95 L 206 93 Z"
-          fill="#1C2A1C" stroke="#2A3F2A" strokeWidth={0.4} opacity={0.7}/>
+          fill="#223322" stroke="#4A7A4A" strokeWidth={0.9} opacity={0.87}/>
         {/* South America */}
         <path d="M 215 88 L 230 90 L 240 98 L 245 110 L 242 122 L 235 132 L 225 138 L 215 135 L 208 125 L 205 112 L 208 100 L 212 95 Z"
-          fill="#1C2A1C" stroke="#2A3F2A" strokeWidth={0.6} opacity={0.7}/>
+          fill="#223322" stroke="#4A7A4A" strokeWidth={1.5} opacity={0.92}/>
         {/* Europe */}
         <path d="M 175 28 L 185 25 L 192 28 L 195 35 L 190 40 L 183 42 L 178 38 Z"
-          fill="#1C2A1C" stroke="#2A3F2A" strokeWidth={0.5} opacity={0.7}/>
+          fill="#223322" stroke="#4A7A4A" strokeWidth={1.1} opacity={0.90}/>
         {/* Scandinavia */}
         <path d="M 183 22 L 190 20 L 192 26 L 187 28 L 183 26 Z"
-          fill="#1C2A1C" stroke="#2A3F2A" strokeWidth={0.4} opacity={0.7}/>
+          fill="#223322" stroke="#4A7A4A" strokeWidth={0.9} opacity={0.87}/>
         {/* Africa */}
-        <path d="M 175 42 L 190 40 L 198 45 L 200 55 L 198 68 L 192 80 L 185 90 L 178 95 L 172 88 L 168 75 L 166 62 L 168 50 Z"
-          fill="#1C2A1C" stroke="#2A3F2A" strokeWidth={0.6} opacity={0.7}/>
+        <path filter="url(#contGlow)" d="M 175 42 L 190 40 L 198 45 L 200 55 L 198 68 L 192 80 L 185 90 L 178 95 L 172 88 L 168 75 L 166 62 L 168 50 Z"
+          fill="#223322" stroke="#4A7A4A" strokeWidth={1.5} opacity={0.92}/>
         {/* Middle East */}
         <path d="M 195 35 L 210 33 L 215 40 L 208 45 L 198 45 L 195 40 Z"
-          fill="#1C2A1C" stroke="#2A3F2A" strokeWidth={0.4} opacity={0.7}/>
+          fill="#223322" stroke="#4A7A4A" strokeWidth={0.9} opacity={0.87}/>
         {/* Russia / Central Asia */}
-        <path d="M 192 18 L 240 15 L 280 18 L 295 25 L 290 32 L 275 35 L 255 32 L 235 28 L 215 26 L 200 28 L 192 24 Z"
-          fill="#1C2A1C" stroke="#2A3F2A" strokeWidth={0.5} opacity={0.7}/>
+        <path filter="url(#contGlow)" d="M 192 18 L 240 15 L 280 18 L 295 25 L 290 32 L 275 35 L 255 32 L 235 28 L 215 26 L 200 28 L 192 24 Z"
+          fill="#223322" stroke="#4A7A4A" strokeWidth={1.1} opacity={0.90}/>
         {/* South Asia */}
         <path d="M 240 38 L 258 35 L 268 42 L 265 52 L 258 58 L 248 55 L 240 48 Z"
-          fill="#1C2A1C" stroke="#2A3F2A" strokeWidth={0.5} opacity={0.7}/>
+          fill="#223322" stroke="#4A7A4A" strokeWidth={1.1} opacity={0.90}/>
         {/* China / East Asia */}
         <path d="M 265 28 L 295 25 L 308 32 L 312 42 L 305 48 L 290 50 L 275 48 L 265 42 L 262 35 Z"
-          fill="#1C2A1C" stroke="#2A3F2A" strokeWidth={0.5} opacity={0.7}/>
+          fill="#223322" stroke="#4A7A4A" strokeWidth={1.1} opacity={0.90}/>
         {/* Southeast Asia */}
         <path d="M 290 52 L 305 50 L 312 58 L 308 65 L 298 65 L 290 60 Z"
-          fill="#1C2A1C" stroke="#2A3F2A" strokeWidth={0.4} opacity={0.7}/>
+          fill="#223322" stroke="#4A7A4A" strokeWidth={0.9} opacity={0.87}/>
         {/* Australia */}
         <path d="M 300 110 L 320 105 L 335 110 L 338 122 L 330 130 L 315 132 L 305 125 L 298 118 Z"
-          fill="#1C2A1C" stroke="#2A3F2A" strokeWidth={0.5} opacity={0.7}/>
+          fill="#223322" stroke="#4A7A4A" strokeWidth={1.1} opacity={0.90}/>
         {/* Greenland */}
         <path d="M 155 12 L 170 10 L 175 18 L 168 22 L 158 20 Z"
-          fill="#1C2A1C" stroke="#2A3F2A" strokeWidth={0.4} opacity={0.6}/>
+          fill="#223322" stroke="#4A7A4A" strokeWidth={0.9} opacity={0.84}/>
         {/* Japan */}
         <path d="M 313 38 L 318 36 L 320 42 L 315 44 L 312 40 Z"
-          fill="#1C2A1C" stroke="#2A3F2A" strokeWidth={0.4} opacity={0.7}/>
+          fill="#223322" stroke="#4A7A4A" strokeWidth={0.9} opacity={0.87}/>
 
         {/* Grid lines — very faint */}
         {[60,120,180,240,300].map(x=><line key={x} x1={x} y1={0} x2={x} y2={180} stroke="#FFFFFF" strokeWidth={0.15} opacity={0.06}/>)}
@@ -1175,8 +1179,8 @@ function UnderstandTab() {
   return (
     <div style={{maxWidth:700,margin:"0 auto",display:"flex",flexDirection:"column",gap:36}}>
       <div>
-        <h2 style={{fontFamily:"var(--serif)",fontSize:28,color:"#FFFFFF",marginBottom:12}}>
-          Why do complex things <em style={{color:"var(--accent2)"}}>fall apart?</em>
+        <h2 style={{fontFamily:"var(--serif)",fontSize:28,color:"#FFFFFF",marginBottom:12,borderLeft:"3px solid #A78BFA",paddingLeft:14}}>
+          Why do complex things <em style={{color:"#A78BFA"}}>fall apart?</em>
         </h2>
         <p style={{color:"#D4D4D4",fontSize:14,lineHeight:1.75,fontFamily:"var(--sans)",fontWeight:400}}>
           Civilizations. Cities. Ecosystems. Companies. They all grow, peak, and sometimes collapse. The answer is always the same — and there's a number for it.
@@ -1970,7 +1974,7 @@ function ExploreTab() {
   return (
     <div style={{display:"flex",flexDirection:"column",gap:32}}>
       <div>
-        <h2 style={{fontFamily:"var(--serif)",fontSize:28,color:"#FFFFFF",marginBottom:12}}>Explore real systems</h2>
+        <h2 style={{fontFamily:"var(--serif)",fontSize:28,color:"#FFFFFF",marginBottom:12,borderLeft:"3px solid #3B82F6",paddingLeft:14}}>Explore real systems</h2>
         <p style={{color:"#D4D4D4",fontSize:13,fontFamily:"var(--sans)",fontWeight:400,lineHeight:1.6}}>
           20 datasets across collapses, recoveries, ecosystems, cities, and current systems — all calibrated to real historical data. Tap any card to load its full analysis below.
         </p>
@@ -2291,6 +2295,50 @@ function ExploreTab() {
           ))}
         </div>
 
+
+        {/* FIX 2: Variable overview grid — always visible before any pill is clicked */}
+        {!activeDomain && (
+          <div style={{padding:"16px 24px",borderBottom:"1px solid #1A1A1A",background:"#000000"}}>
+            <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#525252",letterSpacing:2,marginBottom:12}}>
+              WHAT EACH VARIABLE MEANS IN EACH DOMAIN — SELECT A DOMAIN TO EXPAND
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(230px,1fr))",gap:10}}>
+              {DOMAIN_PRESETS.map(d=>(
+                <button key={d.id} onClick={()=>setActiveDomain(d.id)}
+                  style={{background:"#0A0A0A",border:`1px solid ${d.color}30`,borderRadius:10,
+                    padding:"14px 16px",textAlign:"left",cursor:"pointer",transition:"all 0.15s"}}
+                  onMouseEnter={e=>{e.currentTarget.style.borderColor=d.color+"80";e.currentTarget.style.background="#111111";}}
+                  onMouseLeave={e=>{e.currentTarget.style.borderColor=d.color+"30";e.currentTarget.style.background="#0A0A0A";}}
+                >
+                  <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
+                    <span style={{fontSize:18}}>{d.emoji}</span>
+                    <span style={{fontSize:13,fontWeight:700,color:d.color,fontFamily:"var(--sans)"}}>{d.label}</span>
+                  </div>
+                  <div style={{fontSize:11,color:"#737373",fontFamily:"var(--sans)",lineHeight:1.5,marginBottom:10}}>{d.note}</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:5}}>
+                    {[
+                      {sym:"χ",color:"#60A5FA",q:d.vars.chi.label},
+                      {sym:"s",color:"#A78BFA",q:d.vars.s.label},
+                      {sym:"λ₀",color:"#F87171",q:d.vars.lambda0.label},
+                      {sym:"C",color:"#FCD34D",q:d.vars.C.label},
+                    ].map(v=>(
+                      <div key={v.sym} style={{display:"flex",gap:7,alignItems:"flex-start"}}>
+                        <span style={{fontFamily:"var(--mono)",fontSize:11,color:v.color,fontWeight:700,flexShrink:0,width:18,paddingTop:1}}>{v.sym}</span>
+                        <span style={{fontSize:11,color:"#737373",fontFamily:"var(--sans)",lineHeight:1.4}}>
+                          {v.q.length > 52 ? v.q.slice(0,52)+"…" : v.q}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{marginTop:10,fontSize:9,color:d.color+"99",fontFamily:"var(--mono)",letterSpacing:1}}>
+                    TAP TO SEE FULL BREAKDOWN + LOAD PRESET →
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Domain detail — expands when selected */}
         {activeDomain && (() => {
           const dom = DOMAIN_PRESETS.find(d=>d.id===activeDomain);
@@ -2589,7 +2637,7 @@ Normalize: divide by max, or (val-min)/(max-min). Under 3 sentences. No bullet p
   return (
     <div style={{display:"flex",flexDirection:"column",gap:32}}>
       <div>
-        <h2 style={{fontFamily:"var(--serif)",fontSize:28,color:"#FFFFFF",marginBottom:12}}>Run an Experiment</h2>
+        <h2 style={{fontFamily:"var(--serif)",fontSize:28,color:"#FFFFFF",marginBottom:12,borderLeft:"3px solid #22C55E",paddingLeft:14}}>Run an Experiment</h2>
         <p style={{color:"#D4D4D4",fontSize:14,lineHeight:1.7,fontFamily:"var(--sans)"}}>Three ways to run an EoE analysis. All produce the same results.</p>
       </div>
 
@@ -4139,7 +4187,7 @@ function CompareTab() {
 
       {/* Header */}
       <div>
-        <h2 style={{fontFamily:"var(--serif)",fontSize:28,color:"#FFFFFF",marginBottom:10}}>
+        <h2 style={{fontFamily:"var(--serif)",fontSize:28,color:"#FFFFFF",marginBottom:10,borderLeft:"3px solid #06B6D4",paddingLeft:14}}>
           National Economies
         </h2>
         <p style={{color:"#A3A3A3",fontSize:13,fontFamily:"var(--sans)",lineHeight:1.65,maxWidth:620}}>
@@ -4699,7 +4747,7 @@ function ClimateTab() {
 
       {/* Header */}
       <div>
-        <h2 style={{fontFamily:"var(--serif)",fontSize:28,color:"#FFFFFF",marginBottom:10}}>
+        <h2 style={{fontFamily:"var(--serif)",fontSize:28,color:"#FFFFFF",marginBottom:10,borderLeft:"3px solid #EF4444",paddingLeft:14}}>
           Earth Systems
         </h2>
         <p style={{color:"#A3A3A3",fontSize:13,fontFamily:"var(--sans)",lineHeight:1.65,maxWidth:640}}>
@@ -4964,14 +5012,15 @@ export default function EoEApp() {
   }
 
   const TABS = [
-    {id:"understand",  label:"Understand",        icon:"📖"},
-    {id:"explore",     label:"Explore",            icon:"🔭"},
-    {id:"experiment",  label:"Experiment",         icon:"⚗️"},
-    {id:"assistant",   label:"Assistant",          icon:"💬"},
-    {id:"directory",   label:"Sources",            icon:"🗂️"},
-    {id:"compare",     label:"Compare",            icon:"🌍"},
-    {id:"climate",     label:"Climate",            icon:"🌡️"},
+    {id:"understand",  label:"Understand",  icon:"📖", accent:"#A78BFA", desc:"The framework"},
+    {id:"explore",     label:"Explore",     icon:"🔭", accent:"#3B82F6", desc:"20 real systems"},
+    {id:"experiment",  label:"Experiment",  icon:"⚗️", accent:"#22C55E", desc:"Your data"},
+    {id:"assistant",   label:"Assistant",   icon:"💬", accent:"#F59E0B", desc:"AI guide"},
+    {id:"directory",   label:"Sources",     icon:"🗂️", accent:"#EC4899", desc:"34 datasets"},
+    {id:"compare",     label:"Compare",     icon:"🌍", accent:"#06B6D4", desc:"Nations"},
+    {id:"climate",     label:"Climate",     icon:"🌡️", accent:"#EF4444", desc:"Earth systems"},
   ];
+  const activeTabMeta = TABS.find(t=>t.id===tab) || TABS[0];
 
   return (
     <>
@@ -4979,7 +5028,7 @@ export default function EoEApp() {
       <div style={{minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column"}}>
 
         {/* Top accent line */}
-        <div style={{height:2,background:"linear-gradient(90deg,transparent,#0D9488,#14B8A6,transparent)",flexShrink:0}}/>
+        <div style={{height:2,background:`linear-gradient(90deg,transparent,${activeTabMeta.accent},${activeTabMeta.accent}CC,transparent)`,flexShrink:0,transition:"background 0.4s"}}/>
 
         {/* Header */}
         <div style={{
@@ -4998,9 +5047,9 @@ export default function EoEApp() {
             {TABS.map(t=>(
               <button key={t.id} onClick={()=>setTab(t.id)} style={{
                 padding:"9px 10px",background:"none",border:"none",
-                borderBottom:tab===t.id?"2px solid var(--teal2)":"2px solid transparent",
+                borderBottom:tab===t.id?`2px solid ${t.accent}`:"2px solid transparent",
                 marginBottom:-1,fontSize:11,fontWeight:tab===t.id?700:400,
-                color:tab===t.id?"var(--accent3)":"#A3A3A3",fontFamily:"var(--sans)",
+                color:tab===t.id?t.accent:"#A3A3A3",fontFamily:"var(--sans)",
                 transition:"all 0.15s",display:"flex",alignItems:"center",gap:5,
               }}>
                 <span>{t.icon}</span><span>{t.label}</span>
@@ -5010,7 +5059,7 @@ export default function EoEApp() {
         </div>
 
         {/* Content */}
-        <div style={{flex:1,maxWidth:1040,margin:"0 auto",padding:"40px 24px",width:"100%"}}>
+        <div style={{flex:1,maxWidth:1040,margin:"0 auto",padding:"40px 24px",width:"100%",borderTop:`1px solid ${activeTabMeta.accent}18`,transition:"border-color 0.4s"}}>
           {tab==="understand"  && <UnderstandTab/>}
           {tab==="explore"     && <ExploreTab/>}
           {tab==="experiment"  && <ExperimentTab onGoToExplore={()=>setTab("explore")} onGoToAssistant={()=>setTab("assistant")} uploadedDatasets={uploadedDatasets}/>}
