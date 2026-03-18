@@ -2074,7 +2074,7 @@ function ExploreTab({ injectDataset=null }) {
   const [showCitation, setShowCitation] = useState(false);
   const [activeResearch, setActiveResearch] = useState(null); // "sensitivity"|"tipping"|"overlay"
   const ALL_DATASETS = injectDataset ? [injectDataset, ...DATASETS] : DATASETS;
-  useEffect(()=>{ if(injectDataset){ setActiveId(injectDataset.id); } },[injectDataset]);
+  useEffect(()=>{ if(injectDataset){ setActiveId(injectDataset.id); } });
   const ds = ALL_DATASETS.find(d=>d.id===activeId) || ALL_DATASETS[0];
   const pts = ds.points;
   const safeIdx = ptIdx!==null && ptIdx < pts.length ? ptIdx : null;
