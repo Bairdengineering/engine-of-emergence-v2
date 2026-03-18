@@ -2626,14 +2626,14 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
       const d1 = await r1.json();
       const raw1 = d1.content?.map(b=>b.text||"").join("")||"";
       let structured;
-      try { structured = JSON.parse(raw1.replace(/```json|```/g,"").trim()); }
+      try { const c1 = raw1.replace(/```[a-z]*/g,"").replace(/```/g,"").trim(); structured = JSON.parse(c1); }
       catch(e) { structured = {title:"Experiment",hypothesis,domain:domain||"General",timeScale:timeScale||"Decades",variables:{chi:"Efficiency",s:"Throughput",lambda0:"Burden",C:"Complexity"},eoe_prediction:"Analysis pending.",confidence:"speculative",confidence_reason:"Parse error.",generate_chart:false,chart_reason:"N/A",uncertainty_flag:"Structure parsing failed."}; }
       setProcessingStep(2);
       const r2 = await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers,body:JSON.stringify({model:"claude-sonnet-4-5",max_tokens:1500,system:SYSTEM_ANALYZE,messages:[{role:"user",content:JSON.stringify(structured)}]})});
       const d2 = await r2.json();
       const raw2 = d2.content?.map(b=>b.text||"").join("")||"";
       let analysis;
-      try { analysis = JSON.parse(raw2.replace(/```json|```/g,"").trim()); }
+      try { const c2 = raw2.replace(/```[a-z]*/g,"").replace(/```/g,"").trim(); analysis = JSON.parse(c2); }
       catch(e) { analysis = {narrative:raw2||"Analysis could not be parsed.",chart_data:null,chart_note:null,minsight:"See narrative above.",key_finding:"See narrative.",analogues:[],intervention:"See narrative."}; }
       setProcessingStep(3);
       setExperiment({structured,analysis,timestamp:new Date().toISOString(),id:Date.now()});
