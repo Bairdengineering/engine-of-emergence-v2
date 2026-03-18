@@ -4246,7 +4246,6 @@ function CompareTab() {
           marginBottom:10,letterSpacing:3}}>WORLD MAP — dot size = GDP, color = M</div>
         <svg viewBox={`0 0 ${worldW} ${worldH}`} style={{display:"block",width:"100%",height:"auto"}} preserveAspectRatio="xMidYMid meet">
           <rect x={0} y={0} width={worldW} height={worldH} fill="#050505"/>
-          {/* CONTINENTS */}
           <g fill="none" stroke="#3A6A4A" strokeWidth="0.9" opacity="0.6">
             <path d="M20.0,30.0 L66.7,25.0 L141.7,28.3 L175.0,33.3 L191.7,50.0 L208.3,71.7 L188.3,76.7 L175.0,80.0 L166.7,91.7 L153.3,120.0 L161.7,133.3 L150.0,125.0 L141.7,120.0 L120.0,110.0 L105.0,96.7 L93.3,73.3 L70.0,53.3 L41.7,50.0 L20.0,50.0 L20.0,30.0Z"/>
             <path d="M170.0,130.0 L191.7,130.0 L216.7,141.7 L236.7,158.3 L241.7,173.3 L230.0,186.7 L220.0,196.7 L213.3,205.0 L200.0,213.3 L191.7,241.7 L180.0,233.3 L170.0,208.3 L166.7,180.0 L166.7,158.3 L170.0,130.0Z"/>
@@ -4259,3 +4258,1108 @@ function CompareTab() {
             <path d="M516.7,76.7 L521.7,83.3 L526.7,93.3 L533.3,90.0 L536.7,80.0 L530.0,73.3 L520.0,73.3 L516.7,76.7Z"/>
             <path d="M490.0,186.7 L500.0,180.0 L513.3,173.3 L530.0,173.3 L536.7,180.0 L546.7,186.7 L553.3,193.3 L550.0,206.7 L540.0,213.3 L530.0,210.0 L516.7,206.7 L493.3,203.3 L490.0,186.7Z"/>
           </g>
+          {/* ── Continent wireframe outlines ── */}
+          <g fill="none" stroke="#3A6A4A" strokeWidth="0.9" opacity="0.65">
+            <path d="M20.0,30.0 L66.7,25.0 L141.7,28.3 L175.0,33.3 L191.7,50.0 L208.3,71.7 L188.3,76.7 L175.0,80.0 L166.7,91.7 L158.3,100.0 L153.3,120.0 L161.7,133.3 L150.0,125.0 L141.7,120.0 L133.3,113.3 L120.0,110.0 L105.0,96.7 L100.0,86.7 L93.3,73.3 L86.7,63.3 L70.0,53.3 L41.7,50.0 L20.0,50.0 L20.0,30.0Z"/>
+            <path d="M170.0,130.0 L186.7,130.0 L213.3,141.7 L236.7,158.3 L241.7,173.3 L233.3,186.7 L223.3,196.7 L213.3,205.0 L200.0,213.3 L191.7,241.7 L180.0,233.3 L175.0,220.0 L170.0,208.3 L166.7,180.0 L166.7,158.3 L170.0,130.0Z"/>
+            <path d="M208.3,11.7 L266.7,11.7 L270.0,23.3 L258.3,36.7 L223.3,50.0 L213.3,43.3 L208.3,11.7Z"/>
+            <path d="M283.3,50.0 L286.7,56.7 L291.7,70.0 L300.0,73.3 L313.3,76.7 L325.0,86.7 L330.0,83.3 L346.7,81.7 L350.0,73.3 L343.3,66.7 L336.7,60.0 L330.0,53.3 L320.0,53.3 L308.3,56.7 L300.0,63.3 L291.7,70.0 L286.7,73.3 L283.3,76.7 L283.3,90.0 L290.0,90.0 L300.0,91.7 L316.7,88.3 L330.0,88.3 L341.7,88.3 L353.3,100.0 L358.3,110.0 L370.0,130.0 L383.3,130.0 L373.3,136.7 L366.7,146.7 L370.0,153.3 L366.7,166.7 L360.0,180.0 L346.7,196.7 L343.3,206.7 L330.0,206.7 L326.7,196.7 L323.3,186.7 L316.7,158.3 L308.3,143.3 L300.0,141.7 L291.7,143.3 L286.7,143.3 L276.7,136.7 L270.0,130.0 L270.0,116.7 L273.3,110.0 L276.7,103.3 L286.7,93.3 L290.0,90.0 L283.3,90.0 L283.3,76.7 L283.3,50.0Z"/>
+            <path d="M350.0,90.0 L360.0,100.0 L370.0,110.0 L391.7,113.3 L396.7,106.7 L393.3,100.0 L380.0,93.3 L366.7,90.0 L350.0,90.0Z"/>
+            <path d="M346.7,33.3 L366.7,36.7 L400.0,30.0 L433.3,30.0 L466.7,30.0 L500.0,30.0 L533.3,33.3 L566.7,36.7 L600.0,36.7 L600.0,58.3 L566.7,63.3 L533.3,70.0 L500.0,73.3 L466.7,66.7 L433.3,63.3 L400.0,58.3 L366.7,53.3 L350.0,50.0 L346.7,41.7 L346.7,33.3Z"/>
+            <path d="M400.0,103.3 L413.3,110.0 L420.0,120.0 L426.7,136.7 L433.3,136.7 L440.0,126.7 L446.7,113.3 L453.3,110.0 L446.7,103.3 L436.7,96.7 L426.7,93.3 L413.3,93.3 L400.0,103.3Z"/>
+            <path d="M463.3,116.7 L475.0,125.0 L483.3,141.7 L493.3,146.7 L503.3,141.7 L496.7,130.0 L486.7,120.0 L470.0,116.7 L463.3,116.7Z"/>
+            <path d="M516.7,76.7 L521.7,83.3 L526.7,93.3 L533.3,90.0 L536.7,80.0 L530.0,73.3 L520.0,73.3 L516.7,76.7Z"/>
+            <path d="M490.0,186.7 L500.0,180.0 L513.3,173.3 L520.0,170.0 L530.0,173.3 L536.7,180.0 L546.7,186.7 L553.3,193.3 L550.0,206.7 L540.0,213.3 L530.0,210.0 L516.7,206.7 L493.3,203.3 L490.0,193.3 L490.0,186.7Z"/>
+          </g>
+          {/* ── Continent wireframe outlines ── */}
+          <g fill="none" stroke="#3A6A4A" strokeWidth="0.9" opacity="0.6">
+            <path d="M20.0,30.0 L66.7,25.0 L133.3,28.3 L166.7,30.0 L191.7,50.0 L208.3,71.7 L188.3,76.7 L175.0,80.0 L166.7,86.7 L158.3,100.0 L150.0,120.0 L158.3,123.3 L150.0,125.0 L141.7,120.0 L133.3,113.3 L125.0,108.3 L116.7,103.3 L105.0,96.7 L100.0,86.7 L93.3,73.3 L83.3,60.0 L66.7,53.3 L20.0,50.0 L20.0,30.0Z"/>
+            <path d="M170.0,130.0 L191.7,130.0 L216.7,141.7 L241.7,158.3 L241.7,180.0 L230.0,191.7 L220.0,196.7 L213.3,205.0 L203.3,213.3 L191.7,241.7 L180.0,233.3 L175.0,220.0 L170.0,208.3 L166.7,180.0 L166.7,158.3 L170.0,130.0Z"/>
+            <path d="M208.3,11.7 L266.7,11.7 L270.0,23.3 L258.3,36.7 L225.0,50.0 L213.3,43.3 L208.3,11.7Z"/>
+            <path d="M283.3,50.0 L286.7,56.7 L291.7,70.0 L300.0,73.3 L313.3,76.7 L325.0,86.7 L330.0,83.3 L346.7,81.7 L350.0,73.3 L343.3,66.7 L336.7,60.0 L330.0,53.3 L320.0,53.3 L308.3,56.7 L300.0,63.3 L291.7,70.0 L286.7,73.3 L283.3,76.7 L283.3,50.0Z"/>
+            <path d="M308.3,53.3 L313.3,55.0 L320.0,56.7 L330.0,55.0 L336.7,46.7 L343.3,36.7 L346.7,30.0 L333.3,30.0 L323.3,40.0 L313.3,46.7 L308.3,53.3Z"/>
+            <path d="M270.0,123.3 L273.3,116.7 L276.7,110.0 L291.7,100.0 L308.3,91.7 L316.7,88.3 L325.0,88.3 L341.7,91.7 L353.3,100.0 L363.3,113.3 L370.0,130.0 L383.3,130.0 L373.3,136.7 L366.7,143.3 L370.0,153.3 L366.7,163.3 L360.0,180.0 L346.7,196.7 L343.3,206.7 L330.0,206.7 L326.7,196.7 L323.3,186.7 L316.7,158.3 L308.3,143.3 L300.0,141.7 L291.7,143.3 L286.7,143.3 L276.7,136.7 L270.0,130.0 L270.0,123.3Z"/>
+            <path d="M343.3,83.3 L350.0,90.0 L360.0,100.0 L370.0,110.0 L391.7,113.3 L396.7,106.7 L393.3,100.0 L380.0,93.3 L366.7,90.0 L356.7,86.7 L343.3,83.3Z"/>
+            <path d="M346.7,33.3 L366.7,36.7 L400.0,30.0 L433.3,30.0 L466.7,30.0 L500.0,30.0 L533.3,33.3 L566.7,36.7 L600.0,36.7 L600.0,58.3 L566.7,63.3 L533.3,66.7 L500.0,70.0 L466.7,66.7 L433.3,63.3 L400.0,58.3 L366.7,53.3 L350.0,50.0 L346.7,41.7 L346.7,33.3Z"/>
+            <path d="M400.0,103.3 L413.3,110.0 L420.0,120.0 L426.7,136.7 L433.3,136.7 L436.7,130.0 L443.3,116.7 L450.0,113.3 L453.3,110.0 L446.7,103.3 L436.7,96.7 L426.7,93.3 L413.3,93.3 L400.0,103.3Z"/>
+            <path d="M433.3,66.7 L466.7,63.3 L491.7,63.3 L516.7,73.3 L525.0,83.3 L520.0,96.7 L500.0,113.3 L480.0,116.7 L466.7,110.0 L450.0,103.3 L436.7,96.7 L433.3,83.3 L433.3,66.7Z"/>
+            <path d="M463.3,116.7 L475.0,125.0 L483.3,141.7 L493.3,146.7 L503.3,141.7 L496.7,130.0 L486.7,120.0 L470.0,116.7 L463.3,116.7Z"/>
+            <path d="M516.7,76.7 L521.7,83.3 L526.7,90.0 L530.0,93.3 L533.3,86.7 L536.7,80.0 L530.0,73.3 L520.0,73.3 L516.7,76.7Z"/>
+            <path d="M490.0,186.7 L500.0,180.0 L513.3,173.3 L520.0,170.0 L526.7,170.0 L530.0,173.3 L536.7,180.0 L546.7,186.7 L553.3,193.3 L550.0,206.7 L540.0,213.3 L530.0,210.0 L516.7,206.7 L493.3,203.3 L490.0,193.3 L490.0,186.7Z"/>
+          </g>
+          {/* ── Continent wireframe outlines ── */}
+          <g fill="none" stroke="#3A6A4A" strokeWidth="0.9" opacity="0.55">
+            <path d="M 20.0 30.0 L 66.7 30.0 L 100.0 50.0 L 133.3 66.7 L 161.7 75.0 L 175.0 80.0 L 188.3 76.7 L 200.0 73.3 L 191.7 66.7 L 191.7 50.0 L 166.7 36.7 L 133.3 30.0 L 83.3 30.0 L 20.0 30.0 Z"/>
+            <path d="M 150.0 120.0 L 161.7 133.3 L 171.7 136.7 L 175.0 133.3 L 158.3 123.3 L 150.0 120.0 Z"/>
+            <path d="M 166.7 130.0 L 196.7 130.0 L 216.7 141.7 L 241.7 158.3 L 241.7 175.0 L 233.3 191.7 L 216.7 208.3 L 191.7 241.7 L 175.0 233.3 L 166.7 208.3 L 166.7 183.3 L 170.0 158.3 L 166.7 130.0 Z"/>
+            <path d="M 208.3 11.7 L 266.7 11.7 L 271.7 23.3 L 258.3 33.3 L 225.0 50.0 L 208.3 41.7 L 208.3 11.7 Z"/>
+            <path d="M 283.3 50.0 L 291.7 70.0 L 300.0 73.3 L 313.3 76.7 L 330.0 83.3 L 346.7 81.7 L 350.0 73.3 L 341.7 66.7 L 333.3 58.3 L 325.0 53.3 L 316.7 53.3 L 308.3 56.7 L 300.0 63.3 L 291.7 70.0 L 283.3 50.0 Z"/>
+            <path d="M 308.3 53.3 L 313.3 55.0 L 320.0 56.7 L 330.0 53.3 L 340.0 41.7 L 346.7 33.3 L 333.3 30.0 L 316.7 45.0 L 308.3 53.3 Z"/>
+            <path d="M 270.0 123.3 L 291.7 133.3 L 308.3 141.7 L 316.7 158.3 L 325.0 191.7 L 333.3 208.3 L 346.7 208.3 L 358.3 191.7 L 366.7 166.7 L 370.0 141.7 L 383.3 130.0 L 370.0 120.0 L 358.3 113.3 L 350.0 100.0 L 341.7 91.7 L 325.0 88.3 L 308.3 91.7 L 291.7 100.0 L 270.0 116.7 L 270.0 123.3 Z"/>
+            <path d="M 343.3 83.3 L 360.0 90.0 L 370.0 100.0 L 391.7 113.3 L 400.0 113.3 L 396.7 100.0 L 380.0 93.3 L 360.0 86.7 L 343.3 83.3 Z"/>
+            <path d="M 346.7 33.3 L 400.0 30.0 L 466.7 30.0 L 533.3 33.3 L 600.0 36.7 L 600.0 58.3 L 533.3 66.7 L 466.7 66.7 L 433.3 63.3 L 400.0 58.3 L 366.7 53.3 L 346.7 46.7 L 346.7 33.3 Z"/>
+            <path d="M 400.0 103.3 L 413.3 113.3 L 420.0 120.0 L 430.0 136.7 L 433.3 133.3 L 441.7 113.3 L 450.0 113.3 L 446.7 103.3 L 430.0 91.7 L 413.3 91.7 L 400.0 103.3 Z"/>
+            <path d="M 433.3 66.7 L 466.7 63.3 L 500.0 66.7 L 525.0 83.3 L 516.7 100.0 L 500.0 113.3 L 480.0 116.7 L 466.7 108.3 L 450.0 100.0 L 433.3 83.3 L 433.3 66.7 Z"/>
+            <path d="M 463.3 120.0 L 475.0 125.0 L 483.3 141.7 L 496.7 146.7 L 508.3 141.7 L 500.0 125.0 L 483.3 116.7 L 466.7 113.3 L 463.3 120.0 Z"/>
+            <path d="M 516.7 75.0 L 525.0 83.3 L 533.3 86.7 L 536.7 80.0 L 530.0 73.3 L 520.0 73.3 L 516.7 75.0 Z"/>
+            <path d="M 490.0 186.7 L 500.0 180.0 L 516.7 170.0 L 530.0 173.3 L 536.7 180.0 L 546.7 186.7 L 553.3 196.7 L 550.0 208.3 L 541.7 213.3 L 526.7 210.0 L 513.3 206.7 L 493.3 203.3 L 490.0 186.7 Z"/>
+          </g>
+          <g fill="none" stroke="#3A5A3A" strokeWidth="1.2" opacity="0.6">
+            <path d="M55 28 L80 22 L102 27 L120 34 L128 46 L126 60 L118 72 L104 82 L90 90 L82 98 L76 92 L68 82 L58 68 L52 54 L52 40 Z"/>
+            <path d="M88 104 L108 102 L122 112 L128 130 L124 152 L114 168 L100 174 L88 162 L82 146 L82 128 L86 114 Z"/>
+            <path d="M70 12 L84 8 L90 16 L82 22 L70 20 Z"/>
+            <path d="M264 28 L282 22 L294 26 L298 34 L292 42 L280 46 L268 42 L262 34 Z"/>
+            <path d="M278 18 L292 14 L296 22 L288 28 L278 26 Z"/>
+            <path d="M264 44 L292 40 L308 48 L312 64 L308 82 L298 98 L284 110 L272 112 L260 102 L254 86 L252 70 L256 56 Z"/>
+            <path d="M292 18 L380 12 L418 18 L428 28 L412 36 L378 34 L344 30 L312 26 L294 24 Z"/>
+            <path d="M356 40 L380 36 L394 46 L390 62 L376 68 L360 62 L352 50 Z"/>
+            <path d="M392 30 L432 26 L448 36 L452 50 L438 58 L412 56 L392 50 L384 40 Z"/>
+            <path d="M424 58 L446 54 L454 66 L446 76 L426 74 L418 64 Z"/>
+            <path d="M434 146 L468 138 L488 148 L490 164 L480 178 L458 182 L438 172 L428 158 Z"/>
+          </g>
+          {/* Background grid */}
+          {[-60,-30,0,30,60].map(lat=>{
+            const [,y] = toXY(0,lat);
+            return <line key={lat} x1={0} y1={y/100*worldH} x2={worldW} y2={y/100*worldH}
+              stroke="#1A1A1A" strokeWidth={0.5}/>;
+          })}
+          {[-120,-60,0,60,120].map(lon=>{
+            const [x] = toXY(lon,0);
+            return <line key={lon} x1={x/100*worldW} y1={0} x2={x/100*worldW} y2={worldH}
+              stroke="#1A1A1A" strokeWidth={0.5}/>;
+          })}
+
+
+          {/* Continent wireframe outlines */}
+          <g fill="none" stroke="#2A4A2A" strokeWidth="0.8" opacity="0.55">
+            {/* North America */}
+            <path d="M 52 28 L 78 22 L 100 26 L 118 32 L 128 44 L 130 58 L 124 70 L 112 80 L 100 88 L 90 96 L 82 104 L 76 98 L 68 90 L 60 80 L 54 68 L 50 55 L 50 42 Z"/>
+            {/* Central America + Caribbean */}
+            <path d="M 82 104 L 88 110 L 84 120 L 78 118 Z"/>
+            {/* South America */}
+            <path d="M 88 110 L 106 108 L 120 116 L 128 132 L 126 152 L 118 168 L 108 178 L 96 175 L 86 162 L 80 146 L 80 130 L 84 118 Z"/>
+            {/* Greenland */}
+            <path d="M 68 14 L 82 10 L 88 18 L 80 24 L 68 22 Z"/>
+            {/* Europe */}
+            <path d="M 268 28 L 282 24 L 292 28 L 296 36 L 290 44 L 280 46 L 270 42 L 266 34 Z"/>
+            {/* Scandinavia */}
+            <path d="M 278 18 L 290 14 L 294 22 L 286 28 L 278 26 Z"/>
+            {/* UK */}
+            <path d="M 262 28 L 268 26 L 270 32 L 264 34 Z"/>
+            {/* Africa */}
+            <path d="M 268 44 L 292 40 L 306 48 L 310 64 L 308 82 L 300 98 L 288 110 L 276 114 L 264 106 L 256 90 L 254 74 L 258 58 Z"/>
+            {/* Middle East */}
+            <path d="M 296 38 L 320 34 L 326 46 L 314 52 L 300 50 Z"/>
+            {/* Russia / N Asia */}
+            <path d="M 290 18 L 370 14 L 410 20 L 420 30 L 406 38 L 380 36 L 350 32 L 320 28 L 296 26 Z"/>
+            {/* South Asia */}
+            <path d="M 354 42 L 376 38 L 390 48 L 386 62 L 374 68 L 358 62 L 350 52 Z"/>
+            {/* China / E Asia */}
+            <path d="M 388 32 L 426 28 L 440 38 L 444 52 L 432 60 L 410 58 L 390 52 L 382 42 Z"/>
+            {/* SE Asia */}
+            <path d="M 418 60 L 438 56 L 446 68 L 438 78 L 420 76 L 412 66 Z"/>
+            {/* Japan */}
+            <path d="M 446 40 L 454 36 L 458 44 L 450 50 L 444 46 Z"/>
+            {/* Australia */}
+            <path d="M 430 148 L 460 140 L 480 148 L 484 164 L 476 178 L 456 182 L 436 174 L 424 162 Z"/>
+            {/* New Zealand */}
+            <path d="M 490 168 L 498 162 L 500 172 L 494 176 Z"/>
+          </g>
+
+          {/* ── Continent wireframe outlines ── */}
+          <g fill="none" stroke="#3A5A3A" strokeWidth="1.0" opacity="0.50">
+            {/* North America */}
+            <path d="M55 28 L80 22 L102 27 L120 34 L128 46 L126 60 L118 72 L104 82 L90 90 L82 98 L76 92 L68 82 L58 68 L52 54 L52 40 Z"/>
+            {/* Central America */}
+            <path d="M82 98 L88 104 L84 114 L78 112 Z"/>
+            {/* South America */}
+            <path d="M88 104 L108 102 L122 112 L128 130 L124 152 L114 168 L100 174 L88 162 L82 146 L82 128 L86 114 Z"/>
+            {/* Greenland */}
+            <path d="M70 12 L84 8 L90 16 L82 22 L70 20 Z"/>
+            {/* Iceland */}
+            <path d="M220 22 L228 20 L230 26 L222 28 Z"/>
+            {/* UK/Ireland */}
+            <path d="M252 30 L260 28 L262 36 L254 38 Z"/>
+            {/* Europe */}
+            <path d="M264 28 L282 22 L294 26 L298 34 L292 42 L280 46 L268 42 L262 34 Z"/>
+            {/* Scandinavia */}
+            <path d="M278 18 L292 14 L296 22 L288 28 L278 26 Z"/>
+            {/* Africa */}
+            <path d="M264 44 L292 40 L308 48 L312 64 L308 82 L298 98 L284 110 L272 112 L260 102 L254 86 L252 70 L256 56 Z"/>
+            {/* Madagascar */}
+            <path d="M312 94 L318 90 L320 100 L314 104 Z"/>
+            {/* Middle East */}
+            <path d="M298 36 L322 32 L328 44 L314 50 L298 48 Z"/>
+            {/* Russia/N.Asia */}
+            <path d="M292 18 L380 12 L418 18 L428 28 L412 36 L378 34 L344 30 L312 26 L294 24 Z"/>
+            {/* South Asia */}
+            <path d="M356 40 L380 36 L394 46 L390 62 L376 68 L360 62 L352 50 Z"/>
+            {/* China/E.Asia */}
+            <path d="M392 30 L432 26 L448 36 L452 50 L438 58 L412 56 L392 50 L384 40 Z"/>
+            {/* SE Asia */}
+            <path d="M424 58 L446 54 L454 66 L446 76 L426 74 L418 64 Z"/>
+            {/* Japan */}
+            <path d="M448 38 L458 34 L462 42 L454 48 L446 44 Z"/>
+            {/* Australia */}
+            <path d="M434 146 L468 138 L488 148 L490 164 L480 178 L458 182 L438 172 L428 158 Z"/>
+            {/* New Zealand */}
+            <path d="M494 164 L500 158 L502 168 L496 172 Z"/>
+          </g>
+          {/* Country dots */}
+          {COUNTRY_DATA.map(c=>{
+            const coords = COUNTRY_COORDS[c.code];
+            if (!coords) return null;
+            const M = getCountryM(c, year);
+            const [px,py] = toXY(coords[0], coords[1]);
+            const x = px/100*worldW;
+            const y = py/100*worldH;
+            const r = Math.max(5, Math.min(18, Math.sqrt(c.gdp/200)));
+            const isSel = selected===c.code;
+            return (
+              <g key={c.code} onClick={()=>setSelected(isSel?null:c.code)}
+                style={{cursor:"pointer"}}>
+                <circle cx={x} cy={y} r={r+4} fill={mColor(M)} opacity={0.12}/>
+                <circle cx={x} cy={y} r={r} fill={mColor(M)}
+                  opacity={isSel?1:0.75}
+                  stroke={isSel?"#FFFFFF":"none"} strokeWidth={2}/>
+                {(r>9||isSel) && (
+                  <text x={x} y={y+3} textAnchor="middle" fontSize={7}
+                    fill="#000000" fontFamily="Inter" fontWeight="700">
+                    {c.code}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* Map legend */}
+        <div style={{display:"flex",gap:16,marginTop:10,flexWrap:"wrap",alignItems:"center"}}>
+          {[["#06B6D4","Sustaining (M > +0.30)"],["#22C55E","Stable"],["#84CC16","Healthy"],["#EAB308","Warning"],["#F97316","Declining"],["#EF4444","Critical (M < −0.15)"]].map(([c,l])=>(
+            <div key={l} style={{display:"flex",alignItems:"center",gap:5}}>
+              <div style={{width:10,height:10,borderRadius:"50%",background:c}}/>
+              <span style={{fontSize:10,color:"#737373",fontFamily:"var(--sans)"}}>{l}</span>
+            </div>
+          ))}
+          <span style={{fontSize:10,color:"#525252",fontFamily:"var(--sans)",marginLeft:"auto"}}>
+            Dot size = GDP · Tap any dot for detail
+          </span>
+        </div>
+      </div>
+
+      {/* Selected country detail */}
+      {sel && (
+        <div style={{background:"#0A0A0A",border:`1px solid ${mColor(sel.M)}40`,
+          borderRadius:12,padding:20,display:"flex",gap:20,flexWrap:"wrap",alignItems:"flex-start"}}>
+          <div style={{flex:"1 1 200px"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+              <span style={{fontSize:28}}>{sel.flag}</span>
+              <div>
+                <div style={{fontSize:16,fontWeight:700,color:"#FFFFFF",fontFamily:"var(--sans)"}}>{sel.name}</div>
+                <div style={{fontSize:11,color:"#525252",fontFamily:"var(--mono)"}}>
+                  {sel.region} · GDP ${(sel.gdp/1000).toFixed(1)}T · {year}
+                </div>
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:8,marginTop:12}}>
+              {[
+                {sym:"χ",  val:sel.chi,    color:"#60A5FA", label:"Efficiency"},
+                {sym:"s",  val:sel.s,      color:"#A78BFA", label:"Throughput"},
+                {sym:"λ₀", val:sel.lambda0,color:"#F87171", label:"Base Burden"},
+                {sym:"C",  val:sel.C,      color:"#FCD34D", label:"Complexity"},
+              ].map(v=>(
+                <div key={v.sym} style={{background:"#111111",borderRadius:8,padding:"10px 12px",
+                  border:"1px solid #1A1A1A"}}>
+                  <div style={{fontFamily:"var(--mono)",fontSize:15,color:v.color,fontWeight:700}}>{v.val.toFixed(3)}</div>
+                  <div style={{fontSize:10,color:"#525252",fontFamily:"var(--sans)",marginTop:2}}>{v.sym} · {v.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div style={{textAlign:"center",flexShrink:0}}>
+            <Gauge value={sel.M} size={150}/>
+            <div style={{fontSize:14,fontWeight:700,color:mColor(sel.M),fontFamily:"var(--sans)",marginTop:4}}>
+              {mLabel(sel.M)}
+            </div>
+            <div style={{fontFamily:"var(--mono)",fontSize:11,color:mColor(sel.M),marginTop:2}}>
+              M = {sel.M>=0?"+":""}{sel.M.toFixed(4)}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Ranked list */}
+      <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:14,overflow:"hidden"}}>
+        <div style={{padding:"14px 20px",borderBottom:"1px solid #1A1A1A",
+          display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#3B82F6",letterSpacing:3}}>
+            RANKED BY {sortBy==="M"?"STABILITY MARGIN":sortBy==="GDP"?"GDP":"NAME"} · {scored.length} ECONOMIES · {year}
+          </div>
+          <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#525252"}}>
+            {scored.filter(c=>c.M>0.05).length} healthy · {scored.filter(c=>c.M<0).length} negative margin
+          </div>
+        </div>
+
+        {scored.map((c,i)=>{
+          const barW = Math.abs(c.M) / 0.6 * 100;
+          const isSel = selected===c.code;
+          return (
+            <div key={c.code}
+              onClick={()=>setSelected(isSel?null:c.code)}
+              style={{
+                display:"flex",alignItems:"center",gap:12,
+                padding:"10px 20px",
+                borderBottom:"1px solid #111111",
+                background: isSel?"#0D1020":"transparent",
+                cursor:"pointer",transition:"background 0.1s"
+              }}
+              onMouseEnter={e=>{ if(!isSel) e.currentTarget.style.background="#111111"; }}
+              onMouseLeave={e=>{ if(!isSel) e.currentTarget.style.background="transparent"; }}
+            >
+              {/* Rank */}
+              <div style={{fontFamily:"var(--mono)",fontSize:10,color:"#525252",
+                width:24,textAlign:"right",flexShrink:0}}>
+                {i+1}
+              </div>
+
+              {/* Flag + name */}
+              <div style={{display:"flex",alignItems:"center",gap:8,width:170,flexShrink:0}}>
+                <span style={{fontSize:16}}>{c.flag}</span>
+                <div>
+                  <div style={{fontSize:12,fontWeight:600,color:isSel?"#FFFFFF":"#D4D4D4",
+                    fontFamily:"var(--sans)"}}>{c.name}</div>
+                  <div style={{fontSize:9,color:"#525252",fontFamily:"var(--sans)"}}>{c.region}</div>
+                </div>
+              </div>
+
+              {/* Bar */}
+              <div style={{flex:1,height:6,background:"#1A1A1A",borderRadius:3,overflow:"visible",position:"relative"}}>
+                <div style={{
+                  position:"absolute",
+                  right: c.M>=0 ? "50%" : undefined,
+                  left:  c.M<0  ? "50%" : undefined,
+                  width:`${Math.min(barW/2,50)}%`,
+                  height:"100%",
+                  background:mColor(c.M),
+                  borderRadius:3,
+                  top:0,
+                }}/>
+                <div style={{position:"absolute",left:"50%",top:-2,
+                  width:1,height:10,background:"#333333"}}/>
+              </div>
+
+              {/* M value */}
+              <div style={{fontFamily:"var(--mono)",fontSize:12,fontWeight:700,
+                color:mColor(c.M),width:70,textAlign:"right",flexShrink:0}}>
+                {c.M>=0?"+":""}{c.M.toFixed(3)}
+              </div>
+
+              {/* Status */}
+              <div style={{fontSize:10,color:mColor(c.M),
+                fontFamily:"var(--sans)",width:60,flexShrink:0}}>
+                {mLabel(c.M)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Peer comparison */}
+      {sel && (
+        <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:14,padding:20}}>
+          <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#3B82F6",
+            letterSpacing:3,marginBottom:14}}>HISTORICAL ANALOG — CLOSEST COLLAPSE MATCH</div>
+          <p style={{fontSize:12,color:"#737373",fontFamily:"var(--sans)",
+            marginBottom:14,lineHeight:1.6}}>
+            Which historical collapse does <strong style={{color:"#FFFFFF"}}>{sel.name}</strong>'s
+            current trajectory most closely resemble?
+          </p>
+          {(() => {
+            const selM = sel.M;
+            const selChi = sel.chi;
+            // Find closest historical dataset by M value and chi similarity
+            const matches = DATASETS
+              .filter(d=>d.domain==="Collapse"||d.domain==="Urban")
+              .map(d => {
+                const lastPt = d.points[d.points.length-1];
+                const lastM  = calcM(lastPt.chi,lastPt.s,lastPt.lambda0,lastPt.C);
+                // Distance = weighted combo of M diff and chi diff
+                const dist = Math.abs(lastM-selM)*0.6 + Math.abs(lastPt.chi-selChi)*0.4;
+                return { d, lastM, dist };
+              })
+              .sort((a,b)=>a.dist-b.dist)
+              .slice(0,3);
+
+            return (
+              <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                {matches.map(({d,lastM},i)=>(
+                  <div key={d.id} style={{display:"flex",alignItems:"center",gap:12,
+                    padding:"10px 14px",background:i===0?"#0D1020":"#111111",
+                    border:`1px solid ${i===0?"#2563EB30":"#1A1A1A"}`,
+                    borderRadius:8}}>
+                    <div style={{fontFamily:"var(--mono)",fontSize:11,
+                      color:"#525252",width:20,flexShrink:0}}>#{i+1}</div>
+                    <span style={{fontSize:18}}>{d.emoji}</span>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:13,fontWeight:600,color:"#FFFFFF",
+                        fontFamily:"var(--sans)"}}>{d.label}</div>
+                      <div style={{fontSize:10,color:"#525252",fontFamily:"var(--sans)"}}>
+                        {d.period} · Final M: {lastM>=0?"+":""}{lastM.toFixed(3)}
+                      </div>
+                    </div>
+                    {i===0&&(
+                      <div style={{fontSize:10,background:"#2563EB20",
+                        border:"1px solid #2563EB40",borderRadius:4,
+                        padding:"2px 8px",color:"#93C5FD",fontFamily:"var(--sans)",flexShrink:0}}>
+                        closest match
+                      </div>
+                    )}
+                    <div style={{fontFamily:"var(--mono)",fontSize:12,
+                      color:mColor(lastM),fontWeight:700,flexShrink:0}}>
+                      {lastM>=0?"+":""}{lastM.toFixed(3)}
+                    </div>
+                  </div>
+                ))}
+                <div style={{fontSize:10,color:"#525252",fontFamily:"var(--sans)",
+                  marginTop:4,fontStyle:"italic"}}>
+                  Match based on final Stability Margin and architectural efficiency similarity.
+                  Tap any dataset in the Explore tab to see its full trajectory.
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      )}
+
+      {/* Legitimacy note */}
+      <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:10,
+        padding:"14px 18px",display:"flex",gap:10,alignItems:"flex-start"}}>
+        <span style={{fontSize:13,flexShrink:0}}>⚠️</span>
+        <p style={{fontSize:11,color:"#737373",lineHeight:1.6,fontFamily:"var(--sans)"}}>
+          Country M values are proxy estimates calibrated from World Bank government effectiveness scores,
+          IMF fiscal data, and CBO-equivalent national sources. They represent relative fiscal and institutional
+          health, not precise measurements. Historical slider values use regional adjustment factors, not
+          country-specific historical data. For research use, always verify against primary sources.
+          Framework under peer review — cite as: Baird, N. (2026). Engine of Emergence.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+
+// ── CLIMATE SYSTEMS DATA ──────────────────────────────────────────────────────
+// Each Earth system treated as a complex adaptive system
+// chi = system efficiency (energy/nutrient conversion, feedback integrity)
+// s   = energy/resource throughput (normalized to pre-industrial baseline)
+// lambda0 = base burden (thermal stress, chemical load, structural damage)
+// C   = system complexity (biodiversity, feedback loops, interconnection)
+// Sources: NOAA, NASA, IPCC AR6, peer-reviewed literature
+
+const CLIMATE_SYSTEMS = [
+  {
+    id:"arctic_ice", name:"Arctic Sea Ice", region:"Polar", icon:"🧊",
+    color:"#38BDF8", lat:85, lon:0,
+    desc:"Arctic summer sea ice extent has declined 13% per decade since 1979. The system is approaching a potential tipping point beyond which summer ice-free conditions become self-reinforcing.",
+    source:"NSIDC, PIOMAS, Stroeve et al. (2012), IPCC AR6",
+    history:[
+      {year:1960,chi:0.92,s:0.96,lambda0:0.08,C:0.82, event:"Pre-satellite era baseline. Arctic ice extent near maximum of modern record. Albedo feedback loop fully intact."},
+      {year:1979,chi:0.88,s:0.92,lambda0:0.12,C:0.82, event:"Satellite monitoring begins. First systematic measurements. Summer extent still robust at ~7.2 million km²."},
+      {year:1990,chi:0.83,s:0.86,lambda0:0.17,C:0.80, event:"Measurable decline begins. Ocean warming accelerating ice melt from below. The albedo feedback begins to amplify warming."},
+      {year:2000,chi:0.75,s:0.78,lambda0:0.25,C:0.78, event:"Decline rate accelerates. Ice is thinning as well as retreating. Multi-year ice being replaced by thinner first-year ice."},
+      {year:2007,chi:0.62,s:0.64,lambda0:0.38,C:0.74, event:"Record summer minimum — 4.17 million km². Scientists shocked by speed of decline. M crosses into warning territory."},
+      {year:2012,chi:0.52,s:0.54,lambda0:0.48,C:0.72, event:"All-time record minimum — 3.41 million km². The Arctic is in freefall. Ice-free summers now projected within decades."},
+      {year:2020,chi:0.40,s:0.42,lambda0:0.60,C:0.68, event:"Second lowest extent on record. Arctic warming 4× faster than global average. The tipping point may already be in view."},
+      {year:2023,chi:0.34,s:0.36,lambda0:0.66,C:0.66, event:"Persistent record lows. Antarctica simultaneously shatters its own records. Both poles in simultaneous crisis for the first time in the observational record."},
+    ]
+  },
+  {
+    id:"ocean_heat", name:"Global Ocean Heat", region:"Global Ocean", icon:"🌊",
+    color:"#22D3EE", lat:-20, lon:-30,
+    desc:"The ocean absorbs 90% of excess heat from climate change. Rising heat content drives sea level rise, intensifies hurricanes, and disrupts the circulation systems that regulate global climate.",
+    source:"NOAA Ocean Climate Laboratory, Cheng et al. (2022), von Schuckmann et al. (2023)",
+    history:[
+      {year:1960,chi:0.88,s:0.82,lambda0:0.12,C:0.55, event:"Ocean heat content near equilibrium. Thermohaline circulation functioning normally. Enormous buffering capacity intact."},
+      {year:1975,chi:0.85,s:0.80,lambda0:0.15,C:0.60, event:"Measurable warming begins. Atmosphere loading ocean with heat faster than circulation distributes it."},
+      {year:1990,chi:0.80,s:0.76,lambda0:0.20,C:0.66, event:"Deep ocean warming confirmed. Heat penetrating to 700m+. Marine heatwaves becoming more frequent."},
+      {year:2000,chi:0.74,s:0.70,lambda0:0.26,C:0.72, event:"Argo float network deployed — first comprehensive deep ocean monitoring. The scale of warming shocks scientists."},
+      {year:2010,chi:0.66,s:0.64,lambda0:0.34,C:0.76, event:"Ocean heating rate doubles. Sea level rise accelerating. Coral bleaching events now annual in some regions."},
+      {year:2016,chi:0.58,s:0.58,lambda0:0.42,C:0.80, event:"Record ocean temperatures. Global coral bleaching event kills 50% of shallow Great Barrier Reef corals. M crosses zero."},
+      {year:2020,chi:0.50,s:0.50,lambda0:0.50,C:0.82, event:"Every year since 2015 sets new ocean heat records. Marine heatwaves 50× more frequent than 1980s baseline."},
+      {year:2023,chi:0.42,s:0.42,lambda0:0.58,C:0.84, event:"2023 ocean temperatures shatter records by margins that shock scientists. North Atlantic 5°C above average in some regions. Unprecedented."},
+    ]
+  },
+  {
+    id:"amazon", name:"Amazon Rainforest", region:"South America", icon:"🌳",
+    color:"#4ADE80", lat:-5, lon:-60,
+    desc:"The Amazon generates 50% of its own rainfall through transpiration. At ~20-25% deforestation, models suggest the system tips irreversibly toward savanna. We are at 20%.",
+    source:"INPE, Global Forest Watch, Lovejoy & Nobre (2018), Boulton et al. (2022)",
+    history:[
+      {year:1960,chi:0.92,s:0.90,lambda0:0.08,C:0.88, event:"Amazon largely untouched. 5.5 million km² of intact forest. Self-generating rainfall cycle at maximum efficiency."},
+      {year:1980,chi:0.86,s:0.84,lambda0:0.14,C:0.87, event:"Deforestation begins in earnest. Trans-Amazon highway opens frontier. 5% of forest cleared — still well within resilience limits."},
+      {year:1995,chi:0.80,s:0.78,lambda0:0.20,C:0.86, event:"12% deforested. Fire season intensifies. Rainfall patterns in eastern Amazon begin to shift. Early warning signals appear."},
+      {year:2004,chi:0.74,s:0.72,lambda0:0.26,C:0.86, event:"All-time deforestation record — 27,000 km² in a single year. The moisture recycling system under serious strain."},
+      {year:2012,chi:0.66,s:0.66,lambda0:0.34,C:0.87, event:"18% deforested. Forest Code weakened. Climate models warn 20-25% threshold triggers irreversible savannification."},
+      {year:2019,chi:0.56,s:0.56,lambda0:0.44,C:0.88, event:"80,000 fires. Bolsonaro era deforestation surge. Eastern Amazon now emitting more carbon than it absorbs. M crosses zero."},
+      {year:2022,chi:0.46,s:0.46,lambda0:0.54,C:0.89, event:"21% deforested — approaching the tipping point threshold. Boulton et al. confirm 75% of Amazon has lost measurable resilience since 2000."},
+      {year:2023,chi:0.42,s:0.42,lambda0:0.58,C:0.89, event:"Deforestation slows under Lula but damage persists. The eastern Amazon is now a net carbon source. Scientists debate whether the tipping point is already past."},
+    ]
+  },
+  {
+    id:"amoc", name:"Atlantic Circulation (AMOC)", region:"North Atlantic", icon:"🌀",
+    color:"#818CF8", lat:45, lon:-35,
+    desc:"The Atlantic Meridional Overturning Circulation moves heat from tropics to northern Europe. New research suggests it may be approaching a collapse tipping point that would dramatically cool Europe and disrupt global rainfall patterns.",
+    source:"Caesar et al. (2021), Boers (2021), IPCC AR6 Chapter 9, Ditlevsen & Ditlevsen (2023)",
+    history:[
+      {year:1960,chi:0.86,s:0.88,lambda0:0.14,C:0.72, event:"AMOC near historical maximum. Gulf Stream keeping Northern Europe 5-10°C warmer than it would otherwise be. System fully intact."},
+      {year:1980,chi:0.83,s:0.85,lambda0:0.17,C:0.74, event:"Subtle weakening detectable in proxy records. Greenland melt beginning to add freshwater — which disrupts the density-driven circulation."},
+      {year:2000,chi:0.77,s:0.79,lambda0:0.23,C:0.76, event:"RAPID array deployed — first continuous AMOC monitoring. Direct measurements confirm weakening underway."},
+      {year:2010,chi:0.70,s:0.72,lambda0:0.30,C:0.78, event:"AMOC at weakest point in 1,000 years according to proxy reconstructions. Accelerating Greenland melt adding freshwater faster than the circulation can compensate."},
+      {year:2015,chi:0.62,s:0.64,lambda0:0.38,C:0.78, event:"Multiple studies confirm AMOC 15% weaker than mid-20th century. M enters warning zone. Potential collapse timelines discussed openly in literature."},
+      {year:2021,chi:0.54,s:0.56,lambda0:0.46,C:0.80, event:"Caesar et al. present fingerprint evidence of AMOC approaching a tipping point. Boers finds early warning signals in sea surface temperature data."},
+      {year:2023,chi:0.46,s:0.48,lambda0:0.54,C:0.80, event:"Ditlevsen & Ditlevsen (2023) project collapse between 2025-2095 under current trajectories. Nature paper triggers major scientific debate. M is negative and declining."},
+    ]
+  },
+  {
+    id:"coral_global", name:"Global Coral Reefs", region:"Tropical Oceans", icon:"🪸",
+    color:"#FB923C", lat:5, lon:120,
+    desc:"Coral reefs cover less than 1% of the ocean floor but support 25% of all marine species. At current warming trajectories, 70-90% of reefs will experience annual bleaching by 2050.",
+    source:"GCRMN (2020), Hughes et al. (2017, 2018), IPCC Special Report on Ocean and Cryosphere",
+    history:[
+      {year:1960,chi:0.90,s:0.88,lambda0:0.10,C:0.85, event:"Global reef system near pristine baseline. Bleaching essentially unknown as a phenomenon. Full species diversity and structural complexity."},
+      {year:1980,chi:0.84,s:0.82,lambda0:0.16,C:0.84, event:"First mass bleaching events documented — Caribbean 1983. Coral disease increasing. Overfishing reducing herbivores that keep algae in check."},
+      {year:1998,chi:0.72,s:0.70,lambda0:0.28,C:0.80, event:"First global mass bleaching event. El Niño + warming kills 16% of all coral globally in a single year. The world is shocked."},
+      {year:2005,chi:0.64,s:0.62,lambda0:0.36,C:0.78, event:"Caribbean loses 40% of coral cover in a single bleaching event. Recovery windows between events shortening. M crosses zero."},
+      {year:2016,chi:0.50,s:0.48,lambda0:0.50,C:0.74, event:"Third global mass bleaching — worst on record. Great Barrier Reef loses 50% of shallow coral. Bleaching now occurring in La Niña years."},
+      {year:2020,chi:0.40,s:0.38,lambda0:0.60,C:0.70, event:"GCRMN reports 50% of world's coral lost since 1950. Recovery rates cannot keep pace with bleaching frequency. The system is in structured decline."},
+      {year:2023,chi:0.32,s:0.30,lambda0:0.68,C:0.66, event:"2023-24 global bleaching event — worst in history. 91% of monitored reefs show bleaching. Scientists describe the reef system as experiencing a 'phase shift' from coral to algae dominance."},
+    ]
+  },
+  {
+    id:"permafrost", name:"Arctic Permafrost", region:"Polar/Boreal", icon:"🏔️",
+    color:"#A78BFA", lat:68, lon:120,
+    desc:"Permafrost stores twice as much carbon as the atmosphere. As it thaws, it releases CO₂ and methane — creating a feedback loop that accelerates warming independent of human emissions.",
+    source:"Turetsky et al. (2020), IPCC AR6, Schuur et al. (2015), Walter Anthony et al. (2018)",
+    history:[
+      {year:1960,chi:0.88,s:0.84,lambda0:0.12,C:0.70, event:"Permafrost stable across 25% of Northern Hemisphere land area. Carbon locked in frozen soils for up to 40,000 years. Feedback loops dormant."},
+      {year:1980,chi:0.84,s:0.80,lambda0:0.16,C:0.72, event:"Active layer deepening in Siberia and Alaska. Infrastructure damage beginning. Thermokarst lakes forming as ice-rich permafrost thaws."},
+      {year:2000,chi:0.77,s:0.73,lambda0:0.23,C:0.74, event:"Permafrost temperatures rising 0.5°C per decade — twice the global average warming rate. Abrupt thaw processes (not captured in models) accelerating."},
+      {year:2010,chi:0.68,s:0.64,lambda0:0.32,C:0.76, event:"Methane emissions from Arctic lakes and wetlands measurably increasing. Models underestimating thaw rates. M crosses into warning zone."},
+      {year:2018,chi:0.58,s:0.54,lambda0:0.42,C:0.78, event:"Walter Anthony et al. document abrupt permafrost thaw releasing carbon 10× faster than gradual models predict. The timeline for the carbon feedback accelerates."},
+      {year:2020,chi:0.50,s:0.46,lambda0:0.52,C:0.80, event:"Siberian heatwave — 38°C above Arctic Circle. Record permafrost thaw. Oil infrastructure failures. Massive methane plumes detected. M goes negative."},
+      {year:2023,chi:0.42,s:0.38,lambda0:0.60,C:0.82, event:"2.5 million km² of permafrost has degraded since 1970. Self-reinforcing carbon release now considered 'locked in' for 1.5°C of warming regardless of human action."},
+    ]
+  },
+  {
+    id:"monsoon_asia", name:"Asian Monsoon System", region:"South/East Asia", icon:"🌧️",
+    color:"#34D399", lat:20, lon:90,
+    desc:"The Asian monsoon delivers water to 70% of the world's population. Disruption from warming and aerosol loading is already altering rainfall patterns across India, China, and Southeast Asia.",
+    source:"Wang et al. (2021), Christensen et al. IPCC AR6, Turner & Annamalai (2012)",
+    history:[
+      {year:1960,chi:0.84,s:0.86,lambda0:0.16,C:0.70, event:"Asian monsoon in near-historical baseline. Reliable seasonal rainfall supporting agriculture for 3 billion people across South and East Asia."},
+      {year:1980,chi:0.80,s:0.82,lambda0:0.20,C:0.72, event:"Indian summer monsoon weakening detectably. Aerosol pollution masking some warming but disrupting thermal gradients that drive monsoon circulation."},
+      {year:1990,chi:0.76,s:0.78,lambda0:0.24,C:0.74, event:"Inter-annual variability increasing. ENSO influence on monsoon strengthening. Droughts and floods becoming more extreme and less predictable."},
+      {year:2002,chi:0.70,s:0.72,lambda0:0.30,C:0.76, event:"India's worst drought in 15 years. Pakistan flooding. The monsoon's reliability — the bedrock of Asian agriculture — is measurably declining."},
+      {year:2010,chi:0.64,s:0.66,lambda0:0.36,C:0.78, event:"Pakistan mega-floods (20% of country submerged). Russian heat wave. Both linked to weakened jet stream from Arctic amplification. M at warning level."},
+      {year:2018,chi:0.58,s:0.60,lambda0:0.42,C:0.80, event:"Kerala floods — worst in 100 years. Bangladesh flooding displaces millions. The monsoon is intensifying in some regions, failing in others — spatial coherence breaking down."},
+      {year:2023,chi:0.52,s:0.54,lambda0:0.48,C:0.82, event:"Libya floods kill 11,000 in hours. India and Pakistan simultaneous extreme events. South Asian monsoon described as entering a 'new regime' with no historical analog."},
+    ]
+  },
+  {
+    id:"boreal_forest", name:"Boreal Forest (Taiga)", region:"Northern Hemisphere", icon:"🌲",
+    color:"#86EFAC", lat:58, lon:80,
+    desc:"The boreal forest is Earth's largest terrestrial ecosystem — a carbon sink covering 1.4 billion hectares. Warming is converting it from a carbon sink to a carbon source through fire, beetle outbreaks, and drought.",
+    source:"Gauthier et al. (2015), Walker et al. (2019), IPCC AR6 Chapter 2",
+    history:[
+      {year:1960,chi:0.86,s:0.84,lambda0:0.14,C:0.76, event:"Boreal forest functioning as major carbon sink. Fire return intervals of 100-200 years. Beetle populations controlled by cold winters. System fully intact."},
+      {year:1980,chi:0.82,s:0.80,lambda0:0.18,C:0.76, event:"Fire frequency beginning to increase in North American boreal. Warming reducing snowpack that historically suppressed bark beetle populations."},
+      {year:1995,chi:0.76,s:0.74,lambda0:0.24,C:0.76, event:"Mountain pine beetle epidemic begins in British Columbia — enabled by warmer winters. Will kill trees across 18 million hectares by 2012."},
+      {year:2004,chi:0.68,s:0.66,lambda0:0.32,C:0.76, event:"Alaska fires burn 2.7 million hectares in a single season — largest in state history. Permafrost beneath boreal forest thawing, destabilizing root systems."},
+      {year:2014,chi:0.60,s:0.58,lambda0:0.40,C:0.75, event:"Northwest Territories fire season — 3.4 million hectares. The boreal fire season is now 40% longer than 1970s baseline. M crosses into warning zone."},
+      {year:2020,chi:0.52,s:0.50,lambda0:0.50,C:0.74, event:"Siberian fires emit 540 megatons of CO₂ — equivalent to Sweden's annual emissions. The boreal is transitioning from carbon sink to carbon source."},
+      {year:2023,chi:0.44,s:0.42,lambda0:0.58,C:0.73, event:"Canada's worst fire season in history — 18 million hectares. Smoke blankets US cities. The boreal carbon sink may have permanently flipped. M is negative and accelerating."},
+    ]
+  },
+  {
+    id:"greenland", name:"Greenland Ice Sheet", region:"Arctic", icon:"🏔️",
+    color:"#BAE6FD", lat:72, lon:-42,
+    desc:"Greenland holds enough ice to raise global sea levels by 7 meters. Its melt is now irreversible at current temperatures — the question is how fast. Current melt rate is 280 billion tons per year.",
+    source:"Bamber et al. (2019), The IMBIE Team (2020), Mouginot et al. (2019)",
+    history:[
+      {year:1960,chi:0.90,s:0.86,lambda0:0.10,C:0.60, event:"Greenland ice sheet near mass balance — gaining roughly as much ice from snowfall as it loses to melt. Contribution to sea level rise negligible."},
+      {year:1980,chi:0.86,s:0.82,lambda0:0.14,C:0.62, event:"Balance beginning to tip. Surface melt zone expanding upward in elevation. Outlet glaciers beginning to accelerate."},
+      {year:1995,chi:0.80,s:0.76,lambda0:0.20,C:0.64, event:"Mass loss begins to exceed mass gain. Marine-terminating glaciers accelerating as ocean waters warm. The ice sheet is now shrinking."},
+      {year:2002,chi:0.72,s:0.68,lambda0:0.28,C:0.66, event:"GRACE satellite confirms dramatic acceleration of mass loss. Jakobshavn Glacier doubles in speed. 50 billion tons per year net loss."},
+      {year:2012,chi:0.58,s:0.54,lambda0:0.42,C:0.68, event:"Record surface melt — 97% of ice sheet surface shows melting for first time. 400 billion tons lost that year. M clearly negative."},
+      {year:2019,chi:0.44,s:0.40,lambda0:0.56,C:0.70, event:"Worst year on record — 530 billion tons lost. Enough to raise global sea levels 1.5mm in a single year. Tipping point for irreversible loss may have passed."},
+      {year:2023,chi:0.36,s:0.32,lambda0:0.64,C:0.70, event:"280 billion tons per year average loss over the decade. Scientists now speak of 'committed' sea level rise — ice that will melt regardless of future emissions cuts."},
+    ]
+  },
+  {
+    id:"savanna_africa", name:"African Savanna Systems", region:"Africa", icon:"🦁",
+    color:"#FCD34D", lat:-5, lon:25,
+    desc:"African savannas cover 20% of Earth's land surface and support extraordinary biodiversity. Shifting rainfall patterns, bush encroachment, and land pressure are degrading ecosystem function across the continent.",
+    source:"Venter et al. (2018), Lehmann et al. (2014), Staver et al. (2011)",
+    history:[
+      {year:1960,chi:0.82,s:0.80,lambda0:0.18,C:0.78, event:"African savanna systems largely intact. Large mammal populations sustaining ecosystem function. Fire-grazing interactions maintaining grass-tree balance."},
+      {year:1980,chi:0.76,s:0.74,lambda0:0.24,C:0.78, event:"Agricultural expansion accelerating. Poaching decimating elephant populations that historically maintained open savanna structure."},
+      {year:1995,chi:0.70,s:0.68,lambda0:0.30,C:0.76, event:"Bush encroachment accelerating across Southern and East Africa. Rainfall variability increasing. Savanna-forest boundary shifting."},
+      {year:2005,chi:0.62,s:0.60,lambda0:0.38,C:0.76, event:"Lake Chad has lost 90% of its surface area since 1963 — a regional climate disaster driving migration and conflict. Sahel rainfall patterns destabilizing."},
+      {year:2015,chi:0.54,s:0.52,lambda0:0.46,C:0.75, event:"East African drought — worst in 60 years. Somalia, Kenya, Ethiopia in crisis. The savanna fire season intensifying and extending."},
+      {year:2020,chi:0.46,s:0.44,lambda0:0.54,C:0.74, event:"Madagascar in famine from climate-driven drought. Horn of Africa in fifth consecutive failed rainy season. The savanna carbon sink measurably weakening."},
+      {year:2023,chi:0.40,s:0.38,lambda0:0.60,C:0.73, event:"Horn of Africa in worst drought in 40 years. Wildfires across Southern Africa. The system is in sustained decline — M deeply negative and no reversal in sight without structural intervention."},
+    ]
+  },
+];
+
+const CLIMATE_YEARS = [1960,1980,1995,2000,2004,2010,2015,2018,2020,2023];
+
+function getClimateM(system, year) {
+  // Find closest historical year
+  const years = system.history.map(h=>h.year);
+  let closest = system.history[0];
+  let minDiff = Math.abs(years[0]-year);
+  system.history.forEach(h=>{
+    const diff = Math.abs(h.year-year);
+    if(diff<minDiff){minDiff=diff;closest=h;}
+  });
+  return calcM(closest.chi,closest.s,closest.lambda0,closest.C);
+}
+
+function getClimatePoint(system, year) {
+  const years = system.history.map(h=>h.year);
+  let closest = system.history[0];
+  let minDiff = Math.abs(years[0]-year);
+  system.history.forEach(h=>{
+    const diff = Math.abs(h.year-year);
+    if(diff<minDiff){minDiff=diff;closest=h;}
+  });
+  return closest;
+}
+
+// Approximate lat/lon positions for climate systems on map
+const CLIMATE_COORDS = {
+  arctic_ice:    [0,   85],
+  ocean_heat:    [-30,-20],
+  amazon:        [-60, -5],
+  amoc:          [-35, 45],
+  coral_global:  [120,  5],
+  permafrost:    [120, 68],
+  monsoon_asia:  [90,  20],
+  boreal_forest: [80,  58],
+  greenland:     [-42, 72],
+  savanna_africa:[25,  -5],
+};
+
+// ── CLIMATE TAB ───────────────────────────────────────────────────────────────
+function ClimateTab() {
+  const [year, setYear]       = useState(2023);
+  const [selected, setSelected] = useState(null);
+  const [showAll, setShowAll] = useState(false);
+
+  const sel = selected ? CLIMATE_SYSTEMS.find(s=>s.id===selected) : null;
+  const selPt = sel ? getClimatePoint(sel, year) : null;
+
+  const toXY = (lon,lat,W,H) => [
+    ((lon+180)/360)*W,
+    ((90-lat)/180)*H,
+  ];
+
+  const W=620, H=310;
+
+  const scored = [...CLIMATE_SYSTEMS].sort((a,b)=>getClimateM(b,year)-getClimateM(a,year));
+
+  // Sparkline for a system
+  function ClimateSparkline({sys}){
+    const pts = sys.history;
+    const vals = pts.map(p=>calcM(p.chi,p.s,p.lambda0,p.C));
+    const minV=Math.min(...vals,-0.5), maxV=Math.max(...vals,0.3);
+    const rng=maxV-minV, w=120, h=36, pad=4;
+    const xs=pts.map((_,i)=>pad+(i/(pts.length-1))*(w-pad*2));
+    const ys=vals.map(v=>h-pad-((v-minV)/rng)*(h-pad*2));
+    const path=xs.map((x,i)=>`${i===0?"M":"L"} ${x} ${ys[i]}`).join(" ");
+    const zeroY=h-pad-((0-minV)/rng)*(h-pad*2);
+    const lastM=vals[vals.length-1];
+    return(
+      <svg width={w} height={h} style={{display:"block",overflow:"visible"}}>
+        <line x1={pad} y1={zeroY} x2={w-pad} y2={zeroY} stroke="#333" strokeWidth={0.5} strokeDasharray="2,3"/>
+        <path d={path} fill="none" stroke={mColor(lastM)} strokeWidth={1.5} strokeLinecap="round"/>
+        {vals.map((v,i)=><circle key={i} cx={xs[i]} cy={ys[i]} r={i===vals.length-1?3:2} fill={mColor(v)}/>)}
+      </svg>
+    );
+  }
+
+  return (
+    <div style={{display:"flex",flexDirection:"column",gap:24}}>
+
+      {/* Header */}
+      <div>
+        <h2 style={{fontFamily:"var(--serif)",fontSize:28,color:"#FFFFFF",marginBottom:10,borderLeft:"3px solid #EF4444",paddingLeft:14}}>
+          Earth Systems
+        </h2>
+        <p style={{color:"#A3A3A3",fontSize:13,fontFamily:"var(--sans)",lineHeight:1.65,maxWidth:640}}>
+          The same equation that identifies civilizational collapse applies to planetary systems.
+          Each Earth system has inputs, outputs, and overhead. When burden exceeds throughput, the system destabilizes.
+          These are the 10 most critical Earth systems, calibrated from NOAA, NASA, and peer-reviewed climate literature.
+        </p>
+      </div>
+
+      {/* Year slider */}
+      <div style={{background:"#111111",border:"1px solid #2A2A2A",borderRadius:10,
+        padding:"12px 18px",display:"flex",alignItems:"center",gap:14}}>
+        <span style={{fontFamily:"var(--serif)",fontSize:22,color:"#FFFFFF",flexShrink:0}}>
+          {year}
+        </span>
+        <input type="range" min={0} max={CLIMATE_YEARS.length-1} step={1}
+          value={CLIMATE_YEARS.indexOf(year)<0?CLIMATE_YEARS.length-1:CLIMATE_YEARS.indexOf(year)}
+          onChange={e=>setYear(CLIMATE_YEARS[parseInt(e.target.value)])}
+          style={{flex:1,accentColor:"#2563EB"}}
+        />
+        <div style={{display:"flex",gap:6,flexShrink:0}}>
+          {CLIMATE_YEARS.map(y=>(
+            <button key={y} onClick={()=>setYear(y)} style={{
+              background:year===y?"#2563EB":"#1A1A1A",
+              border:`1px solid ${year===y?"#2563EB":"#2A2A2A"}`,
+              borderRadius:4,padding:"3px 7px",fontSize:9,
+              color:year===y?"#FFFFFF":"#525252",
+              fontFamily:"var(--mono)"
+            }}>{y}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* World map */}
+      <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:14,padding:16}}>
+        <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#3B82F6",marginBottom:10,letterSpacing:3}}>
+          EARTH SYSTEMS MAP · {year} · COLOR = STABILITY MARGIN
+        </div>
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          style={{display:"block",width:"100%",height:"auto"}}
+          preserveAspectRatio="xMidYMid meet"
+        >
+          {/* Background */}
+          <rect x={0} y={0} width={W} height={H} fill="#050505"/>
+          <g fill="none" stroke="#3A6A4A" strokeWidth="0.9" opacity="0.6">
+            <path d="M20.7,31.0 L68.9,25.8 L146.4,29.3 L180.8,34.4 L198.1,51.7 L215.3,74.1 L194.6,79.2 L180.8,82.7 L172.2,94.7 L158.4,124.0 L167.1,137.8 L155.0,129.2 L146.4,124.0 L124.0,113.7 L108.5,99.9 L96.4,75.8 L72.3,55.1 L43.1,51.7 L20.7,51.7 L20.7,31.0Z"/>
+            <path d="M175.7,134.3 L198.1,134.3 L223.9,146.4 L244.6,163.6 L249.7,179.1 L237.7,192.9 L227.3,203.2 L220.4,211.8 L206.7,220.4 L198.1,249.7 L186.0,241.1 L175.7,215.3 L172.2,186.0 L172.2,163.6 L175.7,134.3Z"/>
+            <path d="M215.3,12.1 L275.6,12.1 L279.0,24.1 L266.9,37.9 L230.8,51.7 L220.4,44.8 L215.3,12.1Z"/>
+            <path d="M292.8,51.7 L301.4,72.3 L310.0,75.8 L323.8,79.2 L335.8,89.6 L341.0,86.1 L358.2,84.4 L361.7,75.8 L354.8,68.9 L341.0,55.1 L318.6,58.6 L310.0,65.4 L301.4,72.3 L292.8,79.2 L292.8,93.0 L310.0,94.7 L327.2,91.3 L353.1,91.3 L365.1,103.3 L370.3,113.7 L382.3,134.3 L385.8,141.2 L378.9,151.6 L382.3,158.4 L378.9,172.2 L372.0,186.0 L358.2,203.2 L354.8,213.6 L341.0,213.6 L337.6,203.2 L327.2,163.6 L310.0,146.4 L296.2,148.1 L285.9,141.2 L279.0,134.3 L279.0,120.6 L285.9,106.8 L296.2,96.4 L292.8,93.0 L292.8,51.7Z"/>
+            <path d="M361.7,93.0 L372.0,103.3 L382.3,113.7 L404.7,117.1 L409.9,110.2 L406.4,103.3 L392.7,96.4 L378.9,93.0 L361.7,93.0Z"/>
+            <path d="M358.2,34.4 L413.3,31.0 L482.2,31.0 L551.1,34.4 L585.6,37.9 L620.0,37.9 L620.0,60.3 L551.1,72.3 L516.7,75.8 L482.2,68.9 L447.8,65.4 L413.3,60.3 L378.9,55.1 L361.7,51.7 L358.2,43.1 L358.2,34.4Z"/>
+            <path d="M413.3,106.8 L427.1,113.7 L434.0,124.0 L440.9,141.2 L447.8,141.2 L454.7,130.9 L461.6,117.1 L468.4,113.7 L461.6,106.8 L451.2,99.9 L440.9,96.4 L427.1,96.4 L413.3,106.8Z"/>
+            <path d="M478.8,120.6 L490.8,129.2 L499.4,146.4 L509.8,151.6 L520.1,146.4 L513.2,134.3 L502.9,124.0 L485.7,120.6 L478.8,120.6Z"/>
+            <path d="M533.9,79.2 L539.1,86.1 L544.2,96.4 L551.1,93.0 L554.6,82.7 L547.7,75.8 L537.3,75.8 L533.9,79.2Z"/>
+            <path d="M506.3,192.9 L516.7,186.0 L530.4,179.1 L547.7,179.1 L554.6,186.0 L564.9,192.9 L571.8,199.8 L568.3,213.6 L558.0,220.4 L547.7,217.0 L533.9,213.6 L509.8,210.1 L506.3,192.9Z"/>
+          </g>
+          {/* ── Continent wireframe outlines ── */}
+          <g fill="none" stroke="#3A6A4A" strokeWidth="0.9" opacity="0.65">
+            <path d="M20.7,31.0 L68.9,25.8 L146.4,29.3 L180.8,34.4 L198.1,51.7 L215.3,74.1 L194.6,79.2 L180.8,82.7 L172.2,94.7 L163.6,103.3 L158.4,124.0 L167.1,137.8 L155.0,129.2 L146.4,124.0 L137.8,117.1 L124.0,113.7 L108.5,99.9 L103.3,89.6 L96.4,75.8 L89.6,65.4 L72.3,55.1 L43.1,51.7 L20.7,51.7 L20.7,31.0Z"/>
+            <path d="M175.7,134.3 L192.9,134.3 L220.4,146.4 L244.6,163.6 L249.7,179.1 L241.1,192.9 L230.8,203.2 L220.4,211.8 L206.7,220.4 L198.1,249.7 L186.0,241.1 L180.8,227.3 L175.7,215.3 L172.2,186.0 L172.2,163.6 L175.7,134.3Z"/>
+            <path d="M215.3,12.1 L275.6,12.1 L279.0,24.1 L266.9,37.9 L230.8,51.7 L220.4,44.8 L215.3,12.1Z"/>
+            <path d="M292.8,51.7 L296.2,58.6 L301.4,72.3 L310.0,75.8 L323.8,79.2 L335.8,89.6 L341.0,86.1 L358.2,84.4 L361.7,75.8 L354.8,68.9 L347.9,62.0 L341.0,55.1 L330.7,55.1 L318.6,58.6 L310.0,65.4 L301.4,72.3 L296.2,75.8 L292.8,79.2 L292.8,93.0 L299.7,93.0 L310.0,94.7 L327.2,91.3 L341.0,91.3 L353.1,91.3 L365.1,103.3 L370.3,113.7 L382.3,134.3 L396.1,134.3 L385.8,141.2 L378.9,151.6 L382.3,158.4 L378.9,172.2 L372.0,186.0 L358.2,203.2 L354.8,213.6 L341.0,213.6 L337.6,203.2 L334.1,192.9 L327.2,163.6 L318.6,148.1 L310.0,146.4 L301.4,148.1 L296.2,148.1 L285.9,141.2 L279.0,134.3 L279.0,120.6 L282.4,113.7 L285.9,106.8 L296.2,96.4 L299.7,93.0 L292.8,93.0 L292.8,79.2 L292.8,51.7Z"/>
+            <path d="M361.7,93.0 L372.0,103.3 L382.3,113.7 L404.7,117.1 L409.9,110.2 L406.4,103.3 L392.7,96.4 L378.9,93.0 L361.7,93.0Z"/>
+            <path d="M358.2,34.4 L378.9,37.9 L413.3,31.0 L447.8,31.0 L482.2,31.0 L516.7,31.0 L551.1,34.4 L585.6,37.9 L620.0,37.9 L620.0,60.3 L585.6,65.4 L551.1,72.3 L516.7,75.8 L482.2,68.9 L447.8,65.4 L413.3,60.3 L378.9,55.1 L361.7,51.7 L358.2,43.1 L358.2,34.4Z"/>
+            <path d="M413.3,106.8 L427.1,113.7 L434.0,124.0 L440.9,141.2 L447.8,141.2 L454.7,130.9 L461.6,117.1 L468.4,113.7 L461.6,106.8 L451.2,99.9 L440.9,96.4 L427.1,96.4 L413.3,106.8Z"/>
+            <path d="M478.8,120.6 L490.8,129.2 L499.4,146.4 L509.8,151.6 L520.1,146.4 L513.2,134.3 L502.9,124.0 L485.7,120.6 L478.8,120.6Z"/>
+            <path d="M533.9,79.2 L539.1,86.1 L544.2,96.4 L551.1,93.0 L554.6,82.7 L547.7,75.8 L537.3,75.8 L533.9,79.2Z"/>
+            <path d="M506.3,192.9 L516.7,186.0 L530.4,179.1 L537.3,175.7 L547.7,179.1 L554.6,186.0 L564.9,192.9 L571.8,199.8 L568.3,213.6 L558.0,220.4 L547.7,217.0 L533.9,213.6 L509.8,210.1 L506.3,199.8 L506.3,192.9Z"/>
+          </g>
+          {/* ── Continent wireframe outlines ── */}
+          <g fill="none" stroke="#3A6A4A" strokeWidth="0.9" opacity="0.6">
+            <path d="M20.7,31.0 L68.9,25.8 L137.8,29.3 L172.2,31.0 L198.1,51.7 L215.3,74.1 L194.6,79.2 L180.8,82.7 L172.2,89.6 L163.6,103.3 L155.0,124.0 L163.6,127.4 L155.0,129.2 L146.4,124.0 L137.8,117.1 L129.2,111.9 L120.6,106.8 L108.5,99.9 L103.3,89.6 L96.4,75.8 L86.1,62.0 L68.9,55.1 L20.7,51.7 L20.7,31.0Z"/>
+            <path d="M175.7,134.3 L198.1,134.3 L223.9,146.4 L249.7,163.6 L249.7,186.0 L237.7,198.1 L227.3,203.2 L220.4,211.8 L210.1,220.4 L198.1,249.7 L186.0,241.1 L180.8,227.3 L175.7,215.3 L172.2,186.0 L172.2,163.6 L175.7,134.3Z"/>
+            <path d="M215.3,12.1 L275.6,12.1 L279.0,24.1 L266.9,37.9 L232.5,51.7 L220.4,44.8 L215.3,12.1Z"/>
+            <path d="M292.8,51.7 L296.2,58.6 L301.4,72.3 L310.0,75.8 L323.8,79.2 L335.8,89.6 L341.0,86.1 L358.2,84.4 L361.7,75.8 L354.8,68.9 L347.9,62.0 L341.0,55.1 L330.7,55.1 L318.6,58.6 L310.0,65.4 L301.4,72.3 L296.2,75.8 L292.8,79.2 L292.8,51.7Z"/>
+            <path d="M318.6,55.1 L323.8,56.8 L330.7,58.6 L341.0,56.8 L347.9,48.2 L354.8,37.9 L358.2,31.0 L344.4,31.0 L334.1,41.3 L323.8,48.2 L318.6,55.1Z"/>
+            <path d="M279.0,127.4 L282.4,120.6 L285.9,113.7 L301.4,103.3 L318.6,94.7 L327.2,91.3 L335.8,91.3 L353.1,94.7 L365.1,103.3 L375.4,117.1 L382.3,134.3 L396.1,134.3 L385.8,141.2 L378.9,148.1 L382.3,158.4 L378.9,168.8 L372.0,186.0 L358.2,203.2 L354.8,213.6 L341.0,213.6 L337.6,203.2 L334.1,192.9 L327.2,163.6 L318.6,148.1 L310.0,146.4 L301.4,148.1 L296.2,148.1 L285.9,141.2 L279.0,134.3 L279.0,127.4Z"/>
+            <path d="M354.8,86.1 L361.7,93.0 L372.0,103.3 L382.3,113.7 L404.7,117.1 L409.9,110.2 L406.4,103.3 L392.7,96.4 L378.9,93.0 L368.6,89.6 L354.8,86.1Z"/>
+            <path d="M358.2,34.4 L378.9,37.9 L413.3,31.0 L447.8,31.0 L482.2,31.0 L516.7,31.0 L551.1,34.4 L585.6,37.9 L620.0,37.9 L620.0,60.3 L585.6,65.4 L551.1,68.9 L516.7,72.3 L482.2,68.9 L447.8,65.4 L413.3,60.3 L378.9,55.1 L361.7,51.7 L358.2,43.1 L358.2,34.4Z"/>
+            <path d="M413.3,106.8 L427.1,113.7 L434.0,124.0 L440.9,141.2 L447.8,141.2 L451.2,134.3 L458.1,120.6 L465.0,117.1 L468.4,113.7 L461.6,106.8 L451.2,99.9 L440.9,96.4 L427.1,96.4 L413.3,106.8Z"/>
+            <path d="M447.8,68.9 L482.2,65.4 L508.1,65.4 L533.9,75.8 L542.5,86.1 L537.3,99.9 L516.7,117.1 L496.0,120.6 L482.2,113.7 L465.0,106.8 L451.2,99.9 L447.8,86.1 L447.8,68.9Z"/>
+            <path d="M478.8,120.6 L490.8,129.2 L499.4,146.4 L509.8,151.6 L520.1,146.4 L513.2,134.3 L502.9,124.0 L485.7,120.6 L478.8,120.6Z"/>
+            <path d="M533.9,79.2 L539.1,86.1 L544.2,93.0 L547.7,96.4 L551.1,89.6 L554.6,82.7 L547.7,75.8 L537.3,75.8 L533.9,79.2Z"/>
+            <path d="M506.3,192.9 L516.7,186.0 L530.4,179.1 L537.3,175.7 L544.2,175.7 L547.7,179.1 L554.6,186.0 L564.9,192.9 L571.8,199.8 L568.3,213.6 L558.0,220.4 L547.7,217.0 L533.9,213.6 L509.8,210.1 L506.3,199.8 L506.3,192.9Z"/>
+          </g>
+          {/* ── Continent wireframe outlines ── */}
+          <g fill="none" stroke="#3A6A4A" strokeWidth="0.9" opacity="0.55">
+            <path d="M 20.7 31.0 L 68.9 31.0 L 103.3 51.7 L 137.8 68.9 L 167.1 77.5 L 180.8 82.7 L 194.6 79.2 L 206.7 75.8 L 198.1 68.9 L 198.1 51.7 L 172.2 37.9 L 137.8 31.0 L 86.1 31.0 L 20.7 31.0 Z"/>
+            <path d="M 155.0 124.0 L 167.1 137.8 L 177.4 141.2 L 180.8 137.8 L 163.6 127.4 L 155.0 124.0 Z"/>
+            <path d="M 172.2 134.3 L 203.2 134.3 L 223.9 146.4 L 249.7 163.6 L 249.7 180.8 L 241.1 198.1 L 223.9 215.3 L 198.1 249.7 L 180.8 241.1 L 172.2 215.3 L 172.2 189.4 L 175.7 163.6 L 172.2 134.3 Z"/>
+            <path d="M 215.3 12.1 L 275.6 12.1 L 280.7 24.1 L 266.9 34.4 L 232.5 51.7 L 215.3 43.1 L 215.3 12.1 Z"/>
+            <path d="M 292.8 51.7 L 301.4 72.3 L 310.0 75.8 L 323.8 79.2 L 341.0 86.1 L 358.2 84.4 L 361.7 75.8 L 353.1 68.9 L 344.4 60.3 L 335.8 55.1 L 327.2 55.1 L 318.6 58.6 L 310.0 65.4 L 301.4 72.3 L 292.8 51.7 Z"/>
+            <path d="M 318.6 55.1 L 323.8 56.8 L 330.7 58.6 L 341.0 55.1 L 351.3 43.1 L 358.2 34.4 L 344.4 31.0 L 327.2 46.5 L 318.6 55.1 Z"/>
+            <path d="M 279.0 127.4 L 301.4 137.8 L 318.6 146.4 L 327.2 163.6 L 335.8 198.1 L 344.4 215.3 L 358.2 215.3 L 370.3 198.1 L 378.9 172.2 L 382.3 146.4 L 396.1 134.3 L 382.3 124.0 L 370.3 117.1 L 361.7 103.3 L 353.1 94.7 L 335.8 91.3 L 318.6 94.7 L 301.4 103.3 L 279.0 120.6 L 279.0 127.4 Z"/>
+            <path d="M 354.8 86.1 L 372.0 93.0 L 382.3 103.3 L 404.7 117.1 L 413.3 117.1 L 409.9 103.3 L 392.7 96.4 L 372.0 89.6 L 354.8 86.1 Z"/>
+            <path d="M 358.2 34.4 L 413.3 31.0 L 482.2 31.0 L 551.1 34.4 L 620.0 37.9 L 620.0 60.3 L 551.1 68.9 L 482.2 68.9 L 447.8 65.4 L 413.3 60.3 L 378.9 55.1 L 358.2 48.2 L 358.2 34.4 Z"/>
+            <path d="M 413.3 106.8 L 427.1 117.1 L 434.0 124.0 L 444.3 141.2 L 447.8 137.8 L 456.4 117.1 L 465.0 117.1 L 461.6 106.8 L 444.3 94.7 L 427.1 94.7 L 413.3 106.8 Z"/>
+            <path d="M 447.8 68.9 L 482.2 65.4 L 516.7 68.9 L 542.5 86.1 L 533.9 103.3 L 516.7 117.1 L 496.0 120.6 L 482.2 111.9 L 465.0 103.3 L 447.8 86.1 L 447.8 68.9 Z"/>
+            <path d="M 478.8 124.0 L 490.8 129.2 L 499.4 146.4 L 513.2 151.6 L 525.3 146.4 L 516.7 129.2 L 499.4 120.6 L 482.2 117.1 L 478.8 124.0 Z"/>
+            <path d="M 533.9 77.5 L 542.5 86.1 L 551.1 89.6 L 554.6 82.7 L 547.7 75.8 L 537.3 75.8 L 533.9 77.5 Z"/>
+            <path d="M 506.3 192.9 L 516.7 186.0 L 533.9 175.7 L 547.7 179.1 L 554.6 186.0 L 564.9 192.9 L 571.8 203.2 L 568.3 215.3 L 559.7 220.4 L 544.2 217.0 L 530.4 213.6 L 509.8 210.1 L 506.3 192.9 Z"/>
+          </g>
+          <g fill="none" stroke="#3A5A3A" strokeWidth="1.2" opacity="0.6">
+            <path d="M55 28 L80 22 L102 27 L120 34 L128 46 L126 60 L118 72 L104 82 L90 90 L82 98 L76 92 L68 82 L58 68 L52 54 L52 40 Z"/>
+            <path d="M88 104 L108 102 L122 112 L128 130 L124 152 L114 168 L100 174 L88 162 L82 146 L82 128 L86 114 Z"/>
+            <path d="M70 12 L84 8 L90 16 L82 22 L70 20 Z"/>
+            <path d="M264 28 L282 22 L294 26 L298 34 L292 42 L280 46 L268 42 L262 34 Z"/>
+            <path d="M278 18 L292 14 L296 22 L288 28 L278 26 Z"/>
+            <path d="M264 44 L292 40 L308 48 L312 64 L308 82 L298 98 L284 110 L272 112 L260 102 L254 86 L252 70 L256 56 Z"/>
+            <path d="M292 18 L380 12 L418 18 L428 28 L412 36 L378 34 L344 30 L312 26 L294 24 Z"/>
+            <path d="M356 40 L380 36 L394 46 L390 62 L376 68 L360 62 L352 50 Z"/>
+            <path d="M392 30 L432 26 L448 36 L452 50 L438 58 L412 56 L392 50 L384 40 Z"/>
+            <path d="M424 58 L446 54 L454 66 L446 76 L426 74 L418 64 Z"/>
+            <path d="M434 146 L468 138 L488 148 L490 164 L480 178 L458 182 L438 172 L428 158 Z"/>
+          </g>
+          {/* Grid */}
+          {[-60,-30,0,30,60].map(lat=>{
+            const [,y]=toXY(0,lat,W,H);
+            return <line key={lat} x1={0} y1={y} x2={W} y2={y} stroke="#1A1A1A" strokeWidth={0.8}/>;
+          })}
+          {[-120,-60,0,60,120].map(lon=>{
+            const [x]=toXY(lon,0,W,H);
+            return <line key={lon} x1={x} y1={0} x2={x} y2={H} stroke="#1A1A1A" strokeWidth={0.8}/>;
+          })}
+          {/* Equator */}
+          {(() => { const [,y]=toXY(0,0,W,H); return <line x1={0} y1={y} x2={W} y2={y} stroke="#2A2A2A" strokeWidth={1}/>; })()}
+
+          {/* Continent wireframe outlines */}
+          <g fill="none" stroke="#2A3A4A" strokeWidth="0.8" opacity="0.55">
+            {/* North America */}
+            <path d="M 54 29 L 81 23 L 103 27 L 122 33 L 132 45 L 134 60 L 128 72 L 116 82 L 103 91 L 93 99 L 85 107 L 78 101 L 70 93 L 62 82 L 56 70 L 52 57 L 52 43 Z"/>
+            {/* Central America */}
+            <path d="M 85 107 L 91 113 L 87 124 L 81 122 Z"/>
+            {/* South America */}
+            <path d="M 91 113 L 110 111 L 124 120 L 132 136 L 130 157 L 122 173 L 111 184 L 99 181 L 89 167 L 83 150 L 83 134 L 87 122 Z"/>
+            {/* Greenland */}
+            <path d="M 70 14 L 85 10 L 91 19 L 83 25 L 70 23 Z"/>
+            {/* Europe */}
+            <path d="M 277 29 L 291 25 L 302 29 L 306 37 L 299 45 L 289 47 L 278 43 L 274 35 Z"/>
+            {/* Scandinavia */}
+            <path d="M 287 19 L 300 14 L 304 23 L 295 29 L 287 27 Z"/>
+            {/* Africa */}
+            <path d="M 277 45 L 302 41 L 316 49 L 320 66 L 318 84 L 310 101 L 297 114 L 285 118 L 272 110 L 264 93 L 262 76 L 266 59 Z"/>
+            {/* Middle East */}
+            <path d="M 306 39 L 331 35 L 337 47 L 324 54 L 309 52 Z"/>
+            {/* Russia / N Asia */}
+            <path d="M 299 19 L 382 14 L 423 21 L 433 31 L 419 39 L 392 37 L 361 33 L 330 29 L 305 27 Z"/>
+            {/* South Asia */}
+            <path d="M 365 43 L 388 39 L 402 49 L 398 64 L 385 70 L 368 64 L 360 53 Z"/>
+            {/* China / E Asia */}
+            <path d="M 400 33 L 439 29 L 454 39 L 458 54 L 445 62 L 423 60 L 402 54 L 394 43 Z"/>
+            {/* SE Asia */}
+            <path d="M 431 62 L 452 58 L 460 70 L 452 80 L 433 78 L 424 68 Z"/>
+            {/* Japan */}
+            <path d="M 460 41 L 468 37 L 472 45 L 463 51 L 457 47 Z"/>
+            {/* Australia */}
+            <path d="M 443 153 L 474 144 L 495 153 L 499 170 L 490 184 L 470 188 L 449 180 L 437 167 Z"/>
+          </g>
+
+          {/* ── Continent wireframe outlines ── */}
+          <g fill="none" stroke="#2A3A4A" strokeWidth="1.0" opacity="0.50">
+            {/* North America */}
+            <path d="M57 29 L83 23 L106 28 L124 35 L132 48 L130 62 L122 74 L107 85 L93 93 L85 101 L79 95 L70 85 L60 70 L54 56 L54 41 Z"/>
+            {/* Central America */}
+            <path d="M85 101 L91 107 L87 118 L81 116 Z"/>
+            {/* South America */}
+            <path d="M91 107 L112 105 L126 116 L132 134 L128 157 L118 174 L103 180 L91 167 L85 151 L85 132 L89 118 Z"/>
+            {/* Greenland */}
+            <path d="M72 12 L87 8 L93 17 L85 23 L72 21 Z"/>
+            {/* UK/Ireland */}
+            <path d="M261 31 L269 29 L271 37 L263 39 Z"/>
+            {/* Europe */}
+            <path d="M273 29 L292 23 L304 27 L308 35 L302 43 L290 47 L277 43 L271 35 Z"/>
+            {/* Scandinavia */}
+            <path d="M288 19 L302 15 L306 23 L298 29 L288 27 Z"/>
+            {/* Africa */}
+            <path d="M273 45 L302 41 L319 49 L323 66 L319 85 L308 101 L294 114 L281 116 L269 105 L263 89 L261 72 L265 58 Z"/>
+            {/* Middle East */}
+            <path d="M308 37 L333 33 L339 45 L324 52 L308 50 Z"/>
+            {/* Russia/N.Asia */}
+            <path d="M302 19 L393 13 L432 19 L442 29 L426 37 L391 35 L356 31 L323 27 L304 25 Z"/>
+            {/* South Asia */}
+            <path d="M368 41 L393 37 L407 47 L403 64 L388 70 L372 64 L364 52 Z"/>
+            {/* China/E.Asia */}
+            <path d="M405 31 L447 27 L463 37 L467 52 L453 60 L426 58 L405 52 L397 41 Z"/>
+            {/* SE Asia */}
+            <path d="M438 60 L461 56 L469 68 L461 78 L440 76 L432 66 Z"/>
+            {/* Japan */}
+            <path d="M463 39 L473 35 L477 43 L469 49 L461 45 Z"/>
+            {/* Australia */}
+            <path d="M449 151 L484 143 L504 153 L506 170 L496 184 L473 188 L452 178 L442 163 Z"/>
+          </g>
+          {/* System dots */}
+          {CLIMATE_SYSTEMS.map(sys=>{
+            const coords = CLIMATE_COORDS[sys.id];
+            if(!coords) return null;
+            const M = getClimateM(sys,year);
+            const [x,y] = toXY(coords[0],coords[1],W,H);
+            const isSel = selected===sys.id;
+            return (
+              <g key={sys.id} onClick={()=>setSelected(isSel?null:sys.id)} style={{cursor:"pointer"}}>
+                <circle cx={x} cy={y} r={36} fill={mColor(M)} opacity={0.07}/>
+                <circle cx={x} cy={y} r={22} fill={mColor(M)} opacity={0.15}/>
+                <circle cx={x} cy={y} r={14} fill={mColor(M)} opacity={isSel?1:0.85}
+                  stroke={isSel?"#FFFFFF":"none"} strokeWidth={2}/>
+                <text x={x} y={y+5} textAnchor="middle" fontSize={14}>{sys.icon}</text>
+                <text x={x} y={y+28} textAnchor="middle" fontSize={9}
+                  fill="#FFFFFF" fontFamily="Inter" fontWeight="600">
+                  {sys.name.split(" ")[0]}
+                </text>
+                <text x={x} y={y+39} textAnchor="middle" fontSize={8}
+                  fill={mColor(M)} fontFamily="JetBrains Mono" fontWeight="700">
+                  {(M>=0?"+":"")+M.toFixed(2)}
+                </text>
+              </g>
+            );
+          })}
+        </svg>
+
+        {/* Legend */}
+        <div style={{display:"flex",gap:14,marginTop:10,flexWrap:"wrap",alignItems:"center"}}>
+          {[["#06B6D4","Sustaining"],["#22C55E","Stable"],["#84CC16","Healthy"],
+            ["#EAB308","Warning"],["#F97316","Declining"],["#EF4444","Critical"]].map(([c,l])=>(
+            <div key={l} style={{display:"flex",alignItems:"center",gap:5}}>
+              <div style={{width:8,height:8,borderRadius:"50%",background:c}}/>
+              <span style={{fontSize:10,color:"#737373",fontFamily:"var(--sans)"}}>{l}</span>
+            </div>
+          ))}
+          <span style={{fontSize:10,color:"#525252",fontFamily:"var(--sans)",marginLeft:"auto"}}>
+            Tap any system to expand
+          </span>
+        </div>
+      </div>
+
+      {/* Selected system detail */}
+      {sel && selPt && (
+        <div style={{background:"#0A0A0A",border:`1px solid ${mColor(getClimateM(sel,year))}40`,
+          borderRadius:14,overflow:"hidden"}}>
+
+          {/* Header */}
+          <div style={{padding:"20px 24px",borderBottom:"1px solid #1A1A1A",
+            display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:16}}>
+            <div>
+              <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:8}}>
+                <span style={{fontSize:28}}>{sel.icon}</span>
+                <div>
+                  <div style={{fontSize:17,fontWeight:700,color:"#FFFFFF",fontFamily:"var(--sans)"}}>{sel.name}</div>
+                  <div style={{fontSize:11,color:"#525252",fontFamily:"var(--mono)"}}>{sel.region}</div>
+                </div>
+              </div>
+              <p style={{fontSize:13,color:"#A3A3A3",lineHeight:1.7,fontFamily:"var(--sans)",maxWidth:500}}>{sel.desc}</p>
+              <div style={{fontSize:10,color:"#404040",fontFamily:"var(--mono)",marginTop:8}}>Source: {sel.source}</div>
+            </div>
+            <div style={{textAlign:"center",flexShrink:0}}>
+              <Gauge value={getClimateM(sel,year)} size={150}/>
+              <div style={{fontSize:13,fontWeight:700,color:mColor(getClimateM(sel,year)),
+                fontFamily:"var(--sans)",marginTop:4}}>{mLabel(getClimateM(sel,year))}</div>
+            </div>
+          </div>
+
+          {/* Full trajectory chart */}
+          <div style={{padding:"16px 24px",borderBottom:"1px solid #1A1A1A"}}>
+            <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#3B82F6",marginBottom:12,letterSpacing:3}}>
+              M TRAJECTORY · {sel.history[0].year}–{sel.history[sel.history.length-1].year}
+            </div>
+            <MChart points={sel.history} dsColor={sel.color}/>
+          </div>
+
+          {/* Current point detail */}
+          <div style={{padding:"16px 24px",borderBottom:"1px solid #1A1A1A",
+            background:"#000000"}}>
+            <div style={{fontSize:9,fontFamily:"var(--mono)",color:sel.color,
+              marginBottom:10,letterSpacing:2}}>WHAT WAS HAPPENING · {selPt.year}</div>
+            <p style={{fontSize:13,color:"#D4D4D4",lineHeight:1.7,fontFamily:"var(--sans)"}}>{selPt.event}</p>
+          </div>
+
+          {/* Variable breakdown */}
+          <div style={{padding:"16px 24px",display:"grid",
+            gridTemplateColumns:"repeat(4,1fr)",gap:8}}>
+            {[
+              {sym:"χ",val:selPt.chi,color:"#60A5FA",name:"Efficiency"},
+              {sym:"s",val:selPt.s,color:"#A78BFA",name:"Throughput"},
+              {sym:"λ(C)",val:selPt.lambda0+k*Math.pow(selPt.C,n),color:"#F87171",name:"Burden"},
+              {sym:"C",val:selPt.C,color:"#FCD34D",name:"Complexity"},
+            ].map((v,i)=>(
+              <div key={i} style={{background:"#111111",borderRadius:8,
+                padding:"12px 14px",textAlign:"center",border:"1px solid #1A1A1A"}}>
+                <div style={{fontFamily:"var(--mono)",fontSize:15,color:v.color,fontWeight:700}}>{v.val.toFixed(3)}</div>
+                <div style={{fontSize:9,color:"#525252",marginTop:3,fontFamily:"var(--sans)"}}>{v.sym} · {v.name}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Ranked list */}
+      <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:14,overflow:"hidden"}}>
+        <div style={{padding:"14px 20px",borderBottom:"1px solid #1A1A1A",
+          display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:8}}>
+          <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#3B82F6",letterSpacing:3}}>
+            ALL EARTH SYSTEMS RANKED · {year}
+          </div>
+          <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#EF4444"}}>
+            {scored.filter(s=>getClimateM(s,year)<0).length} of {scored.length} systems in negative margin
+          </div>
+        </div>
+
+        {scored.map((sys,i)=>{
+          const M = getClimateM(sys,year);
+          const isSel = selected===sys.id;
+          const barPct = Math.min(Math.abs(M)/0.6*50, 50);
+          return (
+            <div key={sys.id} onClick={()=>setSelected(isSel?null:sys.id)}
+              style={{
+                display:"flex",alignItems:"center",gap:12,padding:"12px 20px",
+                borderBottom:"1px solid #111111",cursor:"pointer",
+                background:isSel?"#0A0F18":"transparent",transition:"background 0.1s"
+              }}
+              onMouseEnter={e=>{ if(!isSel) e.currentTarget.style.background="#111111"; }}
+              onMouseLeave={e=>{ if(!isSel) e.currentTarget.style.background=isSel?"#0A0F18":"transparent"; }}
+            >
+              <div style={{fontFamily:"var(--mono)",fontSize:10,color:"#525252",
+                width:20,textAlign:"right",flexShrink:0}}>{i+1}</div>
+
+              <div style={{display:"flex",alignItems:"center",gap:8,width:200,flexShrink:0}}>
+                <span style={{fontSize:18}}>{sys.icon}</span>
+                <div>
+                  <div style={{fontSize:12,fontWeight:600,color:isSel?"#FFFFFF":"#D4D4D4",
+                    fontFamily:"var(--sans)"}}>{sys.name}</div>
+                  <div style={{fontSize:9,color:"#525252",fontFamily:"var(--sans)"}}>{sys.region}</div>
+                </div>
+              </div>
+
+              <ClimateSparkline sys={sys}/>
+
+              <div style={{flex:1,height:6,background:"#1A1A1A",borderRadius:3,
+                position:"relative",overflow:"visible",minWidth:60}}>
+                <div style={{
+                  position:"absolute",
+                  right: M>=0?"50%":undefined, left: M<0?"50%":undefined,
+                  width:`${barPct}%`, height:"100%",
+                  background:mColor(M), borderRadius:3, top:0,
+                }}/>
+                <div style={{position:"absolute",left:"50%",top:-2,
+                  width:1,height:10,background:"#333"}}/>
+              </div>
+
+              <div style={{fontFamily:"var(--mono)",fontSize:12,fontWeight:700,
+                color:mColor(M),width:68,textAlign:"right",flexShrink:0}}>
+                {M>=0?"+":""}{M.toFixed(3)}
+              </div>
+              <div style={{fontSize:10,color:mColor(M),
+                fontFamily:"var(--sans)",width:62,flexShrink:0}}>
+                {mLabel(M)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Scientific note */}
+      <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:10,
+        padding:"14px 18px",display:"flex",gap:10,alignItems:"flex-start"}}>
+        <span style={{fontSize:13,flexShrink:0}}>⚠️</span>
+        <p style={{fontSize:11,color:"#737373",lineHeight:1.6,fontFamily:"var(--sans)"}}>
+          Earth system M values are calibrated from NOAA, NASA, IPCC AR6, and peer-reviewed literature.
+          Variables represent system-level proxies: χ = ecosystem/process efficiency relative to pre-industrial baseline,
+          s = energy/nutrient throughput normalized to historical maximum, λ₀ = thermal/chemical/structural burden,
+          C = system complexity and interconnection. These are diagnostic estimates, not precise physical measurements.
+          Framework under peer review — cite as: Baird, N. (2026). Engine of Emergence. arXiv:[pending].
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ── MAIN APP ──────────────────────────────────────────────────────────────────
+export default function EoEApp() {
+  const [screen, setScreen] = useState(
+    window.location.hash === "#admin" ? "admin" : "landing"
+  );
+  const [tab, setTab] = useState("explore");
+  const [uploadedDatasets, setUploadedDatasets] = useState([]);
+
+  function handleExperimentReady(ds) {
+    setUploadedDatasets(prev => {
+      const filtered = prev.filter(d=>d.id!==ds.id);
+      return [ds, ...filtered];
+    });
+  }
+
+  if (screen === "admin") {
+    return <AdminPage onBack={()=>{ window.location.hash=""; setScreen("landing"); }}/>;
+  }
+
+  if (screen === "landing") {
+    return <Landing onEnter={()=>setScreen("app")}/>;
+  }
+
+  const TABS = [
+    {id:"understand",  label:"Understand",  icon:"📖", accent:"#A78BFA", desc:"The framework"},
+    {id:"explore",     label:"Explore",     icon:"🔭", accent:"#3B82F6", desc:"20 real systems"},
+    {id:"experiment",  label:"Experiment",  icon:"⚗️", accent:"#22C55E", desc:"Your data"},
+    {id:"assistant",   label:"Assistant",   icon:"💬", accent:"#F59E0B", desc:"AI guide"},
+    {id:"directory",   label:"Sources",     icon:"🗂️", accent:"#EC4899", desc:"34 datasets"},
+    {id:"compare",     label:"Compare",     icon:"🌍", accent:"#06B6D4", desc:"Nations"},
+    {id:"climate",     label:"Climate",     icon:"🌡️", accent:"#EF4444", desc:"Earth systems"},
+  ];
+  const activeTabMeta = TABS.find(t=>t.id===tab) || TABS[0];
+
+  return (
+    <>
+      <style>{GLOBAL_CSS}</style>
+      <div style={{minHeight:"100vh",background:"var(--bg)",display:"flex",flexDirection:"column"}}>
+
+        {/* Top accent line */}
+        <div style={{height:2,background:`linear-gradient(90deg,transparent,${activeTabMeta.accent},${activeTabMeta.accent}CC,transparent)`,flexShrink:0,transition:"background 0.4s"}}/>
+
+        {/* Header */}
+        <div style={{
+          borderBottom:"1px solid var(--border)",background:"#000000F5",
+          backdropFilter:"blur(10px)",position:"sticky",top:0,zIndex:50,flexShrink:0
+        }}>
+          <div style={{maxWidth:1040,margin:"0 auto",padding:"0 16px",display:"flex",alignItems:"center",justifyContent:"space-between",height:52}}>
+            <button onClick={()=>setScreen("landing")} style={{background:"none",border:"none",display:"flex",alignItems:"center",gap:10,color:"#FFFFFF"}}>
+              <span style={{fontFamily:"var(--mono)",fontSize:10,color:"var(--accent2)",letterSpacing:3}}>EoE</span>
+              <span style={{fontFamily:"var(--serif)",fontSize:16,fontWeight:400}}>Engine of Emergence</span>
+            </button>
+            <div style={{fontSize:9,fontFamily:"var(--mono)",color:"#2A2A2A"}}>Nathan Baird · Independent Researcher · 2026</div>
+          </div>
+          {/* Tabs */}
+          <div style={{maxWidth:1040,margin:"0 auto",padding:"0 8px",display:"flex",borderTop:"1px solid var(--border)",overflowX:"auto"}}>
+            {TABS.map(t=>(
+              <button key={t.id} onClick={()=>setTab(t.id)} style={{
+                padding:"9px 10px",background:"none",border:"none",
+                borderBottom:tab===t.id?`2px solid ${t.accent}`:"2px solid transparent",
+                marginBottom:-1,fontSize:11,fontWeight:tab===t.id?700:400,
+                color:tab===t.id?t.accent:"#A3A3A3",fontFamily:"var(--sans)",
+                transition:"all 0.15s",display:"flex",alignItems:"center",gap:5,
+              }}>
+                <span>{t.icon}</span><span>{t.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div style={{flex:1,maxWidth:1040,margin:"0 auto",padding:"40px 24px",width:"100%",borderTop:`1px solid ${activeTabMeta.accent}18`,transition:"border-color 0.4s"}}>
+          {tab==="understand"  && <UnderstandTab/>}
+          {tab==="explore"     && <ExploreTab/>}
+          {tab==="experiment"  && <ExperimentTab onGoToExplore={()=>setTab("explore")} onGoToAssistant={()=>setTab("assistant")} uploadedDatasets={uploadedDatasets}/>}
+          {tab==="assistant"   && <AssistantTab onExperimentReady={handleExperimentReady}/>}
+          {tab==="directory"   && <DirectoryTab/>}
+          {tab==="compare"     && <CompareTab/>}
+          {tab==="climate"     && <ClimateTab/>}
+        </div>
+
+        {/* Footer */}
+        <div style={{borderTop:"1px solid var(--border)",padding:"14px 20px",textAlign:"center",flexShrink:0}}>
+          <p style={{fontSize:10,color:"#2A2A2A",fontFamily:"var(--sans)"}}>
+            EoE is a candidate framework under peer review · Results are exploratory, not validated findings · Cite as: Baird, N. (2026). Engine of Emergence · arXiv: [pending]
+          </p>
+        </div>
+      </div>
+    </>
+  );
+}
