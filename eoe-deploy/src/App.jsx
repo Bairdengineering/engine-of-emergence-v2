@@ -2473,763 +2473,428 @@ function ExploreTab() {
   );
 }
 
+
 // ── TAB: RUN AN EXPERIMENT ────────────────────────────────────────────────────
 function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) {
-  const [mode, setMode]         = useState(() => {
-    try { return sessionStorage.getItem("eoe_exp_mode") || "preloaded"; }
-    catch { return "preloaded"; }
-  });
-
-  function switchMode(m) {
-    setMode(m);
-    try { sessionStorage.setItem("eoe_exp_mode", m); } catch {}
-  }
-  const [uploadStep, setUploadStep] = useState(() => {
-    try { return sessionStorage.getItem("eoe_upload_step") || "idle"; }
-    catch { return "idle"; }
-  });
-
-  function setUploadStepP(s) {
-    setUploadStep(s);
-    try { sessionStorage.setItem("eoe_upload_step", s); } catch {}
-  }
-  const [uploadRaw, setUploadRaw]   = useState(null);
-  const [uploadName, setUploadName] = useState("");
-  const [colMap, setColMap]         = useState({label:"",chi:"",s:"",lambda0:"",C:""});
-  const [researchQ, setResearchQ]   = useState("");
-  const [expChat, setExpChat]       = useState([
-    { role:"assistant", text:"Hey — I can help you map your columns, normalize your data, write a research question, or explain any EoE variable. What do you need?" }
-  ]);
-  const [expInput, setExpInput]     = useState("");
-  const [expLoading, setExpLoading] = useState(false);
-  const [showExpChat, setShowExpChat] = useState(false);
-
-  const [results, setResults]       = useState(null);
-  const [validation, setValidation] = useState([]);
-  const [community, setCommunity]   = useState(() => {
-    try { return JSON.parse(localStorage.getItem("eoe_community") || "[]"); }
-    catch { return []; }
-  });
+  const [question, setQuestion] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState("");
+  const [uploadStep, setUploadStep] = useState("idle");
+  const [suggestedSources, setSuggestedSources] = useState([]);
   const fileRef = useRef(null);
 
-  // Close chat on Escape
-  useEffect(() => {
-    function onKey(e) { if(e.key==="Escape") setShowExpChat(false); }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  const EXAMPLE_QUESTIONS = [
+    { q: "Is the US government heading toward collapse?", icon: "🇺🇸", hint: "Preloaded dataset" },
+    { q: "How close is the San Andreas fault to a major rupture?", icon: "🏔️", hint: "Seismic data" },
+    { q: "Compare Rome's collapse arc to Detroit's bankruptcy", icon: "🏛️", hint: "Comparison" },
+    { q: "What does the Amazon rainforest tipping point look like?", icon: "🌳", hint: "Ecological" },
+    { q: "Is the Great Barrier Reef past the point of no return?", icon: "🪸", hint: "Preloaded dataset" },
+    { q: "Analyze a company's fiscal stability using EoE", icon: "🏢", hint: "Upload your data" },
+  ];
 
-  async function sendExpChat() {
-    const trimmed = expInput.trim();
-    if (!trimmed) return;
-    const userMsg = { role:"user", text:trimmed };
-    const newMsgs = [...expChat, userMsg];
-    setExpChat(newMsgs);
-    setExpInput("");
-    setExpLoading(true);
-    const ctx = [
-      uploadRaw ? `File: ${uploadName}.csv, headers: ${uploadRaw.headers.join(", ")}. Sample: ${JSON.stringify(uploadRaw.rows[0]||{})}.` : "No file yet.",
-      colMap.chi ? `Mapped: χ=${colMap.chi}, s=${colMap.s||"?"}, λ₀=${colMap.lambda0||"?"}, C=${colMap.C||"?"}.` : "",
-      researchQ  ? `Research question: "${researchQ}".` : "",
-    ].filter(Boolean).join(" ");
+  // Match question to preloaded datasets
+  function matchDataset(q) {
+    const ql = q.toLowerCase();
+    const matches = [];
+    const keywords = {
+      rome:       ["rome","roman","empire","collapse","ancient"],
+      apple:      ["apple","tim cook","iphone","jobs","cupertino"],
+      reef:       ["reef","coral","bleaching","barrier","australia"],
+      detroit:    ["detroit","michigan","bankruptcy","motor city","municipal"],
+      usfiscal:   ["us government","federal","congress","debt","deficit","united states","american"],
+      maya:       ["maya","mayan","mesoamerica","classic"],
+      bronze:     ["bronze age","mycenae","hittite","late bronze"],
+      tang:       ["tang","dynasty","china","chinese","ancient china"],
+      indus:      ["indus","harappa","mohenjo","pakistan"],
+      ottoman:    ["ottoman","turkey","empire","istanbul"],
+      enron:      ["enron","fraud","energy","skilling","lay"],
+      kodak:      ["kodak","film","photography","bankruptcy","rochester"],
+      germany:    ["germany","german","west germany","wirtschaftswunder","reunification"],
+      chesapeake: ["chesapeake","bay","maryland","virginia","estuary"],
+      amazon:     ["amazon","rainforest","brazil","deforestation","tipping"],
+      yellowstone:["yellowstone","wolf","wolves","ecosystem","trophic"],
+      singapore:  ["singapore","city state","lee kuan yew","asian tiger"],
+      ocean:      ["ocean","sea","marine","global warming","heat"],
+      compare:    ["compare","versus","vs","contrast"],
+    };
+    for (const [id, kws] of Object.entries(keywords)) {
+      if (kws.some(kw => ql.includes(kw))) {
+        const ds = DATASETS.find(d => d.id === id);
+        if (ds) matches.push(ds);
+      }
+    }
+    return matches;
+  }
+
+  // Suggest data sources based on question
+  function suggestSources(q) {
+    const ql = q.toLowerCase();
+    const sources = [];
+    if (ql.includes("company") || ql.includes("business") || ql.includes("fiscal") || ql.includes("revenue"))
+      sources.push({ name:"SEC EDGAR", url:"https://www.sec.gov/cgi-bin/browse-edgar", desc:"Annual reports for any US public company", domain:"Business" });
+    if (ql.includes("city") || ql.includes("urban") || ql.includes("municipal"))
+      sources.push({ name:"Lincoln Institute FiSC", url:"https://www.lincolninst.edu/research-data/data-toolkits/fiscally-standardized-cities", desc:"Standardized fiscal data for 150 US cities", domain:"City" });
+    if (ql.includes("country") || ql.includes("government") || ql.includes("nation") || ql.includes("gdp"))
+      sources.push({ name:"World Bank Open Data", url:"https://data.worldbank.org", desc:"Government effectiveness, debt, revenue for 200+ countries", domain:"Government" });
+    if (ql.includes("reef") || ql.includes("coral") || ql.includes("ocean") || ql.includes("marine"))
+      sources.push({ name:"NOAA Coral Reef Watch", url:"https://coralreefwatch.noaa.gov", desc:"Bleaching alerts and thermal stress data", domain:"Ecological" });
+    if (ql.includes("forest") || ql.includes("tree") || ql.includes("deforest"))
+      sources.push({ name:"Global Forest Watch", url:"https://www.globalforestwatch.org", desc:"Annual tree cover loss globally since 2000", domain:"Forest" });
+    if (ql.includes("earthquake") || ql.includes("seismic") || ql.includes("fault"))
+      sources.push({ name:"USGS Earthquake Catalog", url:"https://earthquake.usgs.gov/earthquakes/search/", desc:"Complete earthquake catalog with magnitudes and locations", domain:"Seismic" });
+    return sources;
+  }
+
+  async function runExperiment() {
+    const q = question.trim();
+    if (!q) return;
+    setLoading(true);
+    setError("");
+    setResult(null);
+    setSuggestedSources([]);
+
+    // Check preloaded datasets first
+    const matches = matchDataset(q);
+
+    if (matches.length > 0) {
+      // Run against matched datasets
+      setTimeout(() => {
+        setResult({ type: "preloaded", datasets: matches, question: q });
+        setLoading(false);
+      }, 600);
+      return;
+    }
+
+    // No match — use AI to analyze and route
     try {
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
-        method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          model:"claude-sonnet-4-20250514", max_tokens:400,
-          system:`You are a concise assistant helping set up an EoE experiment. ${ctx}
-EoE needs 4 variables 0-1: χ=efficiency, s=throughput, λ₀=base burden, C=complexity.
-Normalize: divide by max, or (val-min)/(max-min). Under 3 sentences. No bullet points.`,
-          messages: newMsgs.map(m=>({role:m.role,content:m.text}))
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 600,
+          system: `You are an EoE experiment routing assistant. The user has a research question.
+EoE measures M = χs − λ(C) where χ=efficiency, s=throughput, λ₀=burden, C=complexity.
+Analyze their question and respond with JSON only (no markdown):
+{
+  "hasData": boolean (true if question implies they have data to upload),
+  "domain": "Business|City|Ecological|Government|Civilization|Forest|Seismic|Other",
+  "variables": {
+    "chi": "one sentence: what would chi measure for this specific system",
+    "s": "one sentence: what would s measure for this specific system", 
+    "lambda0": "one sentence: what would lambda0 measure for this specific system",
+    "C": "one sentence: what would C measure for this specific system"
+  },
+  "dataNeeded": "one sentence describing exactly what data they need to collect",
+  "suggestedApproach": "two sentences on how to run this experiment"
+}`,
+          messages: [{ role: "user", content: q }]
         })
       });
       const data = await resp.json();
-      setExpChat(prev=>[...prev,{role:"assistant",text:data.content?.map(b=>b.text||"").join("")||"Try again."}]);
+      const text = data.content?.map(b => b.text || "").join("") || "";
+      const cleaned = text.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(cleaned);
+      const sources = suggestSources(q);
+      setSuggestedSources(sources);
+      setResult({ type: "guided", analysis: parsed, question: q });
     } catch(e) {
-      setExpChat(prev=>[...prev,{role:"assistant",text:"Connection issue — try again."}]);
+      // Fallback if AI fails
+      const sources = suggestSources(q);
+      setSuggestedSources(sources);
+      setResult({ type: "guided", analysis: null, question: q });
     }
-    setExpLoading(false);
+    setLoading(false);
   }
-
-  function parseCSV(text) {
-    const lines = text.trim().split(/\r?\n/);
-    const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g,""));
-    const rows = lines.slice(1).map(line => {
-      const vals = line.split(",").map(v => v.trim().replace(/^"|"$/g,""));
-      const obj = {};
-      headers.forEach((h,i) => { obj[h] = vals[i] || ""; });
-      return obj;
-    }).filter(r => Object.values(r).some(v => v !== ""));
-    return { headers, rows };
-  }
-
-  function handleFile(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    setUploadName(file.name.replace(/\.csv$/i,""));
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const parsed = parseCSV(ev.target.result);
-      setUploadRaw(parsed);
-      const h = parsed.headers.map(x => x.toLowerCase());
-      const guess = terms => parsed.headers[h.findIndex(x => terms.some(t => x.includes(t)))] || "";
-      setColMap({
-        label:   guess(["label","name","year","date","period","time"]),
-        chi:     guess(["chi","eff","effic","output","productivity"]),
-        s:       guess(["s","throughput","energy","flow","resource","gdp","revenue"]),
-        lambda0: guess(["lambda","burden","cost","overhead","debt","load"]),
-        C:       guess(["c","complex","complexity","size","scale","pop"]),
-      });
-      setUploadStepP("mapping");
-      setResults(null);
-    };
-    reader.readAsText(file);
-  }
-
-  function runCalc() {
-    const { rows } = uploadRaw;
-    const k=0.15, n=1.4;
-    const pts = rows.map((row,i) => {
-      const chi     = parseFloat(row[colMap.chi]);
-      const s       = parseFloat(row[colMap.s]);
-      const lambda0 = parseFloat(row[colMap.lambda0]);
-      const C       = parseFloat(row[colMap.C]);
-      const label   = colMap.label ? (row[colMap.label] || "Row "+(i+1)) : "Row "+(i+1);
-      if ([chi,s,lambda0,C].some(isNaN)) return null;
-      const M = chi*s - (lambda0 + k*Math.pow(C,n));
-      return { label, chi, s, lambda0, C, M };
-    }).filter(Boolean);
-
-    // Validation checks
-    const checks = [];
-    if (pts.length < 4) checks.push({ type:"red", msg:"Fewer than 4 valid data points — cannot show a meaningful trend." });
-    const outOfRange = pts.some(p => [p.chi,p.s,p.lambda0,p.C].some(v => v<0||v>1));
-    if (outOfRange) checks.push({ type:"yellow", msg:"Some variables appear outside 0–1 range — values may need normalization." });
-    const negBurden = pts.filter(p => p.M < 0).length;
-    if (checks.filter(c=>c.type==="red").length === 0) {
-      checks.push({ type:"green", msg:`Analysis valid. ${pts.length} data points processed. ${negBurden} point${negBurden!==1?"s":""} with negative margin.` });
-    }
-
-    setValidation(checks);
-    if (checks.some(c => c.type==="red")) return;
-    setResults(pts);
-    setUploadStepP("results");
-  }
-
-  function saveToCommunity() {
-    const entry = {
-      id: Date.now().toString(),
-      name: uploadName,
-      domain: "Community",
-      addedAt: new Date().toISOString().split("T")[0],
-      points: results,
-      source: "User contributed",
-    };
-    const updated = [entry, ...community];
-    setCommunity(updated);
-    try { localStorage.setItem("eoe_community", JSON.stringify(updated)); } catch {}
-    alert("Saved to community library!");
-  }
-
-  const STATUS_COLOR = { green:"#22C55E", yellow:"#EAB308", red:"#EF4444" };
-  const STATUS_BG    = { green:"#052e16", yellow:"#422006", red:"#450a0a" };
 
   return (
-    <div style={{display:"flex",flexDirection:"column",gap:32}}>
+    <div style={{display:"flex",flexDirection:"column",gap:32,maxWidth:760,margin:"0 auto",width:"100%"}}>
+
+      {/* Header */}
       <div>
-        <h2 style={{fontFamily:"var(--serif)",fontSize:28,color:"#FFFFFF",marginBottom:12,borderLeft:"3px solid #22C55E",paddingLeft:14}}>Run an Experiment</h2>
-        <p style={{color:"#D4D4D4",fontSize:14,lineHeight:1.7,fontFamily:"var(--sans)"}}>Three ways to run an EoE analysis. All produce the same results.</p>
+        <h2 style={{fontFamily:"var(--serif)",fontSize:28,color:"#FFFFFF",marginBottom:10,
+          borderLeft:"3px solid #22C55E",paddingLeft:14}}>
+          Run an Experiment
+        </h2>
+        <p style={{color:"#A3A3A3",fontSize:13,fontFamily:"var(--sans)",lineHeight:1.65}}>
+          Ask any question about a system you want to analyze. If it matches our preloaded datasets,
+          it runs instantly. If not, we'll tell you exactly what data to collect and where to find it.
+        </p>
       </div>
 
-      {/* Mode toggle */}
-      <div style={{display:"flex",background:"#000000",borderRadius:10,padding:4,gap:2,width:"fit-content"}}>
-        {[["preloaded","📚","Preloaded"],["upload","📂","Upload Yours"],["community","🌐","Community"]].map(([id,icon,label])=>(
-          <button key={id} onClick={()=>switchMode(id)} style={{
-            background:mode===id?"#1A1A1A":"none",
-            border:mode===id?"1px solid #2A2A2A":"1px solid transparent",
-            borderRadius:8,padding:"8px 16px",fontSize:12,fontWeight:mode===id?700:400,
-            color:mode===id?"#FFFFFF":"#737373",fontFamily:"var(--sans)",transition:"all 0.15s",
-            display:"flex",alignItems:"center",gap:6
-          }}><span>{icon}</span><span>{label}</span></button>
-        ))}
-      </div>
-
-      {/* PRELOADED MODE — redirect to Explore */}
-      {mode==="preloaded" && (
-        <div style={{background:"#0A0A0A",border:"1px solid #1A1A1A",borderRadius:14,padding:36,textAlign:"center"}}>
-          <div style={{fontSize:36,marginBottom:16}}>🔭</div>
-          <div style={{fontSize:17,fontFamily:"var(--serif)",color:"#FFFFFF",marginBottom:10}}>
-            All 20 preloaded datasets live in Explore
+      {/* Main input */}
+      <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:16,
+        padding:"24px 28px",display:"flex",flexDirection:"column",gap:16}}>
+        <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#22C55E",letterSpacing:3}}>
+          YOUR RESEARCH QUESTION
+        </div>
+        <textarea
+          value={question}
+          onChange={e=>{setQuestion(e.target.value);setError("");setResult(null);}}
+          onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.metaKey){e.preventDefault();runExperiment();}}}
+          placeholder="Ask anything — e.g. 'Is the US government heading toward collapse?' or 'Analyze my company's fiscal health using EoE'"
+          rows={3}
+          style={{
+            width:"100%",background:"#111111",
+            border:`1px solid ${error?"#EF4444":"#2A2A2A"}`,
+            borderRadius:10,padding:"14px 18px",fontSize:15,
+            color:"#FFFFFF",outline:"none",fontFamily:"var(--sans)",
+            resize:"none",lineHeight:1.6,boxSizing:"border-box",
+            transition:"border-color 0.15s"
+          }}
+          onFocus={e=>e.target.style.borderColor="#22C55E"}
+          onBlur={e=>e.target.style.borderColor=error?"#EF4444":"#2A2A2A"}
+        />
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10}}>
+          <div style={{fontSize:11,color:"#525252",fontFamily:"var(--sans)"}}>
+            Press Enter to run · Shift+Enter for new line
           </div>
-          <p style={{fontSize:13,color:"#737373",fontFamily:"var(--sans)",lineHeight:1.7,maxWidth:400,margin:"0 auto 24px"}}>
-            The Explore tab has the full experience — M trajectory charts with historical event annotations,
-            a live gauge, variable breakdown, download report, and the domain sandbox.
-            Head there to run any preloaded experiment.
-          </p>
-          <button onClick={onGoToExplore} style={{display:"inline-flex",alignItems:"center",gap:8,background:"#2563EB",
-            border:"none",borderRadius:10,padding:"12px 24px",fontSize:13,fontWeight:700,
-            color:"#FFFFFF",fontFamily:"var(--sans)",cursor:"pointer",transition:"background 0.15s"}}
-            onMouseEnter={e=>e.currentTarget.style.background="#3B82F6"}
-            onMouseLeave={e=>e.currentTarget.style.background="#2563EB"}>
-            <span>🔭</span><span>Go to Explore tab →</span>
+          <button onClick={runExperiment} disabled={loading||!question.trim()} style={{
+            background:loading||!question.trim()?"#1A1A1A":"#22C55E",
+            border:"none",borderRadius:10,padding:"12px 28px",
+            fontSize:13,fontWeight:700,color:"#000000",
+            fontFamily:"var(--sans)",cursor:loading||!question.trim()?"not-allowed":"pointer",
+            opacity:loading||!question.trim()?0.4:1,transition:"all 0.15s",
+            display:"flex",alignItems:"center",gap:8
+          }}>
+            {loading ? (
+              <>
+                <div style={{width:14,height:14,borderRadius:"50%",
+                  border:"2px solid #000",borderTopColor:"transparent",
+                  animation:"spin 0.8s linear infinite"}}/>
+                Analyzing...
+              </>
+            ) : "Run Experiment →"}
           </button>
         </div>
-      )}
+      </div>
 
-      {/* UPLOAD MODE */}
-      {mode==="upload" && (
-        <div style={{display:"flex",flexDirection:"column",gap:20,position:"relative"}}>
-
-          {/* Floating chat button — always visible in upload mode */}
-          <button onClick={()=>setShowExpChat(s=>!s)} style={{
-            position:"fixed", bottom:100, right:20, zIndex:40,
-            background:showExpChat?"#1D4ED8":"#2563EB",
-            border:"none", borderRadius:"50%",
-            width:52, height:52,
-            boxShadow:"0 4px 20px #2563EB60",
-            display:"flex", alignItems:"center", justifyContent:"center",
-            cursor:"pointer", transition:"all 0.2s",
-            fontSize:20,
-          }}
-            onMouseEnter={e=>e.currentTarget.style.transform="scale(1.1)"}
-            onMouseLeave={e=>e.currentTarget.style.transform="scale(1)"}
-            title="Ask the assistant"
-          >
-            {showExpChat ? "✕" : "💬"}
-          </button>
-
-          {/* Floating overlay panel */}
-          {showExpChat && (
-            <>
-              {/* Backdrop — tap to dismiss */}
-              <div
-                onClick={()=>setShowExpChat(false)}
-                style={{position:"fixed",inset:0,zIndex:41,background:"#00000060",backdropFilter:"blur(2px)"}}
-              />
-
-              {/* Chat panel */}
-              <div style={{
-                position:"fixed", bottom:0, right:0, left:0,
-                zIndex:42, maxWidth:480, margin:"0 auto",
-                background:"#0A0A0A", border:"1px solid #2A2A2A",
-                borderRadius:"16px 16px 0 0",
-                boxShadow:"0 -8px 40px #00000080",
-                display:"flex", flexDirection:"column",
-                maxHeight:"72vh",
-              }}>
-                {/* Handle bar */}
-                <div style={{display:"flex",justifyContent:"center",padding:"10px 0 4px",flexShrink:0}}>
-                  <div style={{width:36,height:4,borderRadius:2,background:"#333333"}}/>
-                </div>
-
-                {/* Header */}
-                <div style={{padding:"8px 20px 12px",borderBottom:"1px solid #1A1A1A",
-                  flexShrink:0,display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-                  <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    <div style={{width:26,height:26,borderRadius:"50%",background:"#2563EB",
-                      display:"flex",alignItems:"center",justifyContent:"center",
-                      fontSize:10,fontWeight:700,color:"#FFFFFF"}}>E</div>
-                    <div>
-                      <div style={{fontSize:13,fontWeight:600,color:"#FFFFFF",fontFamily:"var(--sans)"}}>
-                        Experiment Assistant
-                      </div>
-                      <div style={{fontSize:10,color:"#525252",fontFamily:"var(--sans)"}}>
-                        {uploadRaw ? `Knows your file: ${uploadRaw.headers.length} columns` : "Ask anything · Upload a file to get column help"}
-                      </div>
-                    </div>
-                  </div>
-                  <button onClick={()=>setShowExpChat(false)} style={{
-                    background:"#1A1A1A",border:"1px solid #2A2A2A",borderRadius:8,
-                    width:32,height:32,fontSize:16,color:"#A3A3A3",
-                    display:"flex",alignItems:"center",justifyContent:"center",
-                    cursor:"pointer",flexShrink:0,fontFamily:"var(--sans)"
-                  }} title="Close (Esc)">✕</button>
-                </div>
-
-                {/* Messages */}
-                <div style={{flex:1,overflowY:"auto",padding:"14px 20px",
-                  display:"flex",flexDirection:"column",gap:12}}>
-                  {expChat.map((m,i)=>(
-                    <div key={i} style={{display:"flex",
-                      justifyContent:m.role==="user"?"flex-end":"flex-start",gap:8,alignItems:"flex-start"}}>
-                      {m.role==="assistant"&&(
-                        <div style={{width:24,height:24,borderRadius:"50%",background:"#2563EB",
-                          display:"flex",alignItems:"center",justifyContent:"center",
-                          fontSize:9,fontWeight:700,color:"#FFFFFF",flexShrink:0,marginTop:1}}>E</div>
-                      )}
-                      <div style={{
-                        maxWidth:"80%",
-                        background:m.role==="user"?"#1A1A1A":"#111111",
-                        border:`1px solid ${m.role==="user"?"#2A2A2A":"#1A1A1A"}`,
-                        borderRadius:m.role==="user"?"14px 14px 4px 14px":"4px 14px 14px 14px",
-                        padding:"10px 14px",fontSize:13,lineHeight:1.65,
-                        color:"#D4D4D4",fontFamily:"var(--sans)"
-                      }}>{m.text}</div>
-                    </div>
-                  ))}
-                  {expLoading&&(
-                    <div style={{display:"flex",gap:8}}>
-                      <div style={{width:24,height:24,borderRadius:"50%",background:"#2563EB",
-                        display:"flex",alignItems:"center",justifyContent:"center",
-                        fontSize:9,fontWeight:700,color:"#FFFFFF",flexShrink:0}}>E</div>
-                      <div style={{background:"#111111",border:"1px solid #1A1A1A",
-                        borderRadius:"4px 14px 14px 14px",padding:"10px 14px",
-                        display:"flex",gap:5,alignItems:"center"}}>
-                        {[0,1,2].map(j=>(
-                          <div key={j} style={{width:5,height:5,borderRadius:"50%",
-                            background:"#3B82F6",animation:"pulse 1.2s ease-in-out infinite",
-                            animationDelay:`${j*0.2}s`}}/>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Quick prompts */}
-                <div style={{padding:"8px 20px",borderTop:"1px solid #1A1A1A",
-                  display:"flex",flexWrap:"wrap",gap:6,flexShrink:0}}>
-                  {[
-                    "How do I normalize my data?",
-                    "What is χ for a company?",
-                    "What should complexity be?",
-                    "Help me write a research question",
-                    uploadRaw ? "Which column should be χ?" : "What CSV format do I need?",
-                  ].map((q,i)=>(
-                    <button key={i} onClick={()=>setExpInput(q)} style={{
-                      background:"#111111",border:"1px solid #1A1A1A",borderRadius:14,
-                      padding:"4px 10px",fontSize:11,color:"#737373",
-                      fontFamily:"var(--sans)",cursor:"pointer"
-                    }}
-                      onMouseEnter={e=>{e.currentTarget.style.borderColor="#2563EB";e.currentTarget.style.color="#93C5FD";}}
-                      onMouseLeave={e=>{e.currentTarget.style.borderColor="#1A1A1A";e.currentTarget.style.color="#737373";}}
-                    >{q}</button>
-                  ))}
-                </div>
-
-                {/* Input */}
-                <div style={{padding:"10px 20px 20px",flexShrink:0,display:"flex",gap:8}}>
-                  <input value={expInput}
-                    onChange={e=>setExpInput(e.target.value)}
-                    onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendExpChat();}}}
-                    placeholder="Ask anything about your experiment..."
-                    style={{flex:1,background:"#111111",border:"1px solid #2A2A2A",
-                      borderRadius:9,padding:"11px 16px",fontSize:13,color:"#FFFFFF",
-                      outline:"none",fontFamily:"var(--sans)",transition:"border-color 0.15s"}}
-                    onFocus={e=>e.target.style.borderColor="#2563EB"}
-                    onBlur={e=>e.target.style.borderColor="#2A2A2A"}
-                    autoFocus
-                  />
-                  <button onClick={sendExpChat} disabled={expLoading} style={{
-                    background:expLoading?"#1A1A1A":"#2563EB",border:"none",
-                    borderRadius:9,width:44,height:44,fontSize:18,color:"white",
-                    display:"flex",alignItems:"center",justifyContent:"center",
-                    cursor:expLoading?"not-allowed":"pointer",opacity:expLoading?0.5:1
-                  }}>↑</button>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* Step 1: drop zone */}
-          {uploadStep==="idle" && (
-            <>
-              {/* Need help? — redirect to Assistant tab */}
-              <div style={{background:"#060A14",border:"1px solid #2563EB25",
-                borderRadius:12,padding:"14px 18px",marginBottom:4,
-                display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,flexWrap:"wrap"}}>
-                <div style={{display:"flex",alignItems:"center",gap:10}}>
-                  <div style={{width:28,height:28,borderRadius:"50%",background:"#2563EB",
-                    display:"flex",alignItems:"center",justifyContent:"center",
-                    fontSize:11,fontWeight:700,color:"#FFFFFF",flexShrink:0}}>E</div>
-                  <div>
-                    <div style={{fontSize:13,fontWeight:600,color:"#FFFFFF",fontFamily:"var(--sans)"}}>
-                      Not sure how to map your data?
-                    </div>
-                    <div style={{fontSize:11,color:"#525252",fontFamily:"var(--sans)",marginTop:1}}>
-                      The Assistant tab will map your columns automatically and explain everything in plain English.
-                    </div>
-                  </div>
-                </div>
-                <button onClick={()=>onGoToAssistant && onGoToAssistant()} style={{
-                  background:"#2563EB",border:"none",borderRadius:8,
-                  padding:"8px 16px",fontSize:12,fontWeight:600,
-                  color:"#FFFFFF",fontFamily:"var(--sans)",cursor:"pointer",
-                  flexShrink:0,whiteSpace:"nowrap"
-                }}>Go to Assistant →</button>
-              </div>
-
-              {/* What to upload — clear instructions */}              {/* What to upload — clear instructions */}
-              <div style={{background:"#0A1520",border:"1px solid #2563EB25",borderRadius:12,padding:"16px 20px",marginBottom:4}}>
-                <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#3B82F6",letterSpacing:3,marginBottom:10}}>WHAT TO UPLOAD</div>
-                <p style={{fontSize:13,color:"#D4D4D4",fontFamily:"var(--sans)",lineHeight:1.7,marginBottom:10}}>
-                  Upload a CSV with your own data — any system you want to analyze. Each row is one time point.
-                  You need four columns: one for <strong style={{color:"#60A5FA"}}>efficiency (χ)</strong>, one for <strong style={{color:"#A78BFA"}}>throughput (s)</strong>,
-                  one for <strong style={{color:"#F87171"}}>overhead cost (λ₀)</strong>, and one for <strong style={{color:"#FCD34D"}}>complexity (C)</strong>.
-                  All values must be between 0 and 1.
-                </p>
-                <p style={{fontSize:12,color:"#737373",fontFamily:"var(--sans)",lineHeight:1.6}}>
-                  Not sure how to map your data? Use the <strong style={{color:"#FFFFFF"}}>Assistant tab</strong> — drop your CSV there and the AI will map the columns for you automatically, run the analysis, and explain the results in plain English.
-                </p>
-                <div style={{marginTop:12,display:"flex",gap:8,flexWrap:"wrap"}}>
-                  {[
-                    {col:"Year / Label",ex:"2020, Q1, Rome 100CE"},
-                    {col:"χ — Efficiency",ex:"0.72 · how well inputs become outputs"},
-                    {col:"s — Throughput",ex:"0.80 · resource/energy flow"},
-                    {col:"λ₀ — Base Burden",ex:"0.24 · fixed overhead cost"},
-                    {col:"C — Complexity",ex:"0.68 · scale and organizational density"},
-                  ].map((c,i)=>(
-                    <div key={i} style={{background:"#111111",border:"1px solid #1A1A1A",
-                      borderRadius:7,padding:"7px 12px",flex:"1 1 160px"}}>
-                      <div style={{fontSize:11,fontWeight:600,color:"#FFFFFF",fontFamily:"var(--sans)"}}>{c.col}</div>
-                      <div style={{fontSize:10,color:"#525252",fontFamily:"var(--mono)",marginTop:2}}>{c.ex}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div style={{background:"#0A0A0A",border:"2px dashed #2A2A2A",borderRadius:14,
-                padding:"40px 24px",textAlign:"center",cursor:"pointer",transition:"all 0.2s"}}
-                onClick={()=>fileRef.current?.click()}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor="#2563EB";e.currentTarget.style.background="#0A0F1A";}}
+      {/* Example questions */}
+      {!result && !loading && (
+        <div>
+          <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#525252",
+            letterSpacing:3,marginBottom:12}}>EXAMPLE QUESTIONS</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:8}}>
+            {EXAMPLE_QUESTIONS.map((ex,i)=>(
+              <button key={i} onClick={()=>{setQuestion(ex.q);setResult(null);}}
+                style={{
+                  background:"#0A0A0A",border:"1px solid #2A2A2A",
+                  borderRadius:10,padding:"12px 16px",textAlign:"left",
+                  cursor:"pointer",transition:"all 0.15s",
+                  display:"flex",flexDirection:"column",gap:6
+                }}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor="#22C55E50";e.currentTarget.style.background="#0A1A0A";}}
                 onMouseLeave={e=>{e.currentTarget.style.borderColor="#2A2A2A";e.currentTarget.style.background="#0A0A0A";}}
               >
-                <div style={{fontSize:36,marginBottom:12}}>📂</div>
-                <div style={{fontSize:15,fontWeight:600,color:"#FFFFFF",marginBottom:6,fontFamily:"var(--sans)"}}>Drop a CSV or click to browse</div>
-                <div style={{fontSize:12,color:"#737373",fontFamily:"var(--sans)"}}>
-                  Or go to the <strong style={{color:"#3B82F6"}}>Assistant tab</strong> to upload and get AI-guided analysis instantly
+                <div style={{display:"flex",alignItems:"center",gap:8}}>
+                  <span style={{fontSize:18}}>{ex.icon}</span>
+                  <span style={{fontSize:9,color:"#22C55E",fontFamily:"var(--mono)",
+                    background:"#22C55E15",borderRadius:4,padding:"2px 7px"}}>{ex.hint}</span>
                 </div>
-                <input ref={fileRef} type="file" accept=".csv,.tsv,.txt" onChange={handleFile} style={{display:"none"}}/>
-              </div>
+                <div style={{fontSize:12,color:"#D4D4D4",fontFamily:"var(--sans)",lineHeight:1.5}}>
+                  {ex.q}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
-              <div style={{background:"#0A0A0A",border:"1px solid #1A1A1A",borderRadius:12,padding:20}}>
-                <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#3B82F6",marginBottom:14,letterSpacing:3}}>VALIDATION FILTER — runs before every calculation</div>
-                {[
-                  ["🔴","Hard stop","Minimum 4 time points","Fewer points cannot show a trend."],
-                  ["🟡","Caution","All variables between 0 and 1","Values outside this range need normalization."],
-                  ["🟡","Caution","System is organized and complex","Qualifier for EoE applicability."],
-                  ["🟡","Caution","Variables mapped coherently","χ=efficiency, s=flow, λ₀=cost, C=scale."],
-                ].map(([status,sev,check,note],i)=>(
-                  <div key={i} style={{display:"flex",gap:10,padding:"10px 0",borderBottom:i<3?"1px solid #1A1A1A":"none",alignItems:"flex-start"}}>
-                    <span style={{fontSize:14,flexShrink:0}}>{status}</span>
-                    <div>
-                      <div style={{fontSize:12,fontWeight:600,color:"#FFFFFF",fontFamily:"var(--sans)"}}>{check} <span style={{fontWeight:400,color:"#525252"}}>· {sev}</span></div>
-                      <div style={{fontSize:11,color:"#737373",fontFamily:"var(--sans)",marginTop:2}}>{note}</div>
+      {/* Results — preloaded match */}
+      {result?.type === "preloaded" && (
+        <div style={{display:"flex",flexDirection:"column",gap:20,animation:"fadeUp 0.4s ease both"}}>
+          <div style={{background:"#0A1A0A",border:"1px solid #22C55E30",borderRadius:12,
+            padding:"14px 18px",display:"flex",gap:10,alignItems:"center"}}>
+            <span style={{fontSize:16}}>✅</span>
+            <div>
+              <div style={{fontSize:13,fontWeight:600,color:"#22C55E",fontFamily:"var(--sans)"}}>
+                Found {result.datasets.length} matching dataset{result.datasets.length>1?"s":""} in our library
+              </div>
+              <div style={{fontSize:11,color:"#525252",fontFamily:"var(--sans)",marginTop:2}}>
+                Full analysis with historical annotations, trajectory charts, and model fit statistics
+              </div>
+            </div>
+          </div>
+
+          {result.datasets.map(ds => {
+            const pts = ds.points;
+            const lastPt = pts[pts.length-1];
+            const M = calcM(lastPt.chi,lastPt.s,lastPt.lambda0,lastPt.C);
+            return (
+              <div key={ds.id} style={{background:"#0A0A0A",border:`1px solid ${ds.color}35`,
+                borderRadius:14,overflow:"hidden"}}>
+                {/* Dataset header */}
+                <div style={{padding:"20px 24px",borderBottom:"1px solid #1A1A1A",
+                  display:"flex",justifyContent:"space-between",alignItems:"flex-start",
+                  flexWrap:"wrap",gap:16}}>
+                  <div>
+                    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
+                      <span style={{fontSize:22}}>{ds.emoji}</span>
+                      <div>
+                        <div style={{fontSize:16,fontFamily:"var(--serif)",color:"#FFFFFF"}}>{ds.label}</div>
+                        <div style={{fontSize:10,color:"#525252",fontFamily:"var(--mono)"}}>{ds.period} · {ds.domain}</div>
+                      </div>
+                    </div>
+                    <p style={{fontSize:13,color:"#A3A3A3",lineHeight:1.65,fontFamily:"var(--sans)",maxWidth:440}}>{ds.desc}</p>
+                  </div>
+                  <div style={{textAlign:"center",flexShrink:0}}>
+                    <Gauge value={M} size={140}/>
+                    <div style={{fontSize:12,fontWeight:700,color:mColor(M),fontFamily:"var(--sans)",marginTop:4}}>
+                      {mLabel(M)}
                     </div>
                   </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Step 2: column mapping + experiment parameters */}
-          {uploadStep==="mapping" && uploadRaw && (
-            <div style={{display:"flex",flexDirection:"column",gap:20}}>
-
-              {/* File info + back */}
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10}}>
-                <div>
-                  <div style={{fontSize:15,fontWeight:600,color:"#FFFFFF",fontFamily:"var(--sans)"}}>
-                    📂 {uploadName}.csv
-                  </div>
-                  <div style={{fontSize:12,color:"#737373",fontFamily:"var(--sans)",marginTop:2}}>
-                    {uploadRaw.rows.length} rows · {uploadRaw.headers.length} columns detected
-                  </div>
                 </div>
-                <button onClick={()=>{setUploadStepP("idle");setUploadRaw(null);if(fileRef.current)fileRef.current.value="";}} style={{
-                    background:"none",border:"1px solid #2A2A2A",borderRadius:8,
-                    padding:"6px 14px",fontSize:11,color:"#737373",fontFamily:"var(--sans)",cursor:"pointer"
-                  }}>← Different file</button>
-              </div>
 
-              {/* STEP A: Map your columns */}
+                {/* Chart */}
+                <div style={{padding:"16px 24px",borderBottom:"1px solid #1A1A1A"}}>
+                  <MChart points={pts} dsColor={ds.color}/>
+                </div>
+
+                {/* Latest annotation */}
+                <div style={{padding:"14px 24px",borderBottom:"1px solid #1A1A1A",
+                  background:"#000000",borderLeft:`3px solid ${ds.color}`}}>
+                  <div style={{fontSize:9,fontFamily:"var(--mono)",color:ds.color,marginBottom:5,letterSpacing:2}}>
+                    MOST RECENT · {lastPt.year}
+                  </div>
+                  <p style={{fontSize:13,color:"#D4D4D4",lineHeight:1.65,fontFamily:"var(--sans)",margin:0}}>
+                    {lastPt.event}
+                  </p>
+                </div>
+
+                {/* Model fit + action */}
+                <div style={{padding:"16px 24px",display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
+                  <WarningLeadBadge dsId={ds.id} points={pts} compact={true}/>
+                  <button onClick={()=>onGoToExplore&&onGoToExplore()} style={{
+                    marginLeft:"auto",background:"#2563EB",border:"none",borderRadius:8,
+                    padding:"9px 18px",fontSize:12,fontWeight:600,color:"#FFFFFF",
+                    fontFamily:"var(--sans)",cursor:"pointer"
+                  }}>Full analysis in Explore →</button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Results — guided (no preloaded match) */}
+      {result?.type === "guided" && (
+        <div style={{display:"flex",flexDirection:"column",gap:16,animation:"fadeUp 0.4s ease both"}}>
+          <div style={{background:"#0A0A14",border:"1px solid #3B82F620",borderRadius:12,
+            padding:"14px 18px",display:"flex",gap:10,alignItems:"center"}}>
+            <span style={{fontSize:16}}>🔬</span>
+            <div>
+              <div style={{fontSize:13,fontWeight:600,color:"#93C5FD",fontFamily:"var(--sans)"}}>
+                No preloaded dataset found — here's how to run this experiment
+              </div>
+              <div style={{fontSize:11,color:"#525252",fontFamily:"var(--sans)",marginTop:2}}>
+                We've mapped your question to EoE variables and identified the data you need
+              </div>
+            </div>
+          </div>
+
+          {result.analysis && (
+            <>
+              {/* Variable mapping */}
               <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:12,padding:20}}>
-                <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#3B82F6",letterSpacing:3,marginBottom:6}}>
-                  STEP A — MAP YOUR COLUMNS
+                <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#3B82F6",letterSpacing:3,marginBottom:14}}>
+                  HOW EoE MAPS TO YOUR QUESTION
                 </div>
-                <p style={{fontSize:12,color:"#737373",fontFamily:"var(--sans)",lineHeight:1.6,marginBottom:16}}>
-                  Tell us which column in your file corresponds to each EoE variable.
-                  All four required columns must contain numbers between 0 and 1.
-                </p>
-                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:10}}>
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:10}}>
                   {[
-                    {key:"label",  label:"Label / Year",    desc:"Row identifier — year, name, or period",            color:"#A3A3A3", required:false, example:"e.g. 2020, Q1, Rome"},
-                    {key:"chi",    label:"χ — Efficiency",   desc:"How well inputs become useful outputs (0–1)",        color:"#60A5FA", required:true,  example:"e.g. gross margin, productivity ratio"},
-                    {key:"s",      label:"s — Throughput",   desc:"Resource or energy flow through the system (0–1)",   color:"#A78BFA", required:true,  example:"e.g. revenue/GDP normalized, flow rate"},
-                    {key:"lambda0",label:"λ₀ — Base Burden", desc:"Fixed overhead cost before complexity effects (0–1)",color:"#F87171", required:true,  example:"e.g. mandatory spending %, fixed cost ratio"},
-                    {key:"C",      label:"C — Complexity",   desc:"Scale, organizational density, or system size (0–1)",color:"#FCD34D", required:true,  example:"e.g. employee count normalized, org layers"},
-                  ].map(f=>(
-                    <div key={f.key} style={{background:"#111111",border:`1px solid ${colMap[f.key]?f.color+"50":"#1A1A1A"}`,borderRadius:10,padding:14,transition:"border-color 0.2s"}}>
-                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
-                        <span style={{fontSize:12,fontWeight:700,color:f.color,fontFamily:"var(--sans)"}}>{f.label}</span>
-                        {f.required
-                          ? <span style={{fontSize:9,color:"#EF4444",fontFamily:"var(--mono)"}}>required</span>
-                          : <span style={{fontSize:9,color:"#525252",fontFamily:"var(--mono)"}}>optional</span>
-                        }
+                    {sym:"χ",color:"#60A5FA",label:"Efficiency",desc:result.analysis.variables?.chi},
+                    {sym:"s",color:"#A78BFA",label:"Throughput",desc:result.analysis.variables?.s},
+                    {sym:"λ₀",color:"#F87171",label:"Base Burden",desc:result.analysis.variables?.lambda0},
+                    {sym:"C",color:"#FCD34D",label:"Complexity",desc:result.analysis.variables?.C},
+                  ].map(v=>(
+                    <div key={v.sym} style={{background:"#111111",border:`1px solid ${v.color}25`,
+                      borderRadius:10,padding:14}}>
+                      <div style={{display:"flex",alignItems:"baseline",gap:8,marginBottom:8}}>
+                        <span style={{fontFamily:"var(--mono)",fontSize:18,color:v.color,fontWeight:700}}>{v.sym}</span>
+                        <span style={{fontSize:10,color:"#525252",fontFamily:"var(--sans)"}}>{v.label}</span>
                       </div>
-                      <div style={{fontSize:10,color:"#525252",fontFamily:"var(--sans)",marginBottom:3,lineHeight:1.4}}>{f.desc}</div>
-                      <div style={{fontSize:9,color:"#404040",fontFamily:"var(--mono)",marginBottom:10,fontStyle:"italic"}}>{f.example}</div>
-                      <select value={colMap[f.key]} onChange={e=>setColMap(p=>({...p,[f.key]:e.target.value}))}
-                        style={{width:"100%",background:"#0A0A0A",border:`1px solid ${colMap[f.key]?f.color+"60":"#2A2A2A"}`,
-                          borderRadius:6,padding:"8px 10px",color:colMap[f.key]?"#FFFFFF":"#737373",
-                          fontSize:12,fontFamily:"var(--mono)",outline:"none"}}>
-                        <option value="">— select column —</option>
-                        {uploadRaw.headers.map(h=><option key={h} value={h}>{h}</option>)}
-                      </select>
-                      {colMap[f.key] && uploadRaw.rows[0] && (
-                        <div style={{fontSize:10,color:f.color,marginTop:6,fontFamily:"var(--mono)",
-                          background:"#000000",borderRadius:4,padding:"4px 8px"}}>
-                          Sample value: <strong>{uploadRaw.rows[0][colMap[f.key]]}</strong>
-                          {uploadRaw.rows[1] && <span style={{color:"#525252"}}> · {uploadRaw.rows[1][colMap[f.key]]}</span>}
-                          {uploadRaw.rows[2] && <span style={{color:"#525252"}}> · {uploadRaw.rows[2][colMap[f.key]]}</span>}
-                        </div>
-                      )}
+                      <div style={{fontSize:12,color:"#A3A3A3",fontFamily:"var(--sans)",lineHeight:1.5}}>{v.desc}</div>
                     </div>
                   ))}
                 </div>
+                {result.analysis.suggestedApproach && (
+                  <div style={{marginTop:14,padding:"12px 16px",background:"#000000",
+                    borderRadius:8,border:"1px solid #1A1A1A"}}>
+                    <div style={{fontSize:9,fontFamily:"var(--mono)",color:"#22C55E",marginBottom:6,letterSpacing:2}}>
+                      SUGGESTED APPROACH
+                    </div>
+                    <p style={{fontSize:13,color:"#D4D4D4",fontFamily:"var(--sans)",lineHeight:1.65,margin:0}}>
+                      {result.analysis.suggestedApproach}
+                    </p>
+                  </div>
+                )}
               </div>
 
-              {/* STEP B: Define your experiment */}
+              {/* Data needed */}
               <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:12,padding:20}}>
-                <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#3B82F6",letterSpacing:3,marginBottom:6}}>
-                  STEP B — DEFINE YOUR EXPERIMENT
+                <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#3B82F6",letterSpacing:3,marginBottom:10}}>
+                  DATA YOU NEED TO COLLECT
                 </div>
-                <p style={{fontSize:12,color:"#737373",fontFamily:"var(--sans)",lineHeight:1.6,marginBottom:16}}>
-                  The most important step. Tell us exactly what you want to find out. This shapes how the results are interpreted and appears on your download report.
+                <p style={{fontSize:13,color:"#D4D4D4",fontFamily:"var(--sans)",lineHeight:1.65,marginBottom:16}}>
+                  {result.analysis.dataNeeded}
                 </p>
-                <div style={{display:"flex",flexDirection:"column",gap:16}}>
 
-                  {/* Research question — most prominent field */}
-                  <div style={{background:"#060A14",border:"1px solid #2563EB40",borderRadius:10,padding:16}}>
-                    <div style={{fontSize:12,fontWeight:700,color:"#93C5FD",fontFamily:"var(--sans)",marginBottom:4}}>
-                      Research question <span style={{color:"#EF4444"}}>*</span>
-                    </div>
-                    <div style={{fontSize:11,color:"#525252",fontFamily:"var(--sans)",marginBottom:10,lineHeight:1.5}}>
-                      What are you trying to find out? Be specific. The more precise your question, the more useful the output.
-                    </div>
-                    <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:12}}>
-                      {[
-                        "Does the M trajectory predict the company's bankruptcy filing?",
-                        "How does M compare to the stock price over this period?",
-                        "When did the burden first exceed output, and what caused it?",
-                        "Is the current M trajectory consistent with ecosystem collapse?",
-                        "How does this city's margin compare to Detroit's collapse arc?",
-                      ].map((ex,i)=>(
-                        <button key={i} onClick={()=>setResearchQ(ex)} style={{
-                          background:researchQ===ex?"#0D1A2E":"#0A0A0A",
-                          border:`1px solid ${researchQ===ex?"#2563EB":"#1A1A1A"}`,
-                          borderRadius:7,padding:"7px 12px",fontSize:11,
-                          color:researchQ===ex?"#93C5FD":"#525252",
-                          fontFamily:"var(--sans)",textAlign:"left",cursor:"pointer",
-                          transition:"all 0.12s"
-                        }}>{ex}</button>
-                      ))}
-                    </div>
-                    <textarea
-                      value={researchQ}
-                      onChange={e=>setResearchQ(e.target.value)}
-                      placeholder="Or write your own question — e.g. 'Does M going negative in 2018 predict the fund's collapse in 2020?'"
-                      rows={3}
-                      style={{width:"100%",background:"#111111",border:`1px solid ${researchQ?"#2563EB60":"#2A2A2A"}`,
-                        borderRadius:8,padding:"10px 14px",fontSize:13,color:"#FFFFFF",
-                        outline:"none",fontFamily:"var(--sans)",resize:"vertical",
-                        boxSizing:"border-box",lineHeight:1.6}}
-                    />
-                  </div>
-
+                {/* Suggested sources */}
+                {suggestedSources.length > 0 && (
                   <div>
-                    <div style={{fontSize:11,fontWeight:600,color:"#D4D4D4",fontFamily:"var(--sans)",marginBottom:6}}>
-                      System name <span style={{color:"#EF4444"}}>*</span>
+                    <div style={{fontSize:11,fontWeight:600,color:"#FFFFFF",fontFamily:"var(--sans)",marginBottom:10}}>
+                      Verified sources for this domain:
                     </div>
-                    <input
-                      value={uploadName}
-                      onChange={e=>setUploadName(e.target.value)}
-                      placeholder="e.g. Detroit fiscal system, Chesapeake Bay 2020, My Company Q1-Q4"
-                      style={{width:"100%",background:"#111111",border:"1px solid #2A2A2A",
-                        borderRadius:8,padding:"10px 14px",fontSize:13,color:"#FFFFFF",
-                        outline:"none",fontFamily:"var(--sans)",boxSizing:"border-box"}}
-                    />
-                  </div>
-                  <div>
-                    <div style={{fontSize:11,fontWeight:600,color:"#D4D4D4",fontFamily:"var(--sans)",marginBottom:6}}>
-                      What kind of system is this?
-                    </div>
-                    <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-                      {["Company / Organization","City / Urban","Ecosystem","National Government",
-                        "Civilization / Historical","Financial System","Other"].map(type=>(
-                        <button key={type}
-                          onClick={()=>setColMap(p=>({...p,_systemType:type}))}
-                          style={{
-                            background:colMap._systemType===type?"#1A1A2A":"#111111",
-                            border:`1px solid ${colMap._systemType===type?"#2563EB":"#2A2A2A"}`,
-                            borderRadius:6,padding:"5px 12px",fontSize:11,
-                            color:colMap._systemType===type?"#93C5FD":"#737373",
-                            fontFamily:"var(--sans)",cursor:"pointer",transition:"all 0.12s"
-                          }}>{type}</button>
+                    <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                      {suggestedSources.map((s,i)=>(
+                        <a key={i} href={s.url} target="_blank" rel="noopener noreferrer"
+                          style={{display:"flex",alignItems:"center",gap:12,
+                            background:"#111111",border:"1px solid #2A2A2A",borderRadius:8,
+                            padding:"10px 14px",textDecoration:"none",transition:"all 0.15s"}}
+                          onMouseEnter={e=>{e.currentTarget.style.borderColor="#3B82F6";}}
+                          onMouseLeave={e=>{e.currentTarget.style.borderColor="#2A2A2A";}}
+                        >
+                          <div style={{flex:1}}>
+                            <div style={{fontSize:12,fontWeight:600,color:"#FFFFFF",fontFamily:"var(--sans)"}}>{s.name} ↗</div>
+                            <div style={{fontSize:11,color:"#737373",fontFamily:"var(--sans)",marginTop:2}}>{s.desc}</div>
+                          </div>
+                          <span style={{fontSize:9,color:"#3B82F6",background:"#3B82F615",
+                            borderRadius:4,padding:"2px 8px",fontFamily:"var(--mono)",flexShrink:0}}>{s.domain}</span>
+                        </a>
                       ))}
                     </div>
                   </div>
-                  <div>
-                    <div style={{fontSize:11,fontWeight:600,color:"#D4D4D4",fontFamily:"var(--sans)",marginBottom:6}}>
-                      Data source (optional — helps with citation)
-                    </div>
-                    <input
-                      value={colMap._source||""}
-                      onChange={e=>setColMap(p=>({...p,_source:e.target.value}))}
-                      placeholder="e.g. World Bank Open Data, company annual reports, field measurements"
-                      style={{width:"100%",background:"#111111",border:"1px solid #2A2A2A",
-                        borderRadius:8,padding:"10px 14px",fontSize:13,color:"#FFFFFF",
-                        outline:"none",fontFamily:"var(--sans)",boxSizing:"border-box"}}
-                    />
-                  </div>
+                )}
+
+                <div style={{display:"flex",gap:10,marginTop:16,flexWrap:"wrap"}}>
+                  <button onClick={()=>fileRef.current?.click()} style={{
+                    background:"#22C55E",border:"none",borderRadius:8,
+                    padding:"10px 20px",fontSize:12,fontWeight:700,
+                    color:"#000000",fontFamily:"var(--sans)",cursor:"pointer"
+                  }}>Upload my data →</button>
+                  <button onClick={()=>onGoToAssistant&&onGoToAssistant()} style={{
+                    background:"#111111",border:"1px solid #2A2A2A",borderRadius:8,
+                    padding:"10px 20px",fontSize:12,fontWeight:600,
+                    color:"#D4D4D4",fontFamily:"var(--sans)",cursor:"pointer"
+                  }}>Get help in Assistant →</button>
                 </div>
+                <input ref={fileRef} type="file" accept=".csv,.tsv,.txt" style={{display:"none"}}/>
               </div>
-
-              {/* Validation preview */}
-              {colMap.chi && colMap.s && colMap.lambda0 && colMap.C && researchQ.trim() && (
-                <div style={{background:"#060F06",border:"1px solid #22C55E25",borderRadius:10,padding:"12px 16px",
-                  display:"flex",gap:10,alignItems:"center"}}>
-                  <span style={{fontSize:16}}>✅</span>
-                  <div>
-                    <div style={{fontSize:12,fontWeight:600,color:"#22C55E",fontFamily:"var(--sans)"}}>
-                      Ready to calculate
-                    </div>
-                    <div style={{fontSize:11,color:"#737373",fontFamily:"var(--sans)",marginTop:2}}>
-                      All 4 required columns mapped · {uploadRaw.rows.length} rows will be processed
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <button onClick={runCalc} disabled={!colMap.chi||!colMap.s||!colMap.lambda0||!colMap.C||!uploadName.trim()||!researchQ.trim()}
-                style={{
-                  background:(!colMap.chi||!colMap.s||!colMap.lambda0||!colMap.C||!uploadName.trim())?"#1A1A1A":"#2563EB",
-                  border:"none",borderRadius:10,padding:"14px 28px",fontSize:14,fontWeight:700,
-                  color:"#FFFFFF",fontFamily:"var(--sans)",
-                  cursor:(!colMap.chi||!colMap.s||!colMap.lambda0||!colMap.C||!uploadName.trim()||!researchQ.trim())?"not-allowed":"pointer",
-                  opacity:(!colMap.chi||!colMap.s||!colMap.lambda0||!colMap.C||!uploadName.trim()||!researchQ.trim())?0.4:1,
-                  alignSelf:"flex-start",transition:"all 0.15s"
-                }}
-                onMouseEnter={e=>{if(colMap.chi&&colMap.s&&colMap.lambda0&&colMap.C&&uploadName.trim()&&researchQ.trim())e.currentTarget.style.background="#3B82F6";}}
-                onMouseLeave={e=>{if(colMap.chi&&colMap.s&&colMap.lambda0&&colMap.C&&uploadName.trim()&&researchQ.trim())e.currentTarget.style.background="#2563EB";}}
-              >
-                Run EoE Analysis →
-              </button>
-            </div>
-          )}
-
-          {/* Step 3: results */}
-          {uploadStep==="results" && (
-            <div style={{display:"flex",flexDirection:"column",gap:16}}>
-              {/* Validation badges */}
-              {validation.map((v,i)=>(
-                <div key={i} style={{background:STATUS_BG[v.type],border:`1px solid ${STATUS_COLOR[v.type]}40`,borderRadius:10,padding:"12px 16px",display:"flex",gap:10,alignItems:"center"}}>
-                  <span style={{fontSize:16}}>{v.type==="green"?"✅":v.type==="yellow"?"⚠️":"🚫"}</span>
-                  <span style={{fontSize:13,color:STATUS_COLOR[v.type],fontFamily:"var(--sans)"}}>{v.msg}</span>
-                </div>
-              ))}
-
-              {results && (
-                <>
-                  {/* Bar chart */}
-                  <div style={{background:"#0A0A0A",border:"1px solid #1A1A1A",borderRadius:12,padding:20,overflowX:"auto"}}>
-                    <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#3B82F6",marginBottom:16,letterSpacing:3}}>STABILITY MARGIN — {uploadName}</div>
-                    <svg width={Math.max(500,results.length*56)} height={180} style={{display:"block"}}>
-                      <line x1={40} y1={90} x2={Math.max(500,results.length*56)-20} y2={90} stroke="#333333" strokeWidth={1} strokeDasharray="4,4"/>
-                      {results.map((r,i)=>{
-                        const x=40+i*((Math.max(500,results.length*56)-60)/results.length);
-                        const barW=Math.max(10,((Math.max(500,results.length*56)-60)/results.length)-8);
-                        const maxAbs=Math.max(...results.map(r2=>Math.abs(r2.M)),0.3);
-                        const barH=Math.abs(r.M)/maxAbs*70;
-                        const barY=r.M>=0?90-barH:90;
-                        return (
-                          <g key={i}>
-                            <rect x={x} y={barY} width={barW} height={barH} fill={mColor(r.M)} opacity={0.85} rx={2}/>
-                            <text x={x+barW/2} y={168} textAnchor="middle" fill="#525252" fontSize={8} fontFamily="JetBrains Mono">
-                              {String(r.label).length>7?String(r.label).slice(0,6)+"…":r.label}
-                            </text>
-                            <text x={x+barW/2} y={r.M>=0?barY-4:barY+barH+12} textAnchor="middle" fill={mColor(r.M)} fontSize={8} fontFamily="JetBrains Mono">
-                              {(r.M>=0?"+":"")+r.M.toFixed(2)}
-                            </text>
-                          </g>
-                        );
-                      })}
-                    </svg>
-                  </div>
-
-                  {/* Results table */}
-                  <div style={{background:"#0A0A0A",border:"1px solid #1A1A1A",borderRadius:12,padding:20,overflowX:"auto"}}>
-                    <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#3B82F6",marginBottom:14,letterSpacing:3}}>FULL RESULTS</div>
-                    <table style={{borderCollapse:"collapse",fontSize:12,width:"100%",fontFamily:"var(--mono)"}}>
-                      <thead>
-                        <tr style={{borderBottom:"1px solid #2A2A2A"}}>
-                          {["Label","χ","s","λ(C)","C","M","Status"].map(h=>(
-                            <th key={h} style={{textAlign:"left",color:"#737373",paddingBottom:8,paddingRight:16,fontWeight:500,fontSize:10}}>{h}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {results.map((r,i)=>(
-                          <tr key={i} style={{borderBottom:"1px solid #1A1A1A"}}>
-                            <td style={{padding:"7px 16px 7px 0",color:"#D4D4D4"}}>{r.label}</td>
-                            <td style={{paddingRight:16,color:"#60A5FA"}}>{r.chi.toFixed(3)}</td>
-                            <td style={{paddingRight:16,color:"#A78BFA"}}>{r.s.toFixed(3)}</td>
-                            <td style={{paddingRight:16,color:"#F87171"}}>{(r.lambda0+k*Math.pow(r.C,n)).toFixed(3)}</td>
-                            <td style={{paddingRight:16,color:"#FCD34D"}}>{r.C.toFixed(3)}</td>
-                            <td style={{paddingRight:16,color:mColor(r.M),fontWeight:600}}>{(r.M>=0?"+":"")+r.M.toFixed(4)}</td>
-                            <td style={{color:mColor(r.M)}}>{mLabel(r.M)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-
-                  {/* Actions row */}
-                  <div style={{display:"flex",gap:12,flexWrap:"wrap"}}>
-                    <button onClick={saveToCommunity} style={{
-                      background:"#111111",border:"1px solid #2A2A2A",borderRadius:10,
-                      padding:"11px 20px",fontSize:13,fontWeight:600,color:"#FFFFFF",
-                      fontFamily:"var(--sans)",display:"flex",alignItems:"center",gap:8
-                    }}>🌐 Save to community library</button>
-                    <button onClick={()=>{setUploadStepP("idle");setResults(null);setValidation([]);if(fileRef.current)fileRef.current.value="";}} style={{
-                      background:"none",border:"1px solid #2A2A2A",borderRadius:10,
-                      padding:"11px 20px",fontSize:13,color:"#737373",fontFamily:"var(--sans)"
-                    }}>Upload another file</button>
-                  </div>
-                </>
-              )}
-            </div>
+            </>
           )}
         </div>
       )}
 
-      {/* COMMUNITY MODE */}
-      {mode==="community" && (
-        <div style={{display:"flex",flexDirection:"column",gap:16}}>
-          {community.length === 0 ? (
-            <div style={{background:"#0A0A0A",border:"1px solid #1A1A1A",borderRadius:14,padding:40,textAlign:"center"}}>
-              <div style={{fontSize:40,marginBottom:16}}>🌐</div>
-              <div style={{fontSize:16,fontFamily:"var(--serif)",color:"#FFFFFF",marginBottom:8}}>No community datasets yet</div>
-              <p style={{fontSize:13,color:"#737373",fontFamily:"var(--sans)",lineHeight:1.7,maxWidth:400,margin:"0 auto"}}>
-                Upload your own data and save it to the community library to be the first contributor.
-                All submissions show verification badges and source citations.
-              </p>
-            </div>
-          ) : (
-            community.map((c,i)=>(
-              <div key={i} style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:12,padding:20}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
-                  <div>
-                    <div style={{fontSize:15,fontWeight:600,color:"#FFFFFF",fontFamily:"var(--sans)"}}>{c.name}</div>
-                    <div style={{fontSize:11,color:"#525252",fontFamily:"var(--mono)",marginTop:3}}>{c.points.length} data points · Added {c.addedAt}</div>
-                  </div>
-                  <span style={{fontSize:10,background:"#EAB30820",border:"1px solid #EAB30840",borderRadius:4,padding:"2px 8px",color:"#EAB308",fontFamily:"var(--mono)"}}>🟡 Community</span>
-                </div>
-                <Sparkline points={c.points} w={200} h={40}/>
-              </div>
-            ))
-          )}
-        </div>
-      )}
+      {/* Legitimacy note */}
+      <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:10,
+        padding:"14px 18px",display:"flex",gap:10,alignItems:"flex-start"}}>
+        <span style={{fontSize:13,flexShrink:0}}>⚠️</span>
+        <p style={{fontSize:11,color:"#737373",lineHeight:1.6,fontFamily:"var(--sans)"}}>
+          EoE identifies declining or improving margins and patterns consistent with collapse predictions.
+          It cannot predict when collapse will occur. All values are proxy estimates, not precise measurements.
+          Framework under peer review — cite as: Baird, N. (2026). Engine of Emergence. arXiv:[pending].
+        </p>
+      </div>
     </div>
   );
 }
