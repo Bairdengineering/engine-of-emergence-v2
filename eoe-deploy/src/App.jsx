@@ -2624,7 +2624,7 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
 
   async function loadRuns(key) {
     try {
-      const resp = await fetch("/api/load-experiments?key=" + key);
+      const resp = await fetch("/api/load-experiments?key=" + key + "&secret=" + (window.__eoe_s||"eoe2026"));
       if (resp.ok) {
         const data = await resp.json();
         if (data.experiments && data.experiments.length > 0) { return data.experiments.map(e => Array.isArray(e) ? e[0] : e).map(e => typeof e === "string" ? JSON.parse(e) : e); }
@@ -2638,7 +2638,7 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
       await fetch("/api/save-experiment", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({ key, experiment: result })
+        body: JSON.stringify({ key, experiment: result, secret: (window.__eoe_s||"eoe2026") })
       });
     } catch(e) {}
     try {
