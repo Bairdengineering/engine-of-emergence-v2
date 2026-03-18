@@ -7,8 +7,11 @@ export default async function handler(req, res) {
     req.on('end', () => resolve(data));
   });
 
-  const { key, experiment } = JSON.parse(body);
+  if (body.length > 100000) return res.status(413).json({ error: 'Experiment too large' });
+
+  const { key, experiment, secret } = JSON.parse(body);
   if (!key || !experiment) return res.status(400).json({ error: 'Missing key or experiment' });
+  if (secret !== 'eoe2026') return res.status(403).json({ error: 'Forbidden' });
 
   const url = `${process.env.KV_REST_API_URL}/lpush/${key}`;
   const response = await fetch(url, {
