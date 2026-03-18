@@ -10,6 +10,8 @@ export default async function handler(req, res) {
   });
 
   const data = await response.json();
-  const experiments = (data.result || []).map(e => JSON.parse(e));
+  const experiments = (data.result || []).map(e => {
+    try { return typeof e === 'string' ? JSON.parse(e) : e; } catch { return null; }
+  }).filter(Boolean);
   return res.status(200).json({ experiments });
 }
