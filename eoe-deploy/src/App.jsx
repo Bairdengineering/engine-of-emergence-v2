@@ -2690,7 +2690,8 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
       const key = hashStr(hypothesis);
       const run = {structured,analysis,timestamp:new Date().toISOString(),id:Date.now()};
       saveRun(key, run);
-      const allRuns = loadRuns(key);
+      // const allRuns = loadRuns(key);
+      const allRuns = [run]; // cache disabled for testing
       const averaged = averageRuns(allRuns);
       setExperiment({...averaged, cacheKey:key});
     })();
