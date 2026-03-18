@@ -2585,51 +2585,72 @@ function ExploreTab() {
 }
 
 
+
 // ── TAB: RUN AN EXPERIMENT ────────────────────────────────────────────────────
 function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) {
-  const [question, setQuestion] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
-  const [uploadStep, setUploadStep] = useState("idle");
-  const [suggestedSources, setSuggestedSources] = useState([]);
+  const bottomRef = useRef(null);
+  const inputRef = useRef(null);
   const fileRef = useRef(null);
 
-  const EXAMPLE_QUESTIONS = [
-    { q: "Is the US government heading toward collapse?", icon: "🇺🇸", hint: "Preloaded dataset" },
-    { q: "How close is the San Andreas fault to a major rupture?", icon: "🏔️", hint: "Seismic data" },
-    { q: "Compare Rome's collapse arc to Detroit's bankruptcy", icon: "🏛️", hint: "Comparison" },
-    { q: "What does the Amazon rainforest tipping point look like?", icon: "🌳", hint: "Ecological" },
-    { q: "Is the Great Barrier Reef past the point of no return?", icon: "🪸", hint: "Preloaded dataset" },
-    { q: "Analyze a company's fiscal stability using EoE", icon: "🏢", hint: "Upload your data" },
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior:"smooth" });
+  }, [messages, loading]);
+
+  const EXAMPLES = [
+    { icon:"🇺🇸", text:"Is the US federal government heading toward collapse?" },
+    { icon:"🪸", text:"What does the Great Barrier Reef trajectory look like?" },
+    { icon:"🏛️", text:"Walk me through Rome's collapse arc" },
+    { icon:"🌳", text:"Where do I find data on California's Central Valley agricultural system?" },
+    { icon:"🏢", text:"How do I analyze a company's fiscal stability using EoE?" },
+    { icon:"🌋", text:"How close is the San Andreas fault to a major rupture?" },
   ];
 
-  // Match question to preloaded datasets — strict matching only
-  // Only matches when question clearly names a known dataset
+  const SYSTEM = `You are the Engine of Emergence experiment assistant. EoE measures M = χs - λ(C) where χ=efficiency (0-1), s=throughput (0-1), λ₀=base burden (0-1), C=complexity (0-1). M positive = runway, M negative = borrowed time. λ(C) = λ₀ + 0.15 × C^1.4.
+
+PRELOADED DATASETS available for instant analysis: Roman Empire (100-476 CE), Apple Inc (1997-2024), Great Barrier Reef (1985-2024), Detroit (1950-2024), US Federal System (1970-2024), Classic Maya (600-900 CE), Late Bronze Age (1250-1100 BCE), Tang Dynasty (618-907 CE), Indus Valley (2600-1700 BCE), Ottoman Empire (1683-1922), Enron (1996-2001), Kodak (1990-2020), West Germany (1945-2024), Chesapeake Bay (1983-2024), Amazon Rainforest (2000-2023), Yellowstone (1995-2023), Singapore (1965-2024), Global Ocean Heat (1960-2023).
+
+APPROVED DATA SOURCES by domain:
+- Business/Company: SEC EDGAR (edgar.sec.gov), Macrotrends (macrotrends.net), World Bank Enterprise Surveys
+- City/Urban: Lincoln Institute FiSC Database (lincolninst.edu), BEA Metro GDP, US Census ACS
+- National Government: World Bank Open Data (data.worldbank.org), IMF WEO Database, CBO Historical Data
+- Agriculture/Valley/Water: USDA NASS (nass.usda.gov), California DWR (water.ca.gov), CDFA (cdfa.ca.gov), USGS Water Resources (waterdata.usgs.gov)
+- Ecological/Forest: AIMS LTMP, NOAA Coral Reef Watch, Global Forest Watch (globalforestwatch.org), NASA AppEEARS
+- Seismic: USGS Earthquake Catalog (earthquake.usgs.gov), UNAVCO GPS data
+- Historical Civilization: Seshat Databank (seshatdatabank.info), HYDE Database, Turchin Cliodynamics
+- Financial System: FDIC BankFind, Federal Reserve Z.1, BIS Statistics
+
+When answering:
+- If the question matches a preloaded dataset, say so and describe the key findings (M trajectory, when it went negative, warning lead time if applicable)
+- If the question is about a new system, identify the domain, name the exact approved data sources, and explain which columns map to χ, s, λ₀, and C
+- If they want to upload data, tell them to use the Upload button and describe the CSV format needed
+- Be conversational and direct. 2-4 sentences unless they ask for more. No bullet points in normal responses.`;
+
   function matchDataset(q) {
     const ql = q.toLowerCase();
-    const matches = [];
-    // Each dataset requires SPECIFIC named references — not generic words
     const keywords = {
-      rome:       ["roman empire","rome","ancient rome","roman collapse","romulus"],
-      apple:      ["apple inc","apple computer","tim cook","steve jobs","iphone company","apple stock","cupertino"],
-      reef:       ["great barrier reef","coral reef","barrier reef","coral bleaching"],
-      detroit:    ["detroit","motor city","detroit bankruptcy","detroit fiscal"],
-      usfiscal:   ["us federal","us government","federal government","us fiscal","national debt","federal debt","us congress","us deficit","american government","united states government","us budget"],
-      maya:       ["maya civilization","mayan","classic maya","ancient maya"],
-      bronze:     ["bronze age","late bronze age","mycenae","hittite empire"],
-      tang:       ["tang dynasty","tang empire","an lushan"],
-      indus:      ["indus valley","harappan","mohenjo-daro","harappa"],
-      ottoman:    ["ottoman empire","ottoman","tanzimat"],
+      rome:       ["roman empire","rome","ancient rome","roman collapse"],
+      apple:      ["apple inc","apple computer","tim cook","steve jobs","iphone company"],
+      reef:       ["great barrier reef","barrier reef","coral reef bleaching"],
+      detroit:    ["detroit","motor city","detroit bankruptcy"],
+      usfiscal:   ["us federal","us government","federal government","us fiscal","national debt","federal budget","us deficit","united states government"],
+      maya:       ["maya civilization","mayan","classic maya"],
+      bronze:     ["bronze age","late bronze age","mycenae","hittite"],
+      tang:       ["tang dynasty","an lushan"],
+      indus:      ["indus valley","harappan","mohenjo-daro"],
+      ottoman:    ["ottoman empire","ottoman"],
       enron:      ["enron"],
       kodak:      ["kodak","eastman kodak"],
-      germany:    ["west germany","german economic","wirtschaftswunder","post-war germany","german reunification"],
-      chesapeake: ["chesapeake bay","chesapeake estuary"],
-      amazon:     ["amazon rainforest","amazon forest","amazon deforestation","brazilian amazon"],
-      yellowstone:["yellowstone","yellowstone wolves","yellowstone ecosystem"],
-      singapore:  ["singapore","lee kuan yew","city-state singapore"],
-      ocean:      ["ocean heat","global ocean","ocean warming","ocean temperature"],
+      germany:    ["west germany","german economic miracle","wirtschaftswunder"],
+      chesapeake: ["chesapeake bay"],
+      amazon:     ["amazon rainforest","amazon forest","amazon deforestation"],
+      yellowstone:["yellowstone","yellowstone wolves"],
+      singapore:  ["singapore"],
+      ocean:      ["global ocean heat","ocean warming","ocean temperature"],
     };
+    const matches = [];
     for (const [id, kws] of Object.entries(keywords)) {
       if (kws.some(kw => ql.includes(kw))) {
         const ds = DATASETS.find(d => d.id === id);
@@ -2639,413 +2660,261 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
     return matches;
   }
 
-  // Suggest data sources based on question
-  function suggestSources(q) {
-    const ql = q.toLowerCase();
-    const sources = [];
-    if (ql.includes("company") || ql.includes("business") || ql.includes("fiscal") || ql.includes("revenue"))
-      sources.push({ name:"SEC EDGAR", url:"https://www.sec.gov/cgi-bin/browse-edgar", desc:"Annual reports for any US public company", domain:"Business" });
-    if (ql.includes("city") || ql.includes("urban") || ql.includes("municipal"))
-      sources.push({ name:"Lincoln Institute FiSC", url:"https://www.lincolninst.edu/research-data/data-toolkits/fiscally-standardized-cities", desc:"Standardized fiscal data for 150 US cities", domain:"City" });
-    if (ql.includes("country") || ql.includes("government") || ql.includes("nation") || ql.includes("gdp"))
-      sources.push({ name:"World Bank Open Data", url:"https://data.worldbank.org", desc:"Government effectiveness, debt, revenue for 200+ countries", domain:"Government" });
-    if (ql.includes("reef") || ql.includes("coral") || ql.includes("ocean") || ql.includes("marine"))
-      sources.push({ name:"NOAA Coral Reef Watch", url:"https://coralreefwatch.noaa.gov", desc:"Bleaching alerts and thermal stress data", domain:"Ecological" });
-    if (ql.includes("forest") || ql.includes("tree") || ql.includes("deforest"))
-      sources.push({ name:"Global Forest Watch", url:"https://www.globalforestwatch.org", desc:"Annual tree cover loss globally since 2000", domain:"Forest" });
-    if (ql.includes("earthquake") || ql.includes("seismic") || ql.includes("fault"))
-      sources.push({ name:"USGS Earthquake Catalog", url:"https://earthquake.usgs.gov/earthquakes/search/", desc:"Complete earthquake catalog with magnitudes and locations", domain:"Seismic" });
-    return sources;
-  }
+  async function send(q) {
+    const trimmed = (q || input).trim();
+    if (!trimmed || loading) return;
+    setInput("");
 
-  async function runExperiment() {
-    const q = question.trim();
-    if (!q) return;
+    const userMsg = { role:"user", content:trimmed };
+    const newHistory = [...messages, userMsg];
+    setMessages(newHistory);
     setLoading(true);
-    setError("");
-    setResult(null);
-    setSuggestedSources([]);
 
-    // Check preloaded datasets first
-    const matches = matchDataset(q);
+    // Check preloaded datasets
+    const matched = matchDataset(trimmed);
 
-    if (matches.length > 0) {
-      // Run against matched datasets
-      setTimeout(() => {
-        setResult({ type: "preloaded", datasets: matches, question: q });
-        setLoading(false);
-      }, 600);
-      return;
+    try {
+      const resp = await fetch("https://api.anthropic.com/v1/messages", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({
+          model:"claude-sonnet-4-20250514",
+          max_tokens:600,
+          system: SYSTEM + (matched.length > 0 ? `
+
+PRELOADED MATCH FOUND: ${matched.map(d=>d.label).join(", ")}. Lead with this finding.` : ""),
+          messages: newHistory.map(m => ({ role:m.role, content:m.content }))
+        })
+      });
+      const data = await resp.json();
+      const reply = data.content?.map(b=>b.text||"").join("") || "Try again in a moment.";
+      setMessages(prev => [...prev, { role:"assistant", content:reply, datasets:matched }]);
+    } catch(e) {
+      setMessages(prev => [...prev, {
+        role:"assistant",
+        content: matched.length > 0
+          ? `I found a matching dataset: ${matched.map(d=>d.label).join(", ")}. Check the Explore tab for the full analysis with trajectory charts and historical annotations.`
+          : "Connection issue — try again. In the meantime: check the Sources tab for approved data sources, or the Explore tab for preloaded datasets."
+      }]);
     }
-
-    // No match — detect domain and show guidance
-    const sources = suggestSources(q);
-    setSuggestedSources(sources);
-
-    // Rule-based domain detection for variable mapping
-    const ql2 = q.toLowerCase();
-    let domain = "Other";
-    let variables = null;
-    let dataNeeded = "";
-    let approach = "";
-
-    if (ql2.match(/compan|business|firm|startup|corporation|revenue|profit|ceo/)) {
-      domain = "Business";
-      variables = {
-        chi: "How efficiently does the company convert revenue into value — gross margin, revenue per employee, or output per dollar of operating cost.",
-        s: "How much money and energy is flowing through right now — total revenue, new investment, or customer growth rate.",
-        lambda0: "What does it cost just to keep the lights on — rent, payroll for non-revenue staff, debt service, fixed overhead.",
-        C: "How complicated is this organization — number of employees, product lines, markets, and management layers."
-      };
-      dataNeeded = "You need annual revenue, gross margin %, fixed operating costs, and a measure of organizational complexity (headcount or product count). SEC EDGAR has this for any public company.";
-      approach = "Normalize each variable to 0-1 (divide by max). Run M = χs − λ(C) for each year. A declining M 2-3 years before a bankruptcy or acquisition is the classic EoE warning pattern.";
-    } else if (ql2.match(/city|urban|municipal|town|metro|neighborhood/)) {
-      domain = "City";
-      variables = {
-        chi: "How much economic value does the city generate per dollar of infrastructure — GDP per road-mile maintained, or tax revenue per dollar of city spending.",
-        s: "How much economic activity is flowing — employment, tax receipts, building permits, population growth.",
-        lambda0: "What does it cost to keep the city running — pension obligations, debt service, emergency services, infrastructure backlog.",
-        C: "How many people, systems, and jurisdictions must be coordinated — population size, overlapping governments, union contracts."
-      };
-      dataNeeded = "You need municipal revenue, expenditure broken down by mandatory vs discretionary, population, and debt/pension obligations. Lincoln Institute FiSC Database has standardized data for 150 US cities.";
-      approach = "Detroit's collapse arc is preloaded — use it as a comparison baseline. For a new city, normalize Lincoln Institute fiscal data and run the M trajectory over 20+ years.";
-    } else if (ql2.match(/government|federal|nation|country|state|fiscal|debt|deficit|congress/)) {
-      domain = "Government";
-      variables = {
-        chi: "How effectively does government spending turn into actual outcomes — GDP growth per dollar, infrastructure built per dollar, or government effectiveness scores.",
-        s: "How much revenue and economic capacity is available — tax revenue as % of GDP, GDP growth rate, employment rate.",
-        lambda0: "What spending is locked in before a single discretionary dollar — entitlements, interest on debt, military baseline, civil service salaries.",
-        C: "How many laws, agencies, and constituencies must be managed — number of federal agencies, pages of active regulation, treaty obligations."
-      };
-      dataNeeded = "You need government revenue, mandatory vs discretionary spending breakdown, debt/GDP ratio, and a government effectiveness measure. World Bank Open Data and IMF WEO Database are the best free sources.";
-      approach = "The US Federal System dataset is preloaded — try 'US federal government' to see that analysis. For other countries, World Bank government effectiveness scores map directly to χ.";
-    } else if (ql2.match(/ecosystem|forest|reef|river|lake|ocean|species|habitat|biodiversity|environmental/)) {
-      domain = "Ecological";
-      variables = {
-        chi: "How efficiently does the ecosystem convert energy and nutrients into living biomass — net primary productivity, species reproduction rates, or ecosystem service delivery.",
-        s: "How much energy and nutrient is flowing into the system — solar irradiance, rainfall, nutrient upwelling, or resource availability.",
-        lambda0: "What does the ecosystem spend energy on just to survive — baseline respiration, stress responses, disease load, thermal or chemical burden.",
-        C: "How structurally rich and interconnected is this ecosystem — species richness, food web depth, habitat connectivity, trophic levels."
-      };
-      dataNeeded = "You need a productivity metric (NPP or biomass), a resource flow metric (rainfall or nutrient data), a stress indicator, and a biodiversity/complexity measure. NASA AppEEARS provides NPP data for any location on Earth.";
-      approach = "The Great Barrier Reef and Amazon datasets are preloaded for comparison. For a new ecosystem, USGS Water Info, Global Forest Watch, or AIMS LTMP have downloadable time-series data.";
-    } else if (ql2.match(/seismic|earthquake|fault|tectonic|rupture|tremor/)) {
-      domain = "Seismic";
-      variables = {
-        chi: "Fault structural efficiency — how regularly and efficiently does the fault release accumulated stress through small earthquakes vs locking it up.",
-        s: "Seismic energy throughput — normalized annual seismic moment release relative to the regional maximum.",
-        lambda0: "Accumulated strain burden — slip deficit as a fraction of the recurrence interval, representing locked stress.",
-        C: "Fault network complexity — number of fault segments, branching, interaction zones, and proximity to other active faults."
-      };
-      dataNeeded = "You need seismic moment release rates, GPS-measured slip deficit, fault coupling coefficient, and fault network density. USGS Earthquake Catalog and UNAVCO GPS data are the primary sources.";
-      approach = "The Seismic tab has 8 major fault zones preloaded. Check if your fault system is covered there first. For new fault zones, USGS Hazards Science Center publishes coupling coefficients and slip rates.";
-    } else {
-      domain = "Custom System";
-      variables = {
-        chi: "How efficiently does this system convert its inputs (energy, resources, investment) into useful outputs — the ratio of output quality to input cost.",
-        s: "How much resource, energy, or activity is flowing through the system right now — the throughput relative to its historical peak.",
-        lambda0: "What does it cost just to keep this system running at baseline — the fixed overhead that must be paid before any surplus can accumulate.",
-        C: "How many interconnected parts, rules, and relationships must be coordinated — the structural complexity of the system."
-      };
-      dataNeeded = "Identify a time series (10+ data points over years or decades) for each of the four variables above. Normalize each to 0-1. The Assistant tab can help you map your specific data to these variables.";
-      approach = "Start with the domain sandbox in the Explore tab to get a feel for the variables. Then use the Assistant tab — describe your system and it will help you identify data sources and map your columns.";
-    }
-
-    setResult({ type: "guided", analysis: { domain, variables, dataNeeded, suggestedApproach: approach }, question: q });
     setLoading(false);
-    // Trigger floating assistant with context
-    if (window._eoeAskAssistant) {
-      window._eoeAskAssistant(`I want to run an EoE experiment on this question: "${q}". What data do I need and where do I find it?`);
-    }
   }
+
+  function handleFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setMessages(prev => [...prev,
+      { role:"user", content:`📂 ${file.name}` },
+      { role:"assistant", content:`Got it — ${file.name} uploaded. To analyze it with EoE I need columns for: χ (efficiency), s (throughput), λ₀ (base burden), and C (complexity), all normalized to 0-1. Tell me what's in your file and I'll help you map the columns.` }
+    ]);
+    e.target.value = "";
+  }
+
+  const isEmpty = messages.length === 0;
 
   return (
-    <div style={{display:"flex",flexDirection:"column",gap:32,maxWidth:760,margin:"0 auto",width:"100%"}}>
+    <div style={{display:"flex",flexDirection:"column",height:"calc(100vh - 160px)",maxWidth:760,margin:"0 auto",width:"100%"}}>
 
-      {/* Header */}
-      <div>
-        <h2 style={{fontFamily:"var(--serif)",fontSize:28,color:"#FFFFFF",marginBottom:10,
-          borderLeft:"3px solid #22C55E",paddingLeft:14}}>
-          Run an Experiment
-        </h2>
-        <p style={{color:"#A3A3A3",fontSize:13,fontFamily:"var(--sans)",lineHeight:1.65}}>
-          Ask any question about a system you want to analyze. If it matches our preloaded datasets,
-          it runs instantly. If not, we'll tell you exactly what data to collect and where to find it.
-        </p>
-      </div>
-
-      {/* Main input */}
-      <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:16,
-        padding:"24px 28px",display:"flex",flexDirection:"column",gap:16}}>
-        <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#22C55E",letterSpacing:3}}>
-          YOUR RESEARCH QUESTION
-        </div>
-        <textarea
-          value={question}
-          onChange={e=>{setQuestion(e.target.value);setError("");setResult(null);}}
-          onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey&&!e.metaKey){e.preventDefault();runExperiment();}}}
-          placeholder="Ask anything — e.g. 'Is the US government heading toward collapse?' or 'Analyze my company's fiscal health using EoE'"
-          rows={3}
-          style={{
-            width:"100%",background:"#111111",
-            border:`1px solid ${error?"#EF4444":"#2A2A2A"}`,
-            borderRadius:10,padding:"14px 18px",fontSize:15,
-            color:"#FFFFFF",outline:"none",fontFamily:"var(--sans)",
-            resize:"none",lineHeight:1.6,boxSizing:"border-box",
-            transition:"border-color 0.15s"
-          }}
-          onFocus={e=>e.target.style.borderColor="#22C55E"}
-          onBlur={e=>e.target.style.borderColor=error?"#EF4444":"#2A2A2A"}
-        />
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10}}>
-          <div style={{fontSize:11,color:"#525252",fontFamily:"var(--sans)"}}>
-            Press Enter to run · Shift+Enter for new line
+      {/* Header — only when empty */}
+      {isEmpty && (
+        <div style={{flex:1,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"center",gap:32,paddingBottom:40}}>
+          <div style={{textAlign:"center"}}>
+            <h2 style={{fontFamily:"var(--serif)",fontSize:32,color:"#FFFFFF",marginBottom:12,
+              borderLeft:"3px solid #22C55E",paddingLeft:16,textAlign:"left"}}>
+              Run an Experiment
+            </h2>
+            <p style={{color:"#737373",fontSize:14,fontFamily:"var(--sans)",lineHeight:1.65,textAlign:"left"}}>
+              Ask about any system — historical, ecological, fiscal, seismic. If we have preloaded data it runs instantly. If not, we'll tell you exactly where to get it.
+            </p>
           </div>
-          <button onClick={runExperiment} disabled={loading||!question.trim()} style={{
-            background:loading||!question.trim()?"#1A1A1A":"#22C55E",
-            border:"none",borderRadius:10,padding:"12px 28px",
-            fontSize:13,fontWeight:700,color:"#000000",
-            fontFamily:"var(--sans)",cursor:loading||!question.trim()?"not-allowed":"pointer",
-            opacity:loading||!question.trim()?0.4:1,transition:"all 0.15s",
-            display:"flex",alignItems:"center",gap:8
-          }}>
-            {loading ? (
-              <>
-                <div style={{width:14,height:14,borderRadius:"50%",
-                  border:"2px solid #000",borderTopColor:"transparent",
-                  animation:"spin 0.8s linear infinite"}}/>
-                Analyzing...
-              </>
-            ) : "Run Experiment →"}
-          </button>
-        </div>
-      </div>
 
-      {/* Example questions */}
-      {!result && !loading && (
-        <div>
-          <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#525252",
-            letterSpacing:3,marginBottom:12}}>EXAMPLE QUESTIONS</div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:8}}>
-            {EXAMPLE_QUESTIONS.map((ex,i)=>(
-              <button key={i} onClick={()=>{setQuestion(ex.q);setResult(null);}}
+          {/* Example prompts */}
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:8,width:"100%"}}>
+            {EXAMPLES.map((ex,i) => (
+              <button key={i} onClick={() => send(ex.text)}
                 style={{
                   background:"#0A0A0A",border:"1px solid #2A2A2A",
                   borderRadius:10,padding:"12px 16px",textAlign:"left",
                   cursor:"pointer",transition:"all 0.15s",
-                  display:"flex",flexDirection:"column",gap:6
+                  display:"flex",alignItems:"center",gap:10
                 }}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor="#22C55E50";e.currentTarget.style.background="#0A1A0A";}}
+                onMouseEnter={e=>{e.currentTarget.style.borderColor="#22C55E40";e.currentTarget.style.background="#0A1A0A";}}
                 onMouseLeave={e=>{e.currentTarget.style.borderColor="#2A2A2A";e.currentTarget.style.background="#0A0A0A";}}
               >
-                <div style={{display:"flex",alignItems:"center",gap:8}}>
-                  <span style={{fontSize:18}}>{ex.icon}</span>
-                  <span style={{fontSize:9,color:"#22C55E",fontFamily:"var(--mono)",
-                    background:"#22C55E15",borderRadius:4,padding:"2px 7px"}}>{ex.hint}</span>
-                </div>
-                <div style={{fontSize:12,color:"#D4D4D4",fontFamily:"var(--sans)",lineHeight:1.5}}>
-                  {ex.q}
-                </div>
+                <span style={{fontSize:20,flexShrink:0}}>{ex.icon}</span>
+                <span style={{fontSize:13,color:"#D4D4D4",fontFamily:"var(--sans)",lineHeight:1.4}}>{ex.text}</span>
               </button>
             ))}
           </div>
         </div>
       )}
 
-      {/* Results — preloaded match */}
-      {result?.type === "preloaded" && (
-        <div style={{display:"flex",flexDirection:"column",gap:20,animation:"fadeUp 0.4s ease both"}}>
-          <div style={{background:"#0A1A0A",border:"1px solid #22C55E30",borderRadius:12,
-            padding:"14px 18px",display:"flex",gap:10,alignItems:"center"}}>
-            <span style={{fontSize:16}}>✅</span>
-            <div>
-              <div style={{fontSize:13,fontWeight:600,color:"#22C55E",fontFamily:"var(--sans)"}}>
-                Found {result.datasets.length} matching dataset{result.datasets.length>1?"s":""} in our library
-              </div>
-              <div style={{fontSize:11,color:"#525252",fontFamily:"var(--sans)",marginTop:2}}>
-                Full analysis with historical annotations, trajectory charts, and model fit statistics
-              </div>
-            </div>
-          </div>
-
-          {result.datasets.map(ds => {
-            const pts = ds.points;
-            const lastPt = pts[pts.length-1];
-            const M = calcM(lastPt.chi,lastPt.s,lastPt.lambda0,lastPt.C);
-            return (
-              <div key={ds.id} style={{background:"#0A0A0A",border:`1px solid ${ds.color}35`,
-                borderRadius:14,overflow:"hidden"}}>
-                {/* Dataset header */}
-                <div style={{padding:"20px 24px",borderBottom:"1px solid #1A1A1A",
-                  display:"flex",justifyContent:"space-between",alignItems:"flex-start",
-                  flexWrap:"wrap",gap:16}}>
-                  <div>
-                    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
-                      <span style={{fontSize:22}}>{ds.emoji}</span>
-                      <div>
-                        <div style={{fontSize:16,fontFamily:"var(--serif)",color:"#FFFFFF"}}>{ds.label}</div>
-                        <div style={{fontSize:10,color:"#525252",fontFamily:"var(--mono)"}}>{ds.period} · {ds.domain}</div>
-                      </div>
-                    </div>
-                    <p style={{fontSize:13,color:"#A3A3A3",lineHeight:1.65,fontFamily:"var(--sans)",maxWidth:440}}>{ds.desc}</p>
-                  </div>
-                  <div style={{textAlign:"center",flexShrink:0}}>
-                    <Gauge value={M} size={140}/>
-                    <div style={{fontSize:12,fontWeight:700,color:mColor(M),fontFamily:"var(--sans)",marginTop:4}}>
-                      {mLabel(M)}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Chart */}
-                <div style={{padding:"16px 24px",borderBottom:"1px solid #1A1A1A"}}>
-                  <MChart points={pts} dsColor={ds.color} dsId={ds.id}/>
-                </div>
-
-                <MInsight points={pts} dsId={ds.id} dsLabel={ds.label} domain={ds.domain}/>
-                {/* Latest annotation */}
-                <div style={{padding:"14px 24px",borderBottom:"1px solid #1A1A1A",
-                  background:"#000000",borderLeft:`3px solid ${ds.color}`}}>
-                  <div style={{fontSize:9,fontFamily:"var(--mono)",color:ds.color,marginBottom:5,letterSpacing:2}}>
-                    MOST RECENT · {lastPt.year}
-                  </div>
-                  <p style={{fontSize:13,color:"#D4D4D4",lineHeight:1.65,fontFamily:"var(--sans)",margin:0}}>
-                    {lastPt.event}
-                  </p>
-                </div>
-
-                {/* Model fit + action */}
-                <div style={{padding:"16px 24px",display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
-                  <WarningLeadBadge dsId={ds.id} points={pts} compact={true}/>
-                  <button onClick={()=>onGoToExplore&&onGoToExplore()} style={{
-                    marginLeft:"auto",background:"#2563EB",border:"none",borderRadius:8,
-                    padding:"9px 18px",fontSize:12,fontWeight:600,color:"#FFFFFF",
-                    fontFamily:"var(--sans)",cursor:"pointer"
-                  }}>Full analysis in Explore →</button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Results — guided (no preloaded match) */}
-      {result?.type === "guided" && (
-        <div style={{display:"flex",flexDirection:"column",gap:16,animation:"fadeUp 0.4s ease both"}}>
-          <div style={{background:"#0A0A14",border:"1px solid #3B82F620",borderRadius:12,
-            padding:"14px 18px",display:"flex",gap:10,alignItems:"center"}}>
-            <span style={{fontSize:16}}>🔬</span>
-            <div>
-              <div style={{fontSize:13,fontWeight:600,color:"#93C5FD",fontFamily:"var(--sans)"}}>
-                No preloaded dataset found — here's how to run this experiment
-              </div>
-              <div style={{fontSize:11,color:"#525252",fontFamily:"var(--sans)",marginTop:2}}>
-                We've mapped your question to EoE variables and identified the data you need
-              </div>
-            </div>
-          </div>
-
-          {result.analysis && (
-            <>
-              {/* Variable mapping */}
-              <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:12,padding:20}}>
-                <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#3B82F6",letterSpacing:3,marginBottom:14}}>
-                  HOW EoE MAPS TO YOUR QUESTION
-                </div>
-                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:10}}>
-                  {[
-                    {sym:"χ",color:"#60A5FA",label:"Efficiency",desc:result.analysis.variables?.chi},
-                    {sym:"s",color:"#A78BFA",label:"Throughput",desc:result.analysis.variables?.s},
-                    {sym:"λ₀",color:"#F87171",label:"Base Burden",desc:result.analysis.variables?.lambda0},
-                    {sym:"C",color:"#FCD34D",label:"Complexity",desc:result.analysis.variables?.C},
-                  ].map(v=>(
-                    <div key={v.sym} style={{background:"#111111",border:`1px solid ${v.color}25`,
-                      borderRadius:10,padding:14}}>
-                      <div style={{display:"flex",alignItems:"baseline",gap:8,marginBottom:8}}>
-                        <span style={{fontFamily:"var(--mono)",fontSize:18,color:v.color,fontWeight:700}}>{v.sym}</span>
-                        <span style={{fontSize:10,color:"#525252",fontFamily:"var(--sans)"}}>{v.label}</span>
-                      </div>
-                      <div style={{fontSize:12,color:"#A3A3A3",fontFamily:"var(--sans)",lineHeight:1.5}}>{v.desc}</div>
-                    </div>
-                  ))}
-                </div>
-                {result.analysis.suggestedApproach && (
-                  <div style={{marginTop:14,padding:"12px 16px",background:"#000000",
-                    borderRadius:8,border:"1px solid #1A1A1A"}}>
-                    <div style={{fontSize:9,fontFamily:"var(--mono)",color:"#22C55E",marginBottom:6,letterSpacing:2}}>
-                      SUGGESTED APPROACH
-                    </div>
-                    <p style={{fontSize:13,color:"#D4D4D4",fontFamily:"var(--sans)",lineHeight:1.65,margin:0}}>
-                      {result.analysis.suggestedApproach}
-                    </p>
-                  </div>
-                )}
+      {/* Messages */}
+      {!isEmpty && (
+        <div style={{flex:1,overflowY:"auto",padding:"20px 0",display:"flex",flexDirection:"column",gap:20}}>
+          {messages.map((m,i) => (
+            <div key={i} style={{display:"flex",gap:12,alignItems:"flex-start",
+              flexDirection:m.role==="user"?"row-reverse":"row"}}>
+              {/* Avatar */}
+              <div style={{
+                width:32,height:32,borderRadius:"50%",flexShrink:0,marginTop:2,
+                background:m.role==="user"?"#2A2A2A":"#2563EB",
+                display:"flex",alignItems:"center",justifyContent:"center",
+                fontSize:m.role==="user"?14:11,fontWeight:700,
+                color:"#FFFFFF"
+              }}>
+                {m.role==="user" ? "N" : "E"}
               </div>
 
-              {/* Data needed */}
-              <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:12,padding:20}}>
-                <div style={{fontFamily:"var(--mono)",fontSize:9,color:"#3B82F6",letterSpacing:3,marginBottom:10}}>
-                  DATA YOU NEED TO COLLECT
+              <div style={{maxWidth:"85%",display:"flex",flexDirection:"column",gap:10}}>
+                {/* Message bubble */}
+                <div style={{
+                  background:m.role==="user"?"#1A1A1A":"#0A0A0A",
+                  border:`1px solid ${m.role==="user"?"#2A2A2A":"#1A1A1A"}`,
+                  borderRadius:m.role==="user"?"16px 16px 4px 16px":"4px 16px 16px 16px",
+                  padding:"12px 16px",
+                  fontSize:14,lineHeight:1.75,
+                  color:"#D4D4D4",fontFamily:"var(--sans)"
+                }}>
+                  {m.content}
                 </div>
-                <p style={{fontSize:13,color:"#D4D4D4",fontFamily:"var(--sans)",lineHeight:1.65,marginBottom:16}}>
-                  {result.analysis.dataNeeded}
-                </p>
 
-                {/* Suggested sources */}
-                {suggestedSources.length > 0 && (
-                  <div>
-                    <div style={{fontSize:11,fontWeight:600,color:"#FFFFFF",fontFamily:"var(--sans)",marginBottom:10}}>
-                      Verified sources for this domain:
-                    </div>
-                    <div style={{display:"flex",flexDirection:"column",gap:8}}>
-                      {suggestedSources.map((s,i)=>(
-                        <a key={i} href={s.url} target="_blank" rel="noopener noreferrer"
-                          style={{display:"flex",alignItems:"center",gap:12,
-                            background:"#111111",border:"1px solid #2A2A2A",borderRadius:8,
-                            padding:"10px 14px",textDecoration:"none",transition:"all 0.15s"}}
-                          onMouseEnter={e=>{e.currentTarget.style.borderColor="#3B82F6";}}
-                          onMouseLeave={e=>{e.currentTarget.style.borderColor="#2A2A2A";}}
-                        >
-                          <div style={{flex:1}}>
-                            <div style={{fontSize:12,fontWeight:600,color:"#FFFFFF",fontFamily:"var(--sans)"}}>{s.name} ↗</div>
-                            <div style={{fontSize:11,color:"#737373",fontFamily:"var(--sans)",marginTop:2}}>{s.desc}</div>
+                {/* Matched dataset cards */}
+                {m.datasets && m.datasets.length > 0 && (
+                  <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                    {m.datasets.map(ds => {
+                      const lastPt = ds.points[ds.points.length-1];
+                      const M = calcM(lastPt.chi,lastPt.s,lastPt.lambda0,lastPt.C);
+                      const lead = getWarningLead(ds.id);
+                      return (
+                        <div key={ds.id} style={{
+                          background:"#0A0A0A",border:`1px solid ${ds.color}35`,
+                          borderRadius:12,overflow:"hidden"
+                        }}>
+                          <div style={{padding:"14px 18px",borderBottom:"1px solid #1A1A1A",
+                            display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10}}>
+                            <div style={{display:"flex",alignItems:"center",gap:10}}>
+                              <span style={{fontSize:20}}>{ds.emoji}</span>
+                              <div>
+                                <div style={{fontSize:14,fontFamily:"var(--serif)",color:"#FFFFFF"}}>{ds.label}</div>
+                                <div style={{fontSize:10,color:"#525252",fontFamily:"var(--mono)"}}>{ds.period}</div>
+                              </div>
+                            </div>
+                            <div style={{display:"flex",alignItems:"center",gap:12}}>
+                              {lead && lead.lead && (
+                                <div style={{textAlign:"right"}}>
+                                  <div style={{fontFamily:"var(--mono)",fontSize:18,color:"#F97316",fontWeight:700}}>{lead.lead}yr</div>
+                                  <div style={{fontSize:9,color:"#F97316",fontFamily:"var(--sans)"}}>warning lead</div>
+                                </div>
+                              )}
+                              <div style={{textAlign:"right"}}>
+                                <div style={{fontFamily:"var(--mono)",fontSize:18,color:mColor(M),fontWeight:700}}>
+                                  {M>=0?"+":""}{M.toFixed(3)}
+                                </div>
+                                <div style={{fontSize:10,color:mColor(M),fontFamily:"var(--sans)"}}>{mLabel(M)}</div>
+                              </div>
+                            </div>
                           </div>
-                          <span style={{fontSize:9,color:"#3B82F6",background:"#3B82F615",
-                            borderRadius:4,padding:"2px 8px",fontFamily:"var(--mono)",flexShrink:0}}>{s.domain}</span>
-                        </a>
-                      ))}
-                    </div>
+                          <div style={{padding:"10px 18px"}}>
+                            <Sparkline points={ds.points} w={400} h={44}/>
+                          </div>
+                          <div style={{padding:"8px 18px 14px",display:"flex",gap:8}}>
+                            <button onClick={onGoToExplore} style={{
+                              background:"#2563EB",border:"none",borderRadius:7,
+                              padding:"7px 14px",fontSize:11,fontWeight:600,
+                              color:"#FFFFFF",fontFamily:"var(--sans)",cursor:"pointer"
+                            }}>Full analysis in Explore →</button>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
-
-                <div style={{display:"flex",gap:10,marginTop:16,flexWrap:"wrap"}}>
-                  <button onClick={()=>fileRef.current?.click()} style={{
-                    background:"#22C55E",border:"none",borderRadius:8,
-                    padding:"10px 20px",fontSize:12,fontWeight:700,
-                    color:"#000000",fontFamily:"var(--sans)",cursor:"pointer"
-                  }}>Upload my data →</button>
-                  <button onClick={()=>onGoToAssistant&&onGoToAssistant()} style={{
-                    background:"#111111",border:"1px solid #2A2A2A",borderRadius:8,
-                    padding:"10px 20px",fontSize:12,fontWeight:600,
-                    color:"#D4D4D4",fontFamily:"var(--sans)",cursor:"pointer"
-                  }}>💬 Ask the assistant →</button>
-                </div>
-                <input ref={fileRef} type="file" accept=".csv,.tsv,.txt" style={{display:"none"}}/>
               </div>
-            </>
+            </div>
+          ))}
+
+          {/* Loading */}
+          {loading && (
+            <div style={{display:"flex",gap:12,alignItems:"flex-start"}}>
+              <div style={{width:32,height:32,borderRadius:"50%",background:"#2563EB",
+                display:"flex",alignItems:"center",justifyContent:"center",
+                fontSize:11,fontWeight:700,color:"#FFFFFF",flexShrink:0}}>E</div>
+              <div style={{background:"#0A0A0A",border:"1px solid #1A1A1A",
+                borderRadius:"4px 16px 16px 16px",padding:"12px 16px",
+                display:"flex",gap:5,alignItems:"center"}}>
+                {[0,1,2].map(j=>(
+                  <div key={j} style={{width:6,height:6,borderRadius:"50%",
+                    background:"#3B82F6",animation:"pulse 1.2s ease-in-out infinite",
+                    animationDelay:`${j*0.2}s`}}/>
+                ))}
+              </div>
+            </div>
           )}
+          <div ref={bottomRef}/>
         </div>
       )}
 
-      {/* Legitimacy note */}
-      <div style={{background:"#0A0A0A",border:"1px solid #2A2A2A",borderRadius:10,
-        padding:"14px 18px",display:"flex",gap:10,alignItems:"flex-start"}}>
-        <span style={{fontSize:13,flexShrink:0}}>⚠️</span>
-        <p style={{fontSize:11,color:"#737373",lineHeight:1.6,fontFamily:"var(--sans)"}}>
-          EoE identifies declining or improving margins and patterns consistent with collapse predictions.
-          It cannot predict when collapse will occur. All values are proxy estimates, not precise measurements.
-          Framework under peer review — cite as: Baird, N. (2026). Engine of Emergence. arXiv:[pending].
-        </p>
+      {/* Input bar — always at bottom */}
+      <div style={{
+        borderTop: isEmpty ? "none" : "1px solid #1A1A1A",
+        paddingTop: isEmpty ? 0 : 16,
+        flexShrink:0
+      }}>
+        <div style={{
+          display:"flex",gap:8,alignItems:"flex-end",
+          background:"#0A0A0A",border:"1px solid #2A2A2A",
+          borderRadius:14,padding:"10px 12px",
+          transition:"border-color 0.15s"
+        }}
+          onFocusCapture={e=>e.currentTarget.style.borderColor="#22C55E"}
+          onBlurCapture={e=>e.currentTarget.style.borderColor="#2A2A2A"}
+        >
+          {/* Upload button */}
+          <button onClick={()=>fileRef.current?.click()} title="Upload CSV data"
+            style={{background:"none",border:"none",color:"#525252",
+              fontSize:18,cursor:"pointer",padding:"4px",flexShrink:0,
+              transition:"color 0.15s"}}
+            onMouseEnter={e=>e.currentTarget.style.color="#22C55E"}
+            onMouseLeave={e=>e.currentTarget.style.color="#525252"}
+          >📎</button>
+          <input ref={fileRef} type="file" accept=".csv,.tsv,.txt"
+            onChange={handleFile} style={{display:"none"}}/>
+
+          <textarea ref={inputRef}
+            value={input}
+            onChange={e=>setInput(e.target.value)}
+            onKeyDown={e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}}}
+            placeholder="Ask about any system — or describe data you want to analyze..."
+            rows={1}
+            style={{
+              flex:1,background:"none",border:"none",outline:"none",
+              fontSize:14,color:"#FFFFFF",fontFamily:"var(--sans)",
+              resize:"none",lineHeight:1.5,maxHeight:120,overflowY:"auto",
+              padding:"4px 0"
+            }}
+            onInput={e=>{
+              e.target.style.height="auto";
+              e.target.style.height=Math.min(e.target.scrollHeight,120)+"px";
+            }}
+          />
+
+          <button onClick={()=>send()} disabled={loading||!input.trim()}
+            style={{
+              background:loading||!input.trim()?"#1A1A1A":"#22C55E",
+              border:"none",borderRadius:8,
+              width:36,height:36,fontSize:16,
+              color:loading||!input.trim()?"#525252":"#000000",
+              cursor:loading||!input.trim()?"not-allowed":"pointer",
+              opacity:loading||!input.trim()?0.5:1,
+              flexShrink:0,transition:"all 0.15s",
+              display:"flex",alignItems:"center",justifyContent:"center"
+            }}>↑</button>
+        </div>
+        <div style={{fontSize:10,color:"#404040",fontFamily:"var(--sans)",
+          marginTop:6,textAlign:"center"}}>
+          Enter to send · Shift+Enter for new line · 📎 to upload CSV data
+        </div>
       </div>
     </div>
   );
