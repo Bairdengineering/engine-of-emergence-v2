@@ -2753,6 +2753,10 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
 
     setResult({ type: "guided", analysis: { domain, variables, dataNeeded, suggestedApproach: approach }, question: q });
     setLoading(false);
+    // Trigger floating assistant with context
+    if (window._eoeAskAssistant) {
+      window._eoeAskAssistant(`I want to run an EoE experiment on this question: "${q}". What data do I need and where do I find it?`);
+    }
   }
 
   return (
@@ -5340,6 +5344,35 @@ function FloatingAssistant() {
       setTimeout(() => inputRef.current?.focus(), 100);
     }
   }, [open]);
+
+  // Expose trigger for external components
+  useEffect(() => {
+    window._eoeAskAssistant = (q) => {
+      setOpen(true);
+      setMessages(prev => [...prev, { role:"user", text:q }]);
+      // Auto-send after opening
+      setTimeout(async () => {
+        setLoading(true);
+        try {
+          const resp = await fetch("https://api.anthropic.com/v1/messages", {
+            method:"POST", headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({
+              model:"claude-sonnet-4-20250514", max_tokens:400,
+              system: SYSTEM,
+              messages: [{ role:"user", content:q }]
+            })
+          });
+          const data = await resp.json();
+          const reply = data.content?.map(b=>b.text||"").join("") || "Try again.";
+          setMessages(prev=>[...prev, { role:"assistant", text:reply }]);
+        } catch(e) {
+          setMessages(prev=>[...prev, { role:"assistant", text:"Connection issue — try again." }]);
+        }
+        setLoading(false);
+      }, 300);
+    };
+    return () => { delete window._eoeAskAssistant; };
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior:"smooth" });
