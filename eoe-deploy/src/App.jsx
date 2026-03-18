@@ -2137,6 +2137,20 @@ function ExploreTab({ injectDataset=null }) {
                     <div style={{fontSize:8,color:d.color,fontFamily:"var(--mono)",
                       opacity:0.8}}>{displayYear}</div>
                   )}
+                  {d.source==="EoE Experiment" && (() => {
+                    try {
+                      const runs = JSON.parse(localStorage.getItem(d.id)||"[]");
+                      if (runs.length > 1) return (
+                        <div style={{position:"absolute",top:6,right:6,background:d.color,
+                          borderRadius:"50%",width:16,height:16,display:"flex",
+                          alignItems:"center",justifyContent:"center",
+                          fontSize:8,fontWeight:700,color:"#000000"}}>
+                          {runs.length}
+                        </div>
+                      );
+                    } catch(e) {}
+                    return null;
+                  })()}
                 </button>
               );
             })}
@@ -2246,7 +2260,7 @@ function ExploreTab({ injectDataset=null }) {
           </div>
           <p style={{fontSize:13,color:"#D4D4D4",lineHeight:1.65,
             fontFamily:"var(--sans)",fontWeight:400,margin:0}}>
-            {pt?.event || "Tap a year below to see what was happening at that moment."}
+            {pt?.event || (ds.source==="EoE Experiment" ? `${mLabel(calcM(pt.chi,pt.s,pt.lambda0,pt.C))} — ${ds.desc || "Experiment dataset. Select a year point to explore the trajectory."}` : "Tap a year below to see what was happening at that moment.")}
           </p>
         </div>
 
@@ -2840,7 +2854,7 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
           <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
             <button onClick={exportMarkdown} style={{background:"#22C55E",border:"none",borderRadius:8,padding:"10px 18px",fontSize:12,fontWeight:600,color:"#000000",fontFamily:"var(--sans)",cursor:"pointer",display:"flex",alignItems:"center",gap:6}} onMouseEnter={e=>e.currentTarget.style.background="#4ADE80"} onMouseLeave={e=>e.currentTarget.style.background="#22C55E"}>↓ Download .md</button>
             <button onClick={copyToClipboard} style={{background:exportDone?"#22C55E20":"#111111",border:"1px solid "+(exportDone?"#22C55E":"#2A2A2A"),borderRadius:8,padding:"10px 18px",fontSize:12,fontWeight:600,color:exportDone?"#22C55E":"#D4D4D4",fontFamily:"var(--sans)",cursor:"pointer"}}>{exportDone?"✓ Copied!":"⎘ Copy summary"}</button>
-            <button onClick={()=>{ const pts=(a.chart_data&&a.chart_data.length>=2)?a.chart_data.map((p,idx)=>({...p,year:p.year||idx+1})):null; console.log("Explore click pts:",pts,"chart_data:",a.chart_data); onGoToExplore(pts?{id:experiment.cacheKey||"exp_"+experiment.id,label:s.title,emoji:"⚗️",color:"#22C55E",period:s.timeScale,desc:s.hypothesis,domain:s.domain,source:"EoE Experiment",points:pts.map((p,idx)=>({...p,event:p.event||(a.analogues&&a.analogues[idx%a.analogues.length]?a.analogues[idx%a.analogues.length]:a.minsight||"")})))}:null); }} style={{background:"#111111",border:"1px solid #3B82F6",borderRadius:8,padding:"10px 18px",fontSize:12,fontWeight:600,color:"#3B82F6",fontFamily:"var(--sans)",cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.background="#0A0A1A"} onMouseLeave={e=>e.currentTarget.style.background="#111111"}>Full analysis in Explore →</button>
+              <button onClick={()=>{ const pts=(a.chart_data&&a.chart_data.length>=2)?a.chart_data.map((p,idx)=>({...p,year:p.year||idx+1})):null; onGoToExplore(pts?{id:experiment.cacheKey||("exp_"+experiment.id),label:s.title,emoji:"Exp",color:"#22C55E",period:s.timeScale,desc:s.hypothesis,domain:s.domain,source:"EoE Experiment",points:pts.map((p,idx)=>({...p,event:p.event||""}))}:null); }} style={{background:"#111111",border:"1px solid #3B82F6",borderRadius:8,padding:"10px 18px",fontSize:12,fontWeight:600,color:"#3B82F6",fontFamily:"var(--sans)",cursor:"pointer"}} onMouseEnter={e=>e.currentTarget.style.background="#0A0A1A"} onMouseLeave={e=>e.currentTarget.style.background="#111111"}>Full analysis in Explore</button>
             <button onClick={reset} style={{background:"none",border:"1px solid #2A2A2A",borderRadius:8,padding:"10px 18px",fontSize:12,color:"#525252",fontFamily:"var(--sans)",cursor:"pointer"}}>⚗️ New experiment</button>
           </div>
           <div style={{padding:"10px 14px",background:"#111111",borderRadius:8,border:"1px solid #1A1A1A",fontFamily:"var(--mono)",fontSize:10,color:"#525252",lineHeight:1.8}}>Cite as: Baird, N. (2026). Engine of Emergence: A Thermodynamic Framework for the Persistence and Collapse of Organized Complexity. DOI: 10.5281/zenodo.19016245</div>
