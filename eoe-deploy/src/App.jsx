@@ -2640,7 +2640,7 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify({ key, experiment: result, secret: (window.__eoe_s||"eoe2026") })
       });
-    } catch(e) {}
+    } catch(e) { console.error("KV save failed:", e); }
     try {
       const runs = JSON.parse(localStorage.getItem(key)||"[]");
       runs.push(result);
