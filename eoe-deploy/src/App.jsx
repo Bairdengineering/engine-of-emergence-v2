@@ -5395,6 +5395,35 @@ export default function EoEApp() {
   const [tab, setTab] = useState("explore");
   const [uploadedDatasets, setUploadedDatasets] = useState([]);
   const [pendingExploreDs, setPendingExploreDs] = useState(null);
+  const [kvDatasets, setKvDatasets] = useState([]);
+
+  useEffect(() => {
+    async function loadKvExperiments() {
+      try {
+        const resp = await fetch('/api/list-experiments?secret=eoe2026');
+        if (!resp.ok) return;
+        const data = await resp.json();
+        const datasets = (data.experiments || []).map(({ key, runs }) => {
+          if (!runs.length) return null;
+          const last = runs[runs.length - 1];
+          const withCharts = runs.filter(r => r.analysis && r.analysis.chart_data && r.analysis.chart_data.length >= 2);
+          let avgChart = (last.analysis && last.analysis.chart_data) || null;
+          if (withCharts.length > 1) {
+            const len = Math.min(...withCharts.map(r => r.analysis.chart_data.length));
+            avgChart = Array.from({length:len}, (_,i) => {
+              const pts = withCharts.map(r => r.analysis.chart_data[i]).filter(Boolean);
+              return { year: pts[0].year, chi: pts.reduce((a,p)=>a+p.chi,0)/pts.length, s: pts.reduce((a,p)=>a+p.s,0)/pts.length, lambda0: pts.reduce((a,p)=>a+p.lambda0,0)/pts.length, C: pts.reduce((a,p)=>a+p.C,0)/pts.length, event: pts[0].event||"" };
+            });
+          }
+          if (!avgChart || avgChart.length < 2) return null;
+          const st = last.structured || {};
+          return { id: key, label: st.title||"Experiment", emoji: "Exp", color: "#22C55E", period: st.timeScale||"Unknown", desc: st.hypothesis||"", domain: st.domain||"Experiment", source: "EoE Experiment", runCount: runs.length, points: avgChart.map((p,i2) => ({...p, year: p.year||i2+1, event: p.event||""})) };
+        }).filter(Boolean);
+        setKvDatasets(datasets);
+      } catch(e) { console.error("KV load failed:", e); }
+    }
+    loadKvExperiments();
+  }, []);
 
   function handleExperimentReady(ds) {
     setUploadedDatasets(prev => {
