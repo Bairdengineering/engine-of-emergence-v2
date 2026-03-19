@@ -28,7 +28,7 @@ export default async function handler(req, res) {
     req.on('data', chunk => data += chunk);
     req.on('end', () => resolve(data));
   });
-  if (body.length > 50000) return res.status(413).json({ error: 'Request too large' });
+  if (body.length > 500000) return res.status(413).json({ error: 'Request too large' });
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
