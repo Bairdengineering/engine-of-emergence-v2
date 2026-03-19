@@ -2710,7 +2710,7 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
       const d2 = await r2.json();
       const raw2 = d2.content?.map(b=>b.text||"").join("")||"";
       let analysis;
-      try { const s2=raw2.indexOf("{"),e2=raw2.lastIndexOf("}"); const c2=s2>=0&&e2>=0?raw2.slice(s2,e2+1):raw2; analysis = JSON.parse(c2); }
+      try { let c2=raw2.replace(/```json/g,"").replace(/```/g,"").trim(); const s2=c2.indexOf("{"),e2=c2.lastIndexOf("}"); c2=s2>=0&&e2>=0?c2.slice(s2,e2+1):c2; analysis = JSON.parse(c2); }
       catch(e) { analysis = {narrative:raw2||"Analysis could not be parsed.",chart_data:null,chart_note:null,minsight:"See narrative above.",key_finding:"See narrative.",analogues:[],intervention:"See narrative."}; }
       setProcessingStep(3);
       (async () => {
