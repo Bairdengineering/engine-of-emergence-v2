@@ -7,14 +7,19 @@ export default async function handler(req, res) {
   const base = process.env.KV_REST_API_URL;
   const auth = { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` };
 
-  // Get all experiment keys from index
   const idxResp = await fetch(`${base}/smembers/eoe_exp_index`, { headers: auth });
   const idxData = await idxResp.json();
-  const keys = idxData.result || [];
+  let keys = idxData.result || [];
+
+  keys = keys.map(k => {
+    try {
+      const parsed = JSON.parse(k);
+      return Array.isArray(parsed) ? parsed[0] : k;
+    } catch { return k; }
+  }).filter(k => k && k.startsWith('eoe_exp_'));
 
   if (keys.length === 0) return res.status(200).json({ experiments: [] });
 
-  // Load all experiments for each key
   const results = await Promise.all(keys.map(async key => {
     const r = await fetch(`${base}/lrange/${key}/0/-1`, { headers: auth });
     const d = await r.json();

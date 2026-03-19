@@ -20,18 +20,17 @@ export default async function handler(req, res) {
   const base = process.env.KV_REST_API_URL;
   const auth = { Authorization: `Bearer ${process.env.KV_REST_API_TOKEN}` };
 
-  // Save experiment to its key
+  // Save experiment
   await fetch(`${base}/lpush/${key}`, {
     method: 'POST',
     headers: { ...auth, 'Content-Type': 'application/json' },
     body: JSON.stringify([JSON.stringify(experiment)]),
   });
 
-  // Add key to index (dedupe with srem+sadd)
-  await fetch(`${base}/sadd/eoe_exp_index`, {
+  // Add key to index as plain string member
+  await fetch(`${base}/sadd/eoe_exp_index/${encodeURIComponent(key)}`, {
     method: 'POST',
-    headers: { ...auth, 'Content-Type': 'application/json' },
-    body: JSON.stringify([key]),
+    headers: auth,
   });
 
   return res.status(200).json({ ok: true });
