@@ -2633,7 +2633,7 @@ function ExperimentTab({ onGoToExplore, onGoToAssistant, uploadedDatasets=[] }) 
     try { return JSON.parse(localStorage.getItem(key)||"[]"); } catch { return []; }
   }
 
-  async function saveRun(key, result) {
+  async async function saveRun(key, result) {
     try {
       await fetch("/api/save-experiment", {
         method: "POST",
