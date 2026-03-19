@@ -998,7 +998,7 @@ function MChart({ points, dsColor="#3B82F6", dsId=null }) {
 function DSCard({ ds, active, onClick }) {
   const lastM = calcM(ds.points[ds.points.length-1].chi,ds.points[ds.points.length-1].s,ds.points[ds.points.length-1].lambda0,ds.points[ds.points.length-1].C);
   return (
-    <div onClick={onClick} style={{
+    <div onClick={onClick} style={{position:"relative",
       background: active?"#111111":"#0A0A0A",
       border:`1px solid ${active?ds.color+"80":"#2A2A2A"}`,
       borderRadius:12, padding:20, cursor:"pointer",
@@ -2065,7 +2065,7 @@ function SensitivityPanel({ ds, pts }) {
 }
 
 // ── TAB: EXPLORE ──────────────────────────────────────────────────────────────
-function ExploreTab({ injectDataset=null }) {
+function ExploreTab({ injectDataset=null, kvDatasets=[] }) {
   const [activeId, setActiveId]     = useState("rome");
   const [ptIdx, setPtIdx]           = useState(null);
   const [sliders, setSliders]       = useState({chi:0.75, s:0.80, lambda0:0.20, C:0.70});
@@ -5461,7 +5461,7 @@ export default function EoEApp() {
         {/* Content */}
         <div style={{flex:1,maxWidth:1040,margin:"0 auto",padding:"40px 24px",width:"100%",borderTop:`1px solid ${activeTabMeta.accent}18`,transition:"border-color 0.4s"}}>
           {tab==="understand"  && <UnderstandTab/>}
-          {tab==="explore"     && <ExploreTab injectDataset={pendingExploreDs}/>}
+          {tab==="explore"     && <ExploreTab injectDataset={pendingExploreDs} kvDatasets={kvDatasets}/>}
           {tab==="experiment"  && <ExperimentTab onGoToExplore={(ds)=>{ if(ds)setPendingExploreDs(ds); setTab("explore"); }} onGoToAssistant={()=>setTab("assistant")} uploadedDatasets={uploadedDatasets}/>}
           {tab==="directory"   && <DirectoryTab/>}
           {tab==="compare"     && <CompareTab/>}
